@@ -284,7 +284,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0600; f
 }
 
 /* ── LEAFLET OVERRIDES ── */
-.leaflet-tile-pane { filter: brightness(1.5) contrast(1.1); }
+.leaflet-tile-pane { filter: brightness(0.4) contrast(1.2) sepia(0.4) saturate(0.8) hue-rotate(-10deg); }
 .leaflet-popup-content-wrapper {
   background: #130d04 !important;
   border: 1px solid var(--border) !important;
@@ -480,6 +480,10 @@ const legendHTML = {
       <div class="legend-item"><div class="lc-line" style="background:#aa6622;opacity:.5"></div>Return Voyage</div>
     </div>
     <div class="legend-section">
+      <div class="legend-title">Persian-Operated Route</div>
+      <div class="legend-item"><div class="lc-line" style="background:#bb70cc"></div>Persian Gulf to India</div>
+    </div>
+    <div class="legend-section">
       <div class="legend-title">Chinese-Operated Segment</div>
       <div class="legend-item"><div class="lc-line" style="background:#a0e870"></div>Sri Lanka → China</div>
       <div class="legend-note">⚠ Chinese / SE Asian vessels only — travelling east→west. Roman merchants did not sail east of Sri Lanka.</div>
@@ -563,10 +567,15 @@ function showTab(name, btn) {
 // TILE LAYER
 // ─────────────────────────────────────────────
 function tiles() {
-  return L.tileLayer(
-    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 19 }
+  const base = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    { attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP', maxZoom: 17 }
   );
+  const labels = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+    { maxZoom: 17 }
+  );
+  return L.layerGroup([base, labels]);
 }
 
 
@@ -574,10 +583,8 @@ function tiles() {
 // HELPERS
 // ─────────────────────────────────────────────
 function popup(name, stage, body) {
-  // Truncate body for mobile — strip HTML tags and limit to ~140 chars
-  const stripped = body.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g,' ').trim();
-  const short = stripped.length > 160 ? stripped.slice(0, 157) + '…' : stripped;
-  return `<div class="popup-city">${name}</div>${stage ? `<div class="popup-stage">${stage}</div>` : ''}<div class="popup-body">${short}</div>`;
+  // Use the full body text without truncation to prevent cut-offs
+  return `<div class="popup-city">${name}</div>${stage ? `<div class="popup-stage">${stage}</div>` : ''}<div class="popup-body">${body}</div>`;
 }
 
 function cityMark(map, lat, lng, name, stage, desc, color, r) {
@@ -646,6 +653,7 @@ function initMaritime() {
   L.polyline([[14.5,48.2],[12.5,54.0],[11.0,65.0],[10.5,74.0],[10.17,76.2]], { color:'#3acc80', weight:3, dashArray:'8,3', opacity:0.9 }).addTo(map).bindPopup(popup('The Monsoon Crossing','Stage 3 — c. 40 days','From Socotra, the SW monsoon (Hippalus wind) drove ships in ~40 days to Malabar. Ships returned on the NE winter monsoon.'));
   L.polyline([[10.17,76.2],[11.0,65.0],[13.0,54.5],[14.5,48.2]], { color:'#aa6622', weight:1.8, dashArray:'4,5', opacity:0.45 }).addTo(map);
   L.polyline([[12.5,54.0],[18,60],[21.7,72.98]], { color:'#88aa44', weight:2, dashArray:'6,4', opacity:0.7 }).addTo(map).bindPopup(popup('Northwest India Branch','Alternative Route','Some vessels made for Barygaza (Gujarat) — accessing the Indo-Parthian hinterland and Silk Road routes to Central Asia.'));
+  L.polyline([[30.4,48.0],[26.0,54.0],[24.0,60.0],[21.7,72.98],[10.17,76.2]], { color:'#bb70cc', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Persian-Arab Maritime Route','Persian Gulf to India','Ships from Charax Spasinu sailed along the Makran coast or directly to Barygaza, and onward to Muziris, moving Parthian and Silk Road goods without relying on Roman-controlled Red Sea routes.'));
   L.polyline([[10.17,76.2],[8.8,76.6],[9.0,78.5],[7.0,80.0]], { color:'#cc9922', weight:1.8, dashArray:'5,4', opacity:0.75 }).addTo(map).bindPopup(popup('Kollam → Coromandel → Sri Lanka','Periplus Onward','Rounding southern India to the pearl coast and Taprobane — a major transshipment hub for the further eastern trade.'));
   L.polyline([[7.0,80.0],[5.5,95.0],[3.14,101.69],[5.0,108.0],[10.82,106.63],[21.5,109.1]], { color:'#a0e870', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Chinese Segment — East→West','⚠ Chinese / SE Asian Vessels','Roman merchants did not sail east of Sri Lanka. Chinese silk reached the South China Sea from Hepu/Jiaozhi, moving westward through Austronesian maritime networks toward India.'));
 
@@ -687,6 +695,7 @@ function initSilkRoad() {
   // Ghost maritime
   L.polyline([[31.2,29.9],[23.9,35.5],[14.5,48.2],[12.5,54.0],[10.17,76.2]], { color:'#3acc80', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
   L.polyline([[12.5,54.0],[18,60],[21.7,72.98]], { color:'#3acc80', weight:1.2, dashArray:'4,6', opacity:0.22, interactive:false }).addTo(map);
+  L.polyline([[30.4,48.0],[26.0,54.0],[24.0,60.0],[21.7,72.98],[10.17,76.2]], { color:'#bb70cc', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
 
   const srCities = [
     [34.27,108.93,'Chang\'an (Xi\'an)','Western Han Capital · Silk Road Terminus','Chang\'an was the capital of the Western Han (206 BCE–9 CE) and eastern terminus of the Silk Road. Southern routes ran to Hepu/Jiaozhi connecting to the maritime system.','#c44040'],
@@ -717,6 +726,10 @@ function initEvidence() {
 
   const sites = [
     [23.9,35.5,'Berenike, Egypt','KEY EXCAVATION — S. Sidebotham','7.55 kg black pepper in one container; teak of Indian origin; a Tamil Brahmi graffito scratched into pottery — proving an Indian was physically present at this Egyptian port.','#cc3333',12],
+    [26.10,34.25,'Myos Hormos (Quseir al-Qadim)','Red Sea Port','Tamil Brahmi inscriptions found on potsherds here, naming Tamil merchants. Alongside Berenike, this proves a sustained Indian physical presence at the Egyptian ports.','#cc3333',10],
+    [17.03,54.43,'Khor Rori (Sumhuram)','Omani Coast','Tamil Brahmi inscriptions discovered on pottery, indicating Tamil merchant presence at the frankincense ports of southern Arabia.','#cc3333',10],
+    [12.5,54.0,'Socotra (Hoq Cave)','Indian Ocean Junction','Archaeologists discovered 192 Brahmi inscriptions and one Kharosthi inscription left by Indian merchants waiting for the monsoon crossing.','#cc3333',10],
+    [9.87,98.60,'Phu Khao Thong, Thailand','Malay Peninsula','A goldsmith\'s touchstone bearing a Tamil Brahmi inscription was found here, confirming the eastward expansion of the Tamil merchant networks across the Bay of Bengal.','#cc3333',10],
     [10.17,76.2,'Pattanam / Muziris, Kerala','Archaeological Site','Roman amphora sherds, Indian boat-planks (sewn-plank construction), imported glass. Stratified 1st–4th century CE occupation confirming intense commercial activity.','#c87820',11],
     [11.9,79.8,'Arikamedu (Podukē)','Roman Manufacturing Presence','Roman lamps, Mediterranean glass beads, and unfinished intaglio gemstones found — suggesting physical presence of Graeco-Roman artisans.','#d4a843',10],
     [11.5,76.9,'Coimbatore Region','Roman Coin Hoards','One of the most significant concentrations of Roman gold and silver coins in India. Coins of Augustus, Tiberius, Claudius, and Nero recovered in multiple hoards.','#d4a843',9],
@@ -734,7 +747,10 @@ function initEvidence() {
   ];
   sites.forEach(([lat,lng,name,stage,desc,col,r]) => cityMark(map,lat,lng,name,stage,desc,col,r||8));
 
-  L.marker([23.9,35.5], { icon: L.divIcon({ html: '<div style="color:#ff9090;font-family:Cinzel,serif;font-size:8px;background:rgba(30,0,0,0.88);border:1px solid #cc3333;padding:2px 6px;border-radius:2px;white-space:nowrap;margin-top:-26px">★ Tamil Brahmi here</div>', className:'', iconAnchor:[0,26] }), interactive:false }).addTo(map);
+  const brahmiHtml = '<div style="color:#ff9090;font-family:Cinzel,serif;font-size:8px;background:rgba(30,0,0,0.88);border:1px solid #cc3333;padding:2px 6px;border-radius:2px;white-space:nowrap;margin-top:-26px">★ Tamil Brahmi here</div>';
+  [[23.9,35.5], [26.10,34.25], [17.03,54.43], [12.5,54.0], [9.87,98.60]].forEach(([lat, lng]) => {
+    L.marker([lat, lng], { icon: L.divIcon({ html: brahmiHtml, className:'', iconAnchor:[0,26] }), interactive:false }).addTo(map);
+  });
 }
 
 // ─────────────────────────────────────────────
