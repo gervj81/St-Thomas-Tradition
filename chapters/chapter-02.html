@@ -1,0 +1,113 @@
+<!-- Chapter 2: Maps & Geography -->
+<h1>Maps &amp; Geography</h1>
+<p class="chapter-subtitle">Chapter Two — Navigating the world through interactive cartography</p>
+
+<p>A map is never the territory — it is always a story told about the territory. Every cartographic decision — what to include, what to omit, what to emphasize — is an act of interpretation. In this chapter, we explore how maps shape our understanding of place.</p>
+
+<h2>The Evolution of Mapmaking</h2>
+
+<p>The oldest known map, inscribed on clay tablets in ancient Babylon around 600 BCE, depicted a simplified view of the known world as a flat disc surrounded by ocean. Contrast this with today's satellite imagery, and you begin to grasp the revolution that eight centuries of cartographic progress represent.</p>
+
+<div class="callout callout-warning">
+  <div class="callout-title">⚠️ Note on Projections</div>
+  <p>Every flat map distorts the Earth's surface in some way. The Mercator projection inflates areas near the poles; the Peters projection preserves area but distorts shape. No single projection can perfectly represent a sphere on a plane.</p>
+</div>
+
+<h2>Interactive Map: Ancient Trade Routes</h2>
+
+<p>Below is an interactive map demonstrating key nodes along the historic Silk Road. Tap on any glowing marker to learn more about each location.</p>
+
+<div class="interactive-map" style="background: linear-gradient(135deg, #2D4A3E, #1A3A5C); min-height: 320px; position: relative;">
+  <!-- SVG Simplified Map Background -->
+  <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;opacity:0.15;">
+    <!-- Simplified continent outlines -->
+    <path d="M50,180 Q100,120 200,140 Q280,100 350,130 Q420,90 500,120 Q560,100 620,140 Q680,120 750,160 L750,300 Q680,280 620,290 Q560,310 500,280 Q420,300 350,280 Q280,300 200,280 Q100,290 50,260 Z" fill="#fff"/>
+    <!-- Trade route line -->
+    <path d="M150,200 C250,180 350,160 450,190 S600,170 700,200" stroke="#E8B86D" stroke-width="2" fill="none" stroke-dasharray="8,4" opacity="0.6"/>
+  </svg>
+
+  <!-- Hotspot: Constantinople -->
+  <div class="map-hotspot" style="top: 42%; left: 22%;" data-tooltip="tip-constantinople">
+    <span class="map-hotspot-label">Constantinople</span>
+  </div>
+
+  <!-- Hotspot: Samarkand -->
+  <div class="map-hotspot" style="top: 38%; left: 48%;" data-tooltip="tip-samarkand">
+    <span class="map-hotspot-label">Samarkand</span>
+  </div>
+
+  <!-- Hotspot: Xi'an -->
+  <div class="map-hotspot" style="top: 45%; left: 75%;" data-tooltip="tip-xian">
+    <span class="map-hotspot-label">Xi'an</span>
+  </div>
+
+  <!-- Tooltips -->
+  <div class="map-tooltip" id="tip-constantinople" style="top: 55%; left: 15%;">
+    <h4>Constantinople</h4>
+    <p>The gateway between Europe and Asia, Constantinople (modern Istanbul) served as a crucial western terminus of the Silk Road for centuries. Its strategic position on the Bosphorus made it the world's wealthiest city for over a millennium.</p>
+  </div>
+
+  <div class="map-tooltip" id="tip-samarkand" style="top: 52%; left: 40%;">
+    <h4>Samarkand</h4>
+    <p>Located in modern-day Uzbekistan, Samarkand was a jewel of the Silk Road. Under Timur's rule in the 14th century, it became one of the most magnificent cities in the world, renowned for its mosques and madrasas.</p>
+  </div>
+
+  <div class="map-tooltip" id="tip-xian" style="top: 58%; left: 68%;">
+    <h4>Xi'an (Chang'an)</h4>
+    <p>The eastern terminus of the Silk Road, Xi'an was the capital of thirteen Chinese dynasties. During the Tang Dynasty (618–907 CE), it was the most populous city in the world, a cosmopolitan hub of trade and culture.</p>
+  </div>
+
+  <p class="map-caption">Tap on markers to explore major Silk Road trading posts</p>
+</div>
+
+<h2>Cartographic Principles</h2>
+
+<p>Understanding maps requires grasping several fundamental principles that underpin all cartographic work:</p>
+
+<ol>
+  <li><strong>Scale</strong> — The ratio between distances on the map and actual distances on Earth's surface</li>
+  <li><strong>Projection</strong> — The mathematical transformation used to represent the curved surface on a flat plane</li>
+  <li><strong>Symbolization</strong> — The visual language used to represent features (colors, shapes, patterns)</li>
+  <li><strong>Generalization</strong> — The process of simplifying complex real-world features for readability</li>
+</ol>
+
+<h3>The Power of Perspective</h3>
+
+<p>Consider a simple question: which direction is "up" on a map? By convention, we place north at the top — but this is entirely arbitrary. Medieval European maps placed east at the top (hence the word "orientation," from the Latin <em>oriens</em>, meaning "east").<a class="footnote-ref" data-footnote="fn-4" href="#fn-4">4</a></p>
+
+<p>When we rotate our perspective, familiar landscapes become alien. Australia viewed with south at the top is unrecognizable to most. This simple exercise reveals how deeply our spatial understanding is shaped by convention rather than nature.</p>
+
+<h2>Geographic Data Today</h2>
+
+<p>Modern Geographic Information Systems (GIS) have transformed cartography from an art into a science. Layers of data — topographic, demographic, climatic — can be overlaid and analyzed to reveal patterns invisible to the naked eye.</p>
+
+<div class="infographic">
+  <div class="infographic-title">🌍 GIS Data Layers in Modern Cartography</div>
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-value">7</div>
+      <div class="stat-label">Base Layers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">150+</div>
+      <div class="stat-label">Data Sources</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">30cm</div>
+      <div class="stat-label">Resolution</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">24/7</div>
+      <div class="stat-label">Satellite Feed</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<p>In the next chapter, we shift from geographic landscapes to data landscapes — exploring how numbers, when visualized well, can tell stories as vivid as any map.</p>
+
+<!-- Hidden Footnote Content -->
+<div id="fn-4" style="display:none;">
+  <p>The <em>Hereford Mappa Mundi</em> (c. 1300 CE), one of the largest surviving medieval maps, places Jerusalem at its center and east at the top. This "T-O" map format reflected a theological rather than navigational worldview, with the world divided into three continents corresponding to the sons of Noah.</p>
+</div>

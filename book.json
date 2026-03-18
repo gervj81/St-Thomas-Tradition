@@ -1,0 +1,27 @@
+{
+  "title": "The Anti Book",
+  "author": "Author Name",
+  "description": "A production-grade HTML book reader",
+  "chapters": [
+    {
+      "id": "chapter-01",
+      "title": "The Beginning",
+      "file": "chapters/chapter-01.html"
+    },
+    {
+      "id": "chapter-02",
+      "title": "Maps & Geography",
+      "file": "chapters/chapter-02.html"
+    },
+    {
+      "id": "chapter-03",
+      "title": "Data & Insights",
+      "file": "chapters/chapter-03.html"
+    },
+    {
+      "id": "chapter-04",
+      "title": "The Cosmopolitan Matrix",
+      "file": "chapters/chapter-04.html"
+    }
+  ]
+}
