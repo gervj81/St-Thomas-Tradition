@@ -423,7 +423,7 @@ function closeAll() {
 const tabInfo = {
   political: {
     title: 'The Political World · c. 50 CE',
-    text: 'The 1st century CE was a world of overlapping empires: Rome, Parthia, the Kushana kingdoms, and the South Indian polities. <strong>The Parthian Empire was the great middleman</strong> — all overland trade between Rome and India was mediated through Parthian territory. Click any empire or city for details.'
+    text: 'The 1st century CE was a world of overlapping empires: Rome, Parthia, the Indo-Parthian kingdoms, and the South Indian polities. <strong>The Parthian Empire was the great middleman</strong> — all overland trade between Rome and India was mediated through Parthian territory. Click any empire or city for details.'
   },
   maritime: {
     title: 'The Maritime Web: Alexandria to Malabar',
@@ -458,7 +458,7 @@ const legendHTML = {
       <div class="legend-title">Empires · c. 50 CE</div>
       <div class="legend-item"><div class="lc" style="background:#c44040;opacity:.7"></div>Roman Empire</div>
       <div class="legend-item"><div class="lc" style="background:#3a7acc;opacity:.7"></div>Parthian Empire</div>
-      <div class="legend-item"><div class="lc" style="background:#3a9a58;opacity:.7"></div>Kushana / Indo-Parthian</div>
+      <div class="legend-item"><div class="lc" style="background:#3a9a58;opacity:.7"></div>Indo-Parthian</div>
       <div class="legend-item"><div class="lc" style="background:#c87820;opacity:.7"></div>South Indian Kingdoms</div>
       <div class="legend-item"><div class="lc" style="background:#aa7020;opacity:.7"></div>Arabian Zone</div>
     </div>
@@ -560,7 +560,7 @@ function showTab(name, btn) {
   ip._autoDismiss = setTimeout(function() {
     ip.classList.remove('open');
     ov.classList.remove('active');
-  }, 4000);
+  }, 10000);
 }
 
 // ─────────────────────────────────────────────
@@ -610,7 +610,7 @@ function initPolitical() {
   const roman = [[44,-10],[44,-2],[43,3],[47,7],[48,8],[47,12],[45,14],[43,17],[41,20],[40,24],[41,29],[40,33],[37,37],[31,35],[29,34],[24,37],[22,35],[22,28],[30,13],[32,12],[36,9],[36,3],[35,-1],[35,-6],[36,-9],[38,-9],[44,-10]];
   const britain = [[50,-5],[51,1],[53,0],[55,-1],[56,-5],[55,-4],[53,-4],[50,-5]];
   const parthian = [[37,37],[40,40],[40,44],[38,48],[36,50],[37,55],[38,60],[37,63],[35,66],[32,67],[28,65],[25,60],[24,55],[24,50],[26,46],[30,42],[32,40],[35,38],[37,37]];
-  const kushana = [[37,63],[38,66],[40,70],[36,72],[34,72],[30,72],[27,68],[24,67],[22,72],[21,70],[23,65],[25,63],[28,62],[32,63],[35,63],[37,63]];
+  const indoParthian = [[37,63],[38,66],[40,70],[36,72],[34,72],[30,72],[27,68],[24,67],[22,72],[21,70],[23,65],[25,63],[28,62],[32,63],[35,63],[37,63]];
   const chera = [[14.0,74.5],[14.0,75.0],[11.0,76.5],[8.5,77.0],[8.5,76.5],[11.0,76.0],[14.0,74.0]];
   const cholaPandya = [[16.0,80.0],[16.0,78.0],[14.0,75.0],[11.0,76.5],[8.5,77.0],[8.5,77.5],[9.5,79.5],[12.0,80.0],[16.0,80.0]];
   const arabia = [[30,34],[26,34],[22,38],[20,42],[22,45],[28,47],[32,40],[30,34]];
@@ -618,7 +618,7 @@ function initPolitical() {
   L.polygon(roman, polyOpts('#c44040')).addTo(map).bindPopup(popup('Roman Empire','c. 14–68 CE','Stretched from Britannia to Egypt. Its western senators knew India only as abstraction; its eastern merchants navigated Malabar annually. These are not the same empire in terms of geographic knowledge.'));
   L.polygon(britain, polyOpts('#c44040')).addTo(map);
   L.polygon(parthian, polyOpts('#3a7acc')).addTo(map).bindPopup(popup('Parthian Empire','247 BCE – 224 CE','The Great Middleman. All overland trade between Rome and India was mediated by Parthia. A bilingual hinge civilisation: Greek on one side of their coins, Aramaic on the other.'));
-  L.polygon(kushana, polyOpts('#3a9a58')).addTo(map).bindPopup(popup('Kushana / Indo-Parthian','1st c. BCE – 3rd c. CE','Gateway to northwest India from the overland routes. Deeply Hellenised — their coins bore Greek legends. Connected to both Silk Road and maritime trade at Barygaza.'));
+  L.polygon(indoParthian, polyOpts('#3a9a58')).addTo(map).bindPopup(popup('Indo-Parthian','1st c. BCE – 3rd c. CE','Gateway to northwest India from the overland routes. Deeply Hellenised — their coins bore Greek legends. Connected to both Silk Road and maritime trade at Barygaza.'));
   L.polygon(chera, polyOpts('#d48a33')).addTo(map).bindPopup(popup('Chera Kingdom','Malabar Coast','Home of Muziris and the Malabar pepper monopoly. Tamil Sangam literature records Yavana (Greek/Roman) merchants arriving with gold, departing with pepper.'));
   L.polygon(cholaPandya, polyOpts('#c87820')).addTo(map).bindPopup(popup('Chola & Pandya Kingdoms','Coromandel Coast','The hinge of two oceans. Known for Pandyan pearls and fine muslin. Centers like Arikamedu connected the Mediterranean-facing west with the Han-facing east.'));
   L.polygon(arabia, polyOpts('#aa7020')).addTo(map).bindPopup(popup('Arabian Commercial Zone','Nabataean, Himyarite','Control of frankincense made Arabia essential between the Mediterranean and Indian Ocean. Every Rome-to-India traveller passed through this world.'));
@@ -636,7 +636,7 @@ function initPolitical() {
     [21.7,72.98,'Barygaza','NW Indian Port','Modern Bharuch. Premier port of NW India — gateway to the Indus valley and overland routes. The Periplus describes it in detail.','#c87820'],
     [10.17,76.2,'Muziris','Malabar — The Central Emporium','Not the edge of the trade network — the collection point. Roman, Arabian, Indian, and eastern traders all converged here. The midpoint of the Old World trade system.','#d48a33',10],
     [11.9,79.8,'Arikamedu (Podukē)','Coromandel Hinge','A manufacturing node in two overlapping commercial networks — the Indo-Mediterranean trade from the west and the bead-and-textile trade running eastward toward Southeast Asia.','#c87820',10],
-    [33.74,72.83,'Taxila','Kushana Intellectual Hub','Deeply cosmopolitan intellectual and commercial capital of northwestern India. Greek, Aramaic, and Kharosthi inscriptions found at the same site.','#3a9a58',9],
+    [33.74,72.83,'Taxila','Indo Parthian and later Kushana Intellectual Hub','Deeply cosmopolitan intellectual and commercial capital of northwestern India. Greek, Aramaic, and Kharosthi inscriptions found at the same site.','#3a9a58',9],
     [25.61,85.14,'Pataliputra','Mauryan Capital','Greek ambassador Megasthenes resided here c. 300 BCE and wrote the Indika. Pataliputra was known to the Greek world from direct diplomatic residence.','#c87820'],
   ];
   cities.forEach(([lat,lng,name,stage,desc,col,r]) => cityMark(map,lat,lng,name,stage,desc,col,r));
@@ -705,6 +705,8 @@ function initSilkRoad() {
   L.polyline([[31.2,29.9],[23.9,35.5],[14.5,48.2],[12.5,54.0],[10.17,76.2]], { color:'#3acc80', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
   L.polyline([[12.5,54.0],[18,60],[21.7,72.98]], { color:'#3acc80', weight:1.2, dashArray:'4,6', opacity:0.22, interactive:false }).addTo(map);
   L.polyline([[30.4,48.0],[26.0,54.0],[24.0,60.0],[21.7,72.98],[10.17,76.2]], { color:'#bb70cc', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
+  L.polyline([[10.17,76.2],[8.8,76.6],[9.0,78.5],[7.0,80.0]], { color:'#cc9922', weight:1.2, dashArray:'4,6', opacity:0.25, interactive:false }).addTo(map);
+  L.polyline([[7.0,80.0],[5.5,95.0],[3.14,101.69],[5.0,108.0],[10.82,106.63],[21.5,109.1]], { color:'#a0e870', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
 
   const srCities = [
     [34.27,108.93,'Chang\'an (Xi\'an)','Western Han Capital · Silk Road Terminus','Chang\'an was the capital of the Western Han (206 BCE–9 CE) and eastern terminus of the Silk Road. Southern routes ran to Hepu/Jiaozhi connecting to the maritime system.','#c44040'],
@@ -715,7 +717,7 @@ function initSilkRoad() {
     [30.4,48.0,'Charax Spasinu','Overland Meets the Sea','The southern terminus of the Mesopotamian corridor, linking the Silk Road to the Persian Gulf maritime routes.','#3a7acc'],
     [37.16,38.79,'Edessa','Western Terminus','The western anchor of the overland route. Direct contacts with Indo-Parthian kingdoms to the east. The city of the Thomas tradition.','#aa55cc'],
     [36.2,36.2,'Antioch','Roman Endpoint','Where the Silk Road\'s luxury goods entered the Roman Empire. Silk arriving here had travelled over 10,000 km overland.','#c44040'],
-    [33.74,72.83,'Taxila','Kushana Gateway','Major Kushana city in the Indus valley. Where the overland Silk Road connected to northwest Indian port commerce.','#3a9a58'],
+    [33.74,72.83,'Taxila','Indo-Parthian Gateway','Where the overland Silk Road connected to northwest Indian port commerce.','#3a9a58'],
     [21.7,72.98,'Barygaza','India–Silk Road Junction','Where the overland Silk Road branch met the maritime India trade. Goods from Taxila and the Indus were loaded onto ships trading with the Roman world.','#c87820'],
     [21.5,109.1,'Hepu / Jiaozhi','Silk Road → Maritime Junction','The node where overland and maritime systems connected. Under the Western Han, routes from Chang\'an ran south to these ports. When the Eastern Han moved to Luoyang, the commercial route continued.','#e8c060',9],
   ];

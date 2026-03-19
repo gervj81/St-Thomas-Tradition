@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chronological Context Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+/* ── RESET & VARIABLES ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0600; font-family: 'EB Garamond', Georgia, serif; }
+
+:root {
+  --gold: #c9963a;
+  --gold-light: #e8c06a;
+  --border: #6a4e1e;
+  --panel-bg: rgba(10,6,0,0.95);
+}
+
+/* ── HEADER ── */
+#app-header {
+  position: fixed; top: 0; left: 0; right: 0; height: 52px;
+  background: linear-gradient(180deg, #050300 0%, #0e0800 100%);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 14px; z-index: 2000;
+}
+#app-title { font-family: 'Cinzel', serif; font-size: 0.78em; font-weight: 700; letter-spacing: 2px; color: var(--gold-light); text-transform: uppercase; }
+
+#close-btn {
+  color: #c9963a; text-decoration: none; font-family: 'Cinzel', serif; font-size: 0.8em; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase; border: 1px solid var(--border); padding: 5px 12px;
+  border-radius: 4px; background: rgba(10,6,0,0.5); transition: all 0.2s;
+}
+#close-btn:hover { background: rgba(201,150,58,0.2); color: #fff; }
+
+/* ── MAP ── */
+#map { position: fixed; top: 52px; bottom: 80px; left: 0; right: 0; z-index: 1; }
+.leaflet-tile-pane { filter: brightness(0.4) contrast(1.2) sepia(0.4) saturate(0.8) hue-rotate(-10deg); }
+
+/* Popups */
+.leaflet-popup-content-wrapper { background: #130d04 !important; border: 1px solid var(--border) !important; color: #f0e4c0 !important; font-family: 'EB Garamond', Georgia, serif !important; }
+.leaflet-popup-tip-container { display: none !important; }
+.popup-title { font-family: 'Cinzel', serif; font-size: 1.1em; color: var(--gold-light); margin-bottom: 4px; font-weight: 600; }
+.popup-desc { font-size: 1em; color: #c8b47a; line-height: 1.5; }
+
+/* ── TIMELINE CONTROLS (BOTTOM) ── */
+#timeline-container {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 100px;
+  background: linear-gradient(0deg, #050300 0%, #1e1204 100%);
+  border-top: 1px solid var(--border);
+  z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 0 20px 20px;
+}
+#timeline-info { display: none; }
+
+/* Slider Instructions */
+.slider-instruction {
+  position: absolute; top: 12px; left: 0; right: 0; text-align: center;
+  color: #c9963a; font-family: 'Cinzel', serif; font-size: 0.85em; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; animation: pulse 2.5s infinite; pointer-events: none;
+}
+@keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; text-shadow: 0 0 12px rgba(201,150,58,0.8); } 100% { opacity: 0.6; } }
+.anim-arrow-left { display: inline-block; animation: bounceLeft 2s infinite; margin-right: 8px;}
+.anim-arrow-right { display: inline-block; animation: bounceRight 2s infinite; margin-left: 8px;}
+@keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+@keyframes bounceLeft { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-5px); } }
+
+/* Range Slider Styling */
+.slider-wrapper { position: relative; width: 100%; max-width: 800px; margin-top: 30px; }
+input[type=range] {
+  -webkit-appearance: none; appearance: none; width: 100%; background: transparent; margin: 0; position: relative; z-index: 10;
+}
+input[type=range]:focus { outline: none; }
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 4px; cursor: pointer; background: rgba(201,150,58,0.3); border-radius: 2px;
+}
+input[type=range]::-webkit-slider-thumb {
+  height: 24px; width: 24px; border-radius: 50%; background: #0a0600; cursor: pointer; -webkit-appearance: none; margin-top: -10px; 
+  border: 3px solid var(--gold-light); box-shadow: 0 0 12px rgba(201,150,58,0.9);
+}
+.tick-marks {
+  width: 100%; display: flex; justify-content: space-between; padding: 0 10px; margin-top: -15px; pointer-events: none; z-index: 1;
+}
+.tick { width: 3px; height: 10px; background: rgba(201,150,58,0.6); border-radius: 1px;}
+.tick-labels {
+  width: 100%; display: flex; justify-content: space-between; padding: 0 5px; margin-top: 6px; pointer-events: none;
+}
+.tick-label { font-family: 'Cinzel', serif; font-size: 0.65em; font-weight: 700; color: #a48142; width: 45px; text-align: center; }
+
+/* ── INFO BOX (TOP LEFT OVER MAP) ── */
+#era-description-box {
+  position: absolute; top: 70px; left: 20px; z-index: 1500;
+  background: var(--panel-bg); border: 1px solid var(--border); border-radius: 4px; border-top: 3px solid var(--gold);
+  padding: 20px; width: 380px; max-width: calc(100vw - 40px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8); pointer-events: none;
+}
+.era-box-title { font-family: 'Cinzel', serif; font-size: 1.25em; color: var(--gold-light); font-weight: 700; margin-bottom: 2px; }
+.era-box-date { font-family: 'Cinzel', serif; font-size: 0.85em; color: var(--gold); font-weight: 600; margin-bottom: 12px; letter-spacing: 1px;}
+.era-desc-text { color: #d8c8a0; font-size: 1.05em; line-height: 1.6; }
+
+/* ── LEAFLET UI OVERRIDES ── */
+.leaflet-bar { border: 1px solid var(--border) !important; box-shadow: 0 2px 10px rgba(0,0,0,0.8) !important; border-radius: 4px !important; overflow: hidden; }
+.leaflet-bar a { background-color: var(--panel-bg) !important; color: var(--gold-light) !important; border-bottom: 1px solid var(--border) !important; }
+.leaflet-bar a:hover { background-color: rgba(201,150,58,0.2) !important; color: #fff !important; }
+.leaflet-control-zoom-in, .leaflet-control-zoom-out { font-family: 'Cinzel', serif !important; text-decoration: none !important; }
+
+</style>
+</head>
+<body>
+
+<div id="app-header">
+  <div id="app-title">The March to the Matrix</div>
+  <a href="javascript:window.close();" id="close-btn">✕ Close</a>
+</div>
+
+<div id="map"></div>
+
+<div id="era-description-box">
+  <div class="era-box-title" id="display-name">Loading...</div>
+  <div class="era-box-date" id="display-date"></div>
+  <div class="era-desc-text" id="desc-text"></div>
+</div>
+
+<div id="timeline-container">
+  <div class="slider-instruction">
+    <span class="anim-arrow-left">←</span> Drag to explore chronologically <span class="anim-arrow-right">→</span>
+  </div>
+  
+  <div class="slider-wrapper">
+    <input type="range" id="time-slider" min="0" max="5" step="1" value="0">
+    <div class="tick-marks">
+      <div class="tick"></div><div class="tick"></div><div class="tick"></div><div class="tick"></div><div class="tick"></div><div class="tick"></div>
+    </div>
+    <div class="tick-labels">
+      <div class="tick-label">600 BCE</div>
+      <div class="tick-label">500 BCE</div>
+      <div class="tick-label">320 BCE</div>
+      <div class="tick-label">250 BCE</div>
+      <div class="tick-label">50 BCE</div>
+      <div class="tick-label">50 CE</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const map = L.map('map', { center: [28, 55], zoom: 3, zoomControl: false });
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom: 17}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {maxZoom: 17}).addTo(map);
+L.control.zoom({ position: 'topright' }).addTo(map);
+
+let currentLayerGroup = L.layerGroup().addTo(map);
+
+function makePoly(coords, color, title, desc) {
+  const poly = L.polygon(coords, { color: color, fillColor: color, fillOpacity: 0.18, weight: 1.8, dashArray: '6,3' });
+  poly.bindPopup(`<div class="popup-title">${title}</div><div class="popup-desc">${desc}</div>`);
+  return poly;
+}
+
+function makeCity(lat, lng, name, desc, color) {
+  const marker = L.circleMarker([lat, lng], { radius: 8, color: '#e8d498', weight: 2, fillColor: (color || '#c44040'), fillOpacity: 0.95 });
+  marker.bindPopup(`<div class="popup-title">${name}</div><div class="popup-desc">${desc}</div>`);
+  return marker;
+}
+
+// ── POLYGON COORDINATES ──
+const babylonianPol = [[37,36], [37,45], [30,48], [30,40], [33,36], [31,34], [34,35], [37,36]];
+const achaemenidPol = [[41,27], [42,40], [40,50], [42,60], [38,68], [30,70], [25,68], [25,55], [30,48], [30,34], [24,34], [22,32], [22,28], [31,28], [34,35], [38,27], [41,27]];
+const alexanderPol  = [[41,20], [41,27], [42,40], [40,50], [42,60], [38,68], [33,74], [28,70], [25,68], [25,55], [30,48], [30,34], [31,28], [34,35], [38,27], [41,20]];
+
+const antigonidPol  = [[42,20], [42,25], [39,26], [38,24], [36,22], [39,20], [42,20]];
+const seleucidPol   = [[38,26], [40,40], [37,50], [38,60], [36,66], [30,60], [28,50], [33,40], [31,35], [36,35], [38,26]];
+const ptolemaicPol  = [[31,29], [33,35], [30,35], [28,34], [22,35], [22,32], [28,29], [31,29]];
+const mauryaPol     = [[34,70], [30,76], [28,85], [26,90], [22,88], [19,85], [17,80], [15,75], [17,73], [20,70], [24,67], [30,66], [34,70]];
+
+const romanRepublicPol = [[44,-5], [44,5], [45,10], [42,15], [38,24], [34,22], [32,15], [36,10], [36,-5]];
+const romanPol      = [[44,-10],[44,-2],[43,3],[47,7],[48,8],[47,12],[45,14],[43,17],[41,20],[40,24],[41,29],[40,33],[37,37],[31,35],[29,34],[24,37],[22,35],[22,28],[30,13],[32,12],[36,9],[36,3],[35,-1],[35,-6],[36,-9],[38,-9],[44,-10]];
+const britPol       = [[50,-5],[51,1],[53,0],[55,-1],[56,-5],[55,-4],[53,-4],[50,-5]];
+const parthPol      = [[37,37], [40,44], [38,48], [36,50], [37,55], [38,60], [36,63], [32,62], [28,60], [26,55], [30,50], [30,45], [32,44], [35,40], [37,37]];
+const indoParthPol  = [[36,65], [36,70], [34,74], [30,72], [26,68], [24,66], [24,62], [28,60], [32,60], [36,65]];
+
+const cheraPol      = [[12.5,75.0], [10.0,76.5], [8.0,77.2], [8.3,76.8], [10.0,76.0], [12.5,74.8]];
+const cholaPol      = [[14.0,80.0], [12.0,79.5], [10.0,79.0], [8.0,77.5], [8.0,78.2], [10.0,79.8], [14.0,80.2]];
+
+// ── ERAS DATA ──
+const eras = [
+  {
+    name: "The Rivers of Babylon",
+    date: "c. 600 BCE",
+    desc: "The Neo-Babylonian Empire dominates the Near East following the collapse of Assyria. Crucial to this era is the Israelite deportation to Babylon. Akkadian persists in formal contexts, while Aramaic spreads as the practical lingua franca.",
+    draw: () => [
+      makePoly(babylonianPol, '#aa55cc', 'Neo-Babylonian Empire', 'Ruled Mesopotamia and the Levant. Known for the monumental capital Babylon and the exile of the Judeans.'),
+      makeCity(32.54, 44.42, 'Babylon', 'The sprawling capital of the empire on the Euphrates.', '#aa55cc'),
+      makeCity(31.77, 35.23, 'Jerusalem', 'Conquered by Nebuchadnezzar II, leading to the Babylonian exile.', '#cc3333')
+    ]
+  },
+  {
+    name: "The Persian Golden Era",
+    date: "c. 500 BCE",
+    desc: "The Achaemenid Empire becomes one of the largest empires of the ancient world. Profoundly to the narrative of Thomas, the Persians adopt Aramaic as the official administrative lingua franca.",
+    draw: () => [
+      makePoly(achaemenidPol, '#c8982a', 'Achaemenid Empire', 'The pinnacle of Persian power, uniting three continents under a single administration run heavily on Imperial Aramaic.'),
+      makeCity(29.93, 52.89, 'Persepolis', 'The ceremonial capital of the Achaemenid Empire.', '#c8982a'),
+      makeCity(32.19, 48.24, 'Susa', 'Administrative capital bridging the Mesopotamian and Iranian worlds.', '#c8982a')
+    ]
+  },
+  {
+    name: "Alexander's Epic Run",
+    date: "c. 320 BCE",
+    desc: "Alexander the Great shatters the Achaemenid Empire. Concurrently, the Mauryan Empire rises to unite the Indian subcontinent, bringing the Greek and Indian worlds into direct contact. In the deep South, the early Tamil polities of the Chera, Chola, and Pandya emerge in their proto-historic phase.",
+    draw: () => [
+      makePoly(alexanderPol, '#c44040', "Alexander's Empire", 'A transient but radically transformative empire that seeded Greek culture everywhere it stepped.'),
+      makePoly(mauryaPol, '#3a9a58', 'Mauryan Empire', 'The rising Indian empire that confronts the Hellenistic world.'),
+      makePoly(cheraPol, '#d48a33', 'Early Chera Polity', 'Early Tamil polity (proto-historic phase) on the Malabar coast.'),
+      makePoly(cholaPol, '#c87820', 'Early Chola & Pandya', 'Early Tamil polities (proto-historic phase) on the Coromandel coast.'),
+      makeCity(32.54, 44.42, 'Babylon', 'Where Alexander died of a fever, effectively splintering his massive conquests.', '#c44040'),
+      makeCity(31.2, 29.9, 'Alexandria', 'The newly founded jewel of the Mediterranean.', '#c44040')
+    ]
+  },
+  {
+    name: "The Greek Split & Mauryan Unity",
+    date: "c. 250 BCE",
+    desc: "Alexander's empire fractures into distinct Hellenistic kingdoms. In stark contrast, the Mauryan Empire unites almost the entire Indian subcontinent, though the deep Tamil South remains outside firm Mauryan control.",
+    draw: () => [
+      makePoly(mauryaPol, '#3a9a58', 'Mauryan Empire', 'United much of the subcontinent, possessing complex administrative trade infrastructure.'),
+      makePoly(seleucidPol, '#3a7acc', 'Seleucid Empire', 'Hellenistic giant spanning Syria to Bactria, laying the linguistic framework for Greek commerce.'),
+      makePoly(ptolemaicPol, '#9944cc', 'Ptolemaic Egypt', 'Developing Red Sea trade networks that would later expand toward India.'),
+      makePoly(antigonidPol, '#c44040', 'Antigonid Dynasty', 'Controlled Macedon and Greece.'),
+      makePoly(cheraPol, '#d48a33', 'Chera Kingdom', 'Remaining outside firm Mauryan control.'),
+      makePoly(cholaPol, '#c87820', 'Chola & Pandya', 'Remaining outside firm Mauryan control.'),
+      makeCity(31.2, 29.9, 'Alexandria', 'The intellectual and commercial hub of Ptolemaic Egypt.', '#9944cc'),
+      makeCity(36.2, 36.2, 'Antioch', 'Seleucid capital, heavily Greek-speaking.', '#3a7acc'),
+      makeCity(25.61, 85.14, 'Pataliputra', 'Mauryan capital, hosting Greek diplomatic envoys like Megasthenes.', '#3a9a58')
+    ]
+  },
+  {
+    name: "The Rise of Rome",
+    date: "c. 50 BCE",
+    desc: "The Roman Republic dismantles the western Hellenistic states. In the East, the formidable Parthian Empire rises to fill the vacuum, becoming a powerful intermediary controlling and profiting from overland trade routes between Rome and the East.",
+    draw: () => [
+      makePoly(romanRepublicPol, '#c44040', 'Roman Republic', 'Dominating the Mediterranean basin, on the verge of claiming Egypt.'),
+      makePoly(ptolemaicPol, '#9944cc', 'Ptolemaic Egypt', 'The final independent Hellenistic state.'),
+      makePoly(parthPol, '#3a7acc', 'Parthian Empire', 'A powerful intermediary controlling overland caravan networks.'),
+      makePoly(cheraPol, '#d48a33', 'Chera Kingdom', 'Malabar Coast. Increasing maritime trade contacts.'),
+      makePoly(cholaPol, '#c87820', 'Chola & Pandya', 'Coromandel Coast.'),
+      makeCity(41.9, 12.5, 'Rome', 'The roaring capital of a young republic turning into an empire.', '#c44040')
+    ]
+  },
+  {
+    name: "The Cosmopolitan Matrix",
+    date: "c. 50 CE",
+    desc: "Rome has direct maritime access via the Red Sea and monsoon routes to India. Linguistic networks connect this matrix: Greek in the Mediterranean, Aramaic across the Near East, and Tamil/Prakrit in India. A continuous commercial chain is forged.",
+    draw: () => [
+      makePoly(romanPol, '#c44040', 'Roman Empire', 'Now includes Egypt, accessing the Red Sea trade ports.'),
+      makePoly(britPol, '#c44040', 'Britannia (Rome)', 'Roman provincial limit.'),
+      makePoly(parthPol, '#3a7acc', 'Parthian Empire', 'The massive intermediary node serving active Mesopotamian and caravan routes.'),
+      makePoly(indoParthPol, '#3a9a58', 'Indo-Parthian Kingdom', 'NW Indian polity (Gondophares) deeply steeped in Aramaic and Greek influence.'),
+      makePoly(cheraPol, '#d48a33', 'Chera Kingdom', 'Major suppliers of pepper within the Indian Ocean trade.'),
+      makePoly(cholaPol, '#c87820', 'Chola & Pandya', 'Coromandel Coast. The hinge of two oceans, linking West with East.'),
+      makeCity(10.17, 76.2, 'Muziris', 'The great emporium. The monsoon wind system (Hippalus) enables predictable direct voyages here.', '#d48a33')
+    ]
+  }
+];
+
+const slider = document.getElementById('time-slider');
+
+function renderEra(index) {
+  const era = eras[index];
+  document.getElementById('display-name').innerText = era.name;
+  document.getElementById('display-date').innerText = era.date;
+  document.getElementById('desc-text').innerText = era.desc;
+
+  currentLayerGroup.clearLayers();
+  era.draw().forEach(layer => layer.addTo(currentLayerGroup));
+}
+
+slider.addEventListener('input', (e) => {
+  renderEra(parseInt(e.target.value, 10));
+});
+
+// Init
+renderEra(0);
+
+</script>
+</body>
+</html>

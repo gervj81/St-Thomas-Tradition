@@ -1,27 +1,23 @@
 {
-  "title": "The Anti Book",
-  "author": "Author Name",
-  "description": "A production-grade HTML book reader",
+  "title": "St. Thomas Tradition",
+  "subtitle": "A step by step historical Analysis",
+  "author": "Gerald Johnson",
+  "description": "A production-grade HTML book reader documenting the rigorous historical circumstances of the apostolic era.",
   "chapters": [
     {
+      "id": "title",
+      "title": "Title Page",
+      "file": "chapters/title.html"
+    },
+    {
+      "id": "preface",
+      "title": "Preface",
+      "file": "chapters/preface.html"
+    },
+    {
       "id": "chapter-01",
-      "title": "The Beginning",
-      "file": "chapters/chapter-01.html"
-    },
-    {
-      "id": "chapter-02",
-      "title": "Maps & Geography",
-      "file": "chapters/chapter-02.html"
-    },
-    {
-      "id": "chapter-03",
-      "title": "Data & Insights",
-      "file": "chapters/chapter-03.html"
-    },
-    {
-      "id": "chapter-04",
       "title": "The Cosmopolitan Matrix",
-      "file": "chapters/chapter-04.html"
+      "file": "chapters/chapter-01.html"
     }
   ]
 }
