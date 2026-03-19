@@ -37,7 +37,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0600; f
 
 /* ── MAP ── */
 #map { position: fixed; top: 52px; bottom: 80px; left: 0; right: 0; z-index: 1; }
-.leaflet-tile-pane { filter: brightness(0.4) contrast(1.2) sepia(0.4) saturate(0.8) hue-rotate(-10deg); }
+.leaflet-tile-pane { filter: sepia(0.6) contrast(1.05) brightness(0.55) saturate(0.8) hue-rotate(-10deg); }
 
 /* Popups */
 .leaflet-popup-content-wrapper { background: #130d04 !important; border: 1px solid var(--border) !important; color: #f0e4c0 !important; font-family: 'EB Garamond', Georgia, serif !important; }
@@ -155,8 +155,13 @@ input[type=range]::-webkit-slider-thumb {
 
 <script>
 const map = L.map('map', { center: [28, 55], zoom: 3, zoomControl: false });
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom: 17}).addTo(map);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {maxZoom: 17}).addTo(map);
+L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg', {
+  attribution: '&copy; Stadia Maps &copy; Stamen Design &copy; OpenStreetMap',
+  maxZoom: 16
+}).addTo(map);
+L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}{r}.png', {
+  maxZoom: 16, opacity: 0.4
+}).addTo(map);
 L.control.zoom({ position: 'topright' }).addTo(map);
 
 let currentLayerGroup = L.layerGroup().addTo(map);
@@ -290,6 +295,49 @@ slider.addEventListener('input', (e) => {
 
 // Init
 renderEra(0);
+
+// ── SHARED MAP LABELS ──
+function addMapLabels(m) {
+  const regionStyle = 'font-family:Cinzel,serif;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(232,208,152,0.7);text-shadow:0 2px 8px rgba(0,0,0,0.9);pointer-events:none;white-space:nowrap;';
+  const subStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;font-size:0.7em;color:rgba(200,176,122,0.55);letter-spacing:1px;text-transform:none;display:block;margin-top:2px;';
+  const oceanStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;letter-spacing:5px;color:rgba(130,170,210,0.45);text-shadow:0 1px 6px rgba(0,0,0,0.7);pointer-events:none;white-space:nowrap;';
+  const oceanSubStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;font-size:0.65em;color:rgba(130,170,210,0.3);letter-spacing:1px;display:block;margin-top:2px;';
+
+  const regions = [
+    [34, 33, 'LEVANT', '(Syria-Palestine)', 11, 3],
+    [35, 47, 'MESOPOTAMIA', '(Iraq)', 12, 3],
+    [33, 55, 'PERSIA', '(Iran)', 13, 3],
+    [28, 31, 'AEGYPTUS', '(Egypt)', 11, 3],
+    [20, 78, 'DAKṢIṆĀPATHA', '(Deccan India)', 11, 4],
+    [10, 77, 'TAMILAKAM', '(Tamil South)', 10, 4],
+    [34, 74, 'GANDHĀRA', '(NW Pakistan)', 10, 4],
+  ];
+
+  regions.forEach(([lat, lng, name, modern, size, minZ]) => {
+    const html = `<div style="${regionStyle}font-size:${size}px;">${name}<span style="${subStyle}">${modern}</span></div>`;
+    L.marker([lat, lng], {
+      icon: L.divIcon({ html: html, className: '', iconAnchor: [0, 0] }),
+      interactive: false
+    }).addTo(m);
+  });
+
+  const oceans = [
+    [15, 55, 'Mare Erythraeum', '(Arabian Sea)', 14],
+    [35, 18, 'Mare Internum', '(Mediterranean)', 12],
+    [22, 38, 'Sinus Arabicus', '(Red Sea)', 10],
+    [27, 52, 'Sinus Persicus', '(Persian Gulf)', 10],
+    [42, 30, 'Pontus Euxinus', '(Black Sea)', 9],
+  ];
+
+  oceans.forEach(([lat, lng, name, modern, size]) => {
+    const html = `<div style="${oceanStyle}font-size:${size}px;">${name}<span style="${oceanSubStyle}">${modern}</span></div>`;
+    L.marker([lat, lng], {
+      icon: L.divIcon({ html: html, className: '', iconAnchor: [0, 0] }),
+      interactive: false
+    }).addTo(m);
+  });
+}
+addMapLabels(map);
 
 </script>
 </body>
