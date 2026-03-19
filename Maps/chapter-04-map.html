@@ -611,14 +611,16 @@ function initPolitical() {
   const britain = [[50,-5],[51,1],[53,0],[55,-1],[56,-5],[55,-4],[53,-4],[50,-5]];
   const parthian = [[37,37],[40,40],[40,44],[38,48],[36,50],[37,55],[38,60],[37,63],[35,66],[32,67],[28,65],[25,60],[24,55],[24,50],[26,46],[30,42],[32,40],[35,38],[37,37]];
   const kushana = [[37,63],[38,66],[40,70],[36,72],[34,72],[30,72],[27,68],[24,67],[22,72],[21,70],[23,65],[25,63],[28,62],[32,63],[35,63],[37,63]];
-  const southIndia = [[16,74],[16,80],[14,80],[12,80],[9,79],[8,78],[8,77],[9,76],[11,76],[14,74],[16,74]];
+  const chera = [[14.0,74.5],[14.0,75.0],[11.0,76.5],[8.5,77.0],[8.5,76.5],[11.0,76.0],[14.0,74.0]];
+  const cholaPandya = [[16.0,80.0],[16.0,78.0],[14.0,75.0],[11.0,76.5],[8.5,77.0],[8.5,77.5],[9.5,79.5],[12.0,80.0],[16.0,80.0]];
   const arabia = [[30,34],[26,34],[22,38],[20,42],[22,45],[28,47],[32,40],[30,34]];
 
   L.polygon(roman, polyOpts('#c44040')).addTo(map).bindPopup(popup('Roman Empire','c. 14–68 CE','Stretched from Britannia to Egypt. Its western senators knew India only as abstraction; its eastern merchants navigated Malabar annually. These are not the same empire in terms of geographic knowledge.'));
   L.polygon(britain, polyOpts('#c44040')).addTo(map);
   L.polygon(parthian, polyOpts('#3a7acc')).addTo(map).bindPopup(popup('Parthian Empire','247 BCE – 224 CE','The Great Middleman. All overland trade between Rome and India was mediated by Parthia. A bilingual hinge civilisation: Greek on one side of their coins, Aramaic on the other.'));
   L.polygon(kushana, polyOpts('#3a9a58')).addTo(map).bindPopup(popup('Kushana / Indo-Parthian','1st c. BCE – 3rd c. CE','Gateway to northwest India from the overland routes. Deeply Hellenised — their coins bore Greek legends. Connected to both Silk Road and maritime trade at Barygaza.'));
-  L.polygon(southIndia, polyOpts('#c87820')).addTo(map).bindPopup(popup('South Indian Kingdoms','Chera, Chola, Pandya','Home of Muziris and the Malabar pepper trade. Tamil Sangam literature records Yavana (Greek/Roman) merchants arriving with wine, departing with pepper.'));
+  L.polygon(chera, polyOpts('#d48a33')).addTo(map).bindPopup(popup('Chera Kingdom','Malabar Coast','Home of Muziris and the Malabar pepper monopoly. Tamil Sangam literature records Yavana (Greek/Roman) merchants arriving with gold, departing with pepper.'));
+  L.polygon(cholaPandya, polyOpts('#c87820')).addTo(map).bindPopup(popup('Chola & Pandya Kingdoms','Coromandel Coast','The hinge of two oceans. Known for Pandyan pearls and fine muslin. Centers like Arikamedu connected the Mediterranean-facing west with the Han-facing east.'));
   L.polygon(arabia, polyOpts('#aa7020')).addTo(map).bindPopup(popup('Arabian Commercial Zone','Nabataean, Himyarite','Control of frankincense made Arabia essential between the Mediterranean and Indian Ocean. Every Rome-to-India traveller passed through this world.'));
 
   const cities = [
@@ -632,7 +634,9 @@ function initPolitical() {
     [34.55,38.28,'Palmyra','Desert Caravan City','A commercial power between Rome and Parthia. Palmyrene inscriptions record regular voyages to the Persian Gulf and northwestern India.','#aa7020'],
     [30.4,48.0,'Charax Spasinu','Persian Gulf Emporium','The great emporium at the head of the Persian Gulf, where the overland trade met the sea. From Charax, maritime routes ran to India.','#3a7acc'],
     [21.7,72.98,'Barygaza','NW Indian Port','Modern Bharuch. Premier port of NW India — gateway to the Indus valley and overland routes. The Periplus describes it in detail.','#c87820'],
-    [10.17,76.2,'Muziris','Malabar — The Central Emporium','Not the edge of the trade network — the collection point. Roman, Arabian, Indian, and eastern traders all converged here. The midpoint of the Old World trade system.','#c87820',10],
+    [10.17,76.2,'Muziris','Malabar — The Central Emporium','Not the edge of the trade network — the collection point. Roman, Arabian, Indian, and eastern traders all converged here. The midpoint of the Old World trade system.','#d48a33',10],
+    [11.9,79.8,'Arikamedu (Podukē)','Coromandel Hinge','A manufacturing node in two overlapping commercial networks — the Indo-Mediterranean trade from the west and the bead-and-textile trade running eastward toward Southeast Asia.','#c87820',10],
+    [33.74,72.83,'Taxila','Kushana Intellectual Hub','Deeply cosmopolitan intellectual and commercial capital of northwestern India. Greek, Aramaic, and Kharosthi inscriptions found at the same site.','#3a9a58',9],
     [25.61,85.14,'Pataliputra','Mauryan Capital','Greek ambassador Megasthenes resided here c. 300 BCE and wrote the Indika. Pataliputra was known to the Greek world from direct diplomatic residence.','#c87820'],
   ];
   cities.forEach(([lat,lng,name,stage,desc,col,r]) => cityMark(map,lat,lng,name,stage,desc,col,r));
@@ -654,7 +658,10 @@ function initMaritime() {
   L.polyline([[10.17,76.2],[11.0,65.0],[13.0,54.5],[14.5,48.2]], { color:'#aa6622', weight:1.8, dashArray:'4,5', opacity:0.45 }).addTo(map);
   L.polyline([[12.5,54.0],[18,60],[21.7,72.98]], { color:'#88aa44', weight:2, dashArray:'6,4', opacity:0.7 }).addTo(map).bindPopup(popup('Northwest India Branch','Alternative Route','Some vessels made for Barygaza (Gujarat) — accessing the Indo-Parthian hinterland and Silk Road routes to Central Asia.'));
   L.polyline([[30.4,48.0],[26.0,54.0],[24.0,60.0],[21.7,72.98],[10.17,76.2]], { color:'#bb70cc', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Persian-Arab Maritime Route','Persian Gulf to India','Ships from Charax Spasinu sailed along the Makran coast or directly to Barygaza, and onward to Muziris, moving Parthian and Silk Road goods without relying on Roman-controlled Red Sea routes.'));
+  L.polyline([[10.17,76.2],[11.75,76.35],[11.0,77.5],[11.9,79.8]], { color:'#d4a843', weight:2, dashArray:'4,4', opacity:0.9 }).addTo(map).bindPopup(popup('The Palghat Gap','Internal Route: West-South to East-South','The Western Ghats were crossed by passes like the Palghat Gap, allowing overland movement between the Malabar coast and the Deccan plateau, flowing to the Coromandel coast.'));
+  L.polyline([[21.7,72.98],[19.5,74.5],[15.5,76.5],[11.0,77.5]], { color:'#c8982a', weight:2, dashArray:'5,5', opacity:0.8 }).addTo(map).bindPopup(popup('Deccan Internal Network','North-South Corridor','A traveller arriving at Barygaza could journey overland through the Deccan interior to reach the Tamil south, linking the different commercial personalities of the subcontinent.'));
   L.polyline([[10.17,76.2],[8.8,76.6],[9.0,78.5],[7.0,80.0]], { color:'#cc9922', weight:1.8, dashArray:'5,4', opacity:0.75 }).addTo(map).bindPopup(popup('Kollam → Coromandel → Sri Lanka','Periplus Onward','Rounding southern India to the pearl coast and Taprobane — a major transshipment hub for the further eastern trade.'));
+  L.polyline([[11.9,79.8],[11.0,79.8],[10.5,78.8],[7.0,80.0]], { color:'#d48a33', weight:1.8, dashArray:'5,4', opacity:0.85 }).addTo(map);
   L.polyline([[7.0,80.0],[5.5,95.0],[3.14,101.69],[5.0,108.0],[10.82,106.63],[21.5,109.1]], { color:'#a0e870', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Chinese Segment — East→West','⚠ Chinese / SE Asian Vessels','Roman merchants did not sail east of Sri Lanka. Chinese silk reached the South China Sea from Hepu/Jiaozhi, moving westward through Austronesian maritime networks toward India.'));
 
   // Ghost silk road
@@ -668,6 +675,8 @@ function initMaritime() {
     [12.5,54.0,'Socotra','Staging Island','Ships gathered here to wait for the SW monsoon, then launched the direct 40-day crossing to Malabar.','#3acc80',10],
     [10.17,76.2,'Muziris / Pattanam','The Central Emporium','Not the edge of the trade network — the collection point. Roman, Arabian, Indian, and eastern traders converged here. The Malabar ports stood at the midpoint of the Old World trade system.','#c87820',12],
     [21.7,72.98,'Barygaza','NW India Port','Premier NW Indian port. Trading cotton, aromatics, gems; receiving Roman wine, olive oil, and coral.','#88aa44',9],
+    [11.9,79.8,'Arikamedu (Podukē)','Coromandel Port','The hinge of two oceans. Exported fine muslin and manufactured beads. Handled the Bay of Bengal network running eastward.','#d48a33',10],
+    [10.8,79.84,'Kamara','Coromandel Port','A recognised commercial port mentioned in the Periplus where massive ships cut across the Bay of Bengal to the Ganges.','#d48a33',8],
     [8.8,76.6,'Kollam (Quilon)','Malabar Southern Port','Southern Malabar port. Later the main node connecting Kerala to Far Eastern spice routes via Sri Lanka.','#c87820',9],
     [7.0,80.0,'Taprobane (Sri Lanka)','Transshipment Hub','Taprobane (Sri Lanka) — major transshipment node between the western Indian Ocean and routes east to the Malay Peninsula and China.','#cc9922',9],
     [3.14,101.69,'Malacca Strait','Eastern Bottleneck','The handoff point where Malay and Austronesian maritime traders connected the Chinese commercial world to the Indian Ocean system. Eastern limit of Roman commercial agency.','#a0e870',10],
@@ -730,8 +739,10 @@ function initEvidence() {
     [17.03,54.43,'Khor Rori (Sumhuram)','Omani Coast','Tamil Brahmi inscriptions discovered on pottery, indicating Tamil merchant presence at the frankincense ports of southern Arabia.','#cc3333',10],
     [12.5,54.0,'Socotra (Hoq Cave)','Indian Ocean Junction','Archaeologists discovered 192 Brahmi inscriptions and one Kharosthi inscription left by Indian merchants waiting for the monsoon crossing.','#cc3333',10],
     [9.87,98.60,'Phu Khao Thong, Thailand','Malay Peninsula','A goldsmith\'s touchstone bearing a Tamil Brahmi inscription was found here, confirming the eastward expansion of the Tamil merchant networks across the Bay of Bengal.','#cc3333',10],
-    [10.17,76.2,'Pattanam / Muziris, Kerala','Archaeological Site','Roman amphora sherds, Indian boat-planks (sewn-plank construction), imported glass. Stratified 1st–4th century CE occupation confirming intense commercial activity.','#c87820',11],
-    [11.9,79.8,'Arikamedu (Podukē)','Roman Manufacturing Presence','Roman lamps, Mediterranean glass beads, and unfinished intaglio gemstones found — suggesting physical presence of Graeco-Roman artisans.','#d4a843',10],
+    [10.5,76.0,'Palayur & Eyyal','Malabar Coast Hoards','Roman gold and silver coins bearing images of Augustus to Nero found in substantial quantities, confirming the western trade route\'s Indian terminus.','#d4a843',9],
+    [10.17,76.2,'Pattanam / Muziris, Kerala','Archaeological Site','Roman amphora sherds, torpedo jars for liquid transport, imported Mediterranean glass, and wharf-like structural remains.','#c87820',11],
+    [10.96,78.08,'Karur','Inland Capital Hoard','Coin hoard at the inland Chera capital of Karur confirms commercial penetration deep into the political heartland, not just the coasts.','#d4a843',10],
+    [11.9,79.8,'Arikamedu (Podukē)','Roman Manufacturing Presence','Roman lamps, Mediterranean glass beads, and notably an unfinished intaglio gemstone: a piece still being carved by a Western craftsman on-site.','#d4a843',10],
     [11.5,76.9,'Coimbatore Region','Roman Coin Hoards','One of the most significant concentrations of Roman gold and silver coins in India. Coins of Augustus, Tiberius, Claudius, and Nero recovered in multiple hoards.','#d4a843',9],
     [10.5,78.8,'Alagankulam / Madurai','Roman Pottery + Coins','Roman amphorae, rouletted ware, and coins at the ancient Pandya capital. Confirms the pearl-fishing routes were embedded in the Roman commercial network.','#d4a843',9],
     [8.5,78.1,'Gulf of Mannar','Pearl Fisheries','Pliny names Indian pearls alongside pepper as the principal drain on Roman gold. The Periplus describes the pearl trade in detail.','#aa8830',8],
@@ -769,7 +780,7 @@ function initLanguages() {
 
   L.polygon(greek, { color:'#3a78cc', fillColor:'#3a78cc', fillOpacity:0.15, weight:1.8 }).addTo(map).bindPopup(popup('Greek Language Zone','Koinē Greek · after 334 BCE','After Alexander, Greek became the common tongue of educated and commercial life from the eastern Mediterranean to NW India. The Periplus was written in Greek. Indo-Parthian coins bore Greek legends.'));
   L.polygon(greekEast, { color:'#3a78cc', fillColor:'#3a78cc', fillOpacity:0.08, weight:1.2, dashArray:'5,4' }).addTo(map).bindPopup(popup('Greek Commercial Reach East','Yavana Merchants in India','Yavana (Greek/Roman) merchants permanently established at Barygaza and Malabar. Tamil Sangam literature documents their presence.'));
-  L.polygon(aramaic, { color:'#c87028', fillColor:'#c87028', fillOpacity:0.15, weight:1.8 }).addTo(map).bindPopup(popup('Aramaic / Syriac Zone','Lingua Franca of the Semitic East','Aramaic was the administrative language of the Achaemenid Persian Empire. In the 1st century, it was the spoken language of Jesus and his apostles. "Thomas" is Aramaic: toma = twin.'));
+  L.polygon(aramaic, { color:'#c87028', fillColor:'#c87028', fillOpacity:0.15, weight:1.8 }).addTo(map).bindPopup(popup('Aramaic / Syriac Zone','Lingua Franca of the Semitic East','Aramaic was the administrative language of the Achaemenid Empire. Its scripts birthed Kharosthi in NW India. In the 1st century, it was the spoken language of Jesus ("Thomas" is Aramaic for twin).'));
   L.polygon(overlap, { color:'#9944cc', fillColor:'#9944cc', fillOpacity:0.3, weight:1.8 }).addTo(map).bindPopup(popup('Bilingual Overlap Zone','Greek + Aramaic','The Levant — from Antioch through Edessa to Jerusalem — was densest linguistic overlap. A Galilean apostle was functionally at home in both worlds from birth.'));
 
   const langCities = [
@@ -801,12 +812,15 @@ function lazyInit(name) {
 }
 
 window.addEventListener('load', function() {
-  lazyInit('political');
-  // Auto-show info panel for the initial tab
-  updateInfo('political');
-  const ip = document.getElementById('info-panel');
-  ip.classList.add('open');
-  ip._autoDismiss = setTimeout(function() { ip.classList.remove('open'); }, 4000);
+  const urlParams = new URLSearchParams(window.location.search);
+  let initialTab = urlParams.get('tab') || window.location.hash.substring(1) || 'political';
+  const tabs = ['political', 'maritime', 'silkroad', 'evidence', 'languages'];
+  if (!tabs.includes(initialTab)) initialTab = 'political';
+  
+  const btns = document.querySelectorAll('.tab-btn');
+  const btn = btns[tabs.indexOf(initialTab)] || btns[0];
+  showTab(initialTab, btn);
+
   // Bounce the arrow 5 times to attract attention
   const arrow = document.querySelector('#legend-tab-body .tab-arrow');
   if (!arrow) return;
