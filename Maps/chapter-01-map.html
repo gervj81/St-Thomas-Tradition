@@ -589,10 +589,29 @@ function popup(name, stage, body) {
 
 function cityMark(map, lat, lng, name, stage, desc, color, r) {
   r = r || 12;
-  return L.circleMarker([lat, lng], {
+  let mz = 3;
+  if (r === 11 || r === 10) mz = 4;
+  else if (r < 10) mz = 5;
+
+  const marker = L.circleMarker([lat, lng], {
     radius: r, color: '#e8d498', weight: 2,
     fillColor: color, fillOpacity: 0.92
-  }).addTo(map).bindPopup(popup(name, stage, desc), { maxWidth: 280, autoPan: true });
+  }).bindPopup(popup(name, stage, desc), { maxWidth: 280, autoPan: true });
+
+  marker.minZoom = mz;
+  if (!map._cityMarkers) {
+    map._cityMarkers = [];
+    map.on('zoomend', function() {
+      const cz = map.getZoom();
+      map._cityMarkers.forEach(m => {
+        if (cz >= m.minZoom) { if (!map.hasLayer(m)) m.addTo(map); }
+        else { if (map.hasLayer(m)) map.removeLayer(m); }
+      });
+    });
+  }
+  map._cityMarkers.push(marker);
+  if (map.getZoom() >= mz) marker.addTo(map);
+  return marker;
 }
 
 function addLegend() { /* handled by drawer */ }
@@ -653,16 +672,16 @@ function initMaritime() {
 
   L.polyline([[31.2,29.9],[30.08,31.24],[25.99,32.82]], { color:'#6a90cc', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Nile Corridor','Stage 1a','Feluccas carried passengers from Alexandria down the Nile to Koptos — the pivot between the Mediterranean and the Red Sea.'));
   L.polyline([[25.99,32.82],[23.9,35.5]], { color:'#c87820', weight:2.5, dashArray:'5,4', opacity:0.8 }).addTo(map).bindPopup(popup('Eastern Desert','Stage 1b — 12 days','Camel caravans of ~22 animals crossed to the Red Sea coast, passing Roman military forts providing water and security.'));
-  L.polyline([[23.9,35.5],[21.5,38.5],[17,42],[14.5,48.2]], { color:'#cc55aa', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Red Sea to Arabia','Stage 2','Ships sailed south through the Red Sea to Qana on the southern Arabian coast, where frankincense was loaded and cargoes transshipped.'));
+  L.polyline([[23.9,35.5], [21.5,38.5], [17.0,40.5], [13.0,43.2], [12.0,44.5], [13.5,47.0], [14.5,48.2]], { color:'#cc55aa', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Red Sea to Arabia','Stage 2','Ships sailed south through the Red Sea to Qana on the southern Arabian coast, where frankincense was loaded and cargoes transshipped.'));
   L.polyline([[14.5,48.2],[12.5,54.0],[11.0,65.0],[10.5,74.0],[10.17,76.2]], { color:'#3acc80', weight:3, dashArray:'8,3', opacity:0.9 }).addTo(map).bindPopup(popup('The Monsoon Crossing','Stage 3 — c. 40 days','From Socotra, the SW monsoon (Hippalus wind) drove ships in ~40 days to Malabar. Ships returned on the NE winter monsoon.'));
   L.polyline([[10.17,76.2],[11.0,65.0],[13.0,54.5],[14.5,48.2]], { color:'#aa6622', weight:1.8, dashArray:'4,5', opacity:0.45 }).addTo(map);
-  L.polyline([[12.5,54.0],[18,60],[21.7,72.98]], { color:'#88aa44', weight:2, dashArray:'6,4', opacity:0.7 }).addTo(map).bindPopup(popup('Northwest India Branch','Alternative Route','Some vessels made for Barygaza (Gujarat) — accessing the Indo-Parthian hinterland and Silk Road routes to Central Asia.'));
-  L.polyline([[30.4,48.0],[26.0,54.0],[24.0,60.0],[21.7,72.98],[10.17,76.2]], { color:'#bb70cc', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Persian-Arab Maritime Route','Persian Gulf to India','Ships from Charax Spasinu sailed along the Makran coast or directly to Barygaza, and onward to Muziris, moving Parthian and Silk Road goods without relying on Roman-controlled Red Sea routes.'));
+  L.polyline([[12.5,54.0], [18.0,60.0], [20.0,70.0], [20.7,71.5], [21.7,72.98]], { color:'#88aa44', weight:2, dashArray:'6,4', opacity:0.7 }).addTo(map).bindPopup(popup('Northwest India Branch','Alternative Route','Some vessels made for Barygaza (Gujarat) — accessing the Indo-Parthian hinterland and Silk Road routes to Central Asia.'));
+  L.polyline([[30.4,48.0], [27.0,51.0], [26.56,56.25], [24.0,60.0], [20.0,70.0], [20.7,71.5], [21.7,72.98], [15.0,73.0], [10.17,76.2]], { color:'#bb70cc', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Persian-Arab Maritime Route','Persian Gulf to India','Ships from Charax Spasinu sailed along the Makran coast or directly to Barygaza, and onward to Muziris, moving Parthian and Silk Road goods without relying on Roman-controlled Red Sea routes.'));
   L.polyline([[10.17,76.2],[11.75,76.35],[11.0,77.5],[11.9,79.8]], { color:'#d4a843', weight:2, dashArray:'4,4', opacity:0.9 }).addTo(map).bindPopup(popup('The Palghat Gap','Internal Route: West-South to East-South','The Western Ghats were crossed by passes like the Palghat Gap, allowing overland movement between the Malabar coast and the Deccan plateau, flowing to the Coromandel coast.'));
   L.polyline([[21.7,72.98],[19.5,74.5],[15.5,76.5],[11.0,77.5]], { color:'#c8982a', weight:2, dashArray:'5,5', opacity:0.8 }).addTo(map).bindPopup(popup('Deccan Internal Network','North-South Corridor','A traveller arriving at Barygaza could journey overland through the Deccan interior to reach the Tamil south, linking the different commercial personalities of the subcontinent.'));
-  L.polyline([[10.17,76.2],[8.8,76.6],[9.0,78.5],[7.0,80.0]], { color:'#cc9922', weight:1.8, dashArray:'5,4', opacity:0.75 }).addTo(map).bindPopup(popup('Kollam → Coromandel → Sri Lanka','Periplus Onward','Rounding southern India to the pearl coast and Taprobane — a major transshipment hub for the further eastern trade.'));
-  L.polyline([[11.9,79.8],[11.0,79.8],[10.5,78.8],[7.0,80.0]], { color:'#d48a33', weight:1.8, dashArray:'5,4', opacity:0.85 }).addTo(map);
-  L.polyline([[7.0,80.0],[5.5,95.0],[3.14,101.69],[5.0,108.0],[10.82,106.63],[21.5,109.1]], { color:'#a0e870', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Chinese Segment — East→West','⚠ Chinese / SE Asian Vessels','Roman merchants did not sail east of Sri Lanka. Chinese silk reached the South China Sea from Hepu/Jiaozhi, moving westward through Austronesian maritime networks toward India.'));
+  L.polyline([[10.17,76.2], [8.8,76.4], [8.0,77.5], [8.5, 78.5], [7.0,80.0]], { color:'#cc9922', weight:1.8, dashArray:'5,4', opacity:0.75 }).addTo(map).bindPopup(popup('Kollam → Coromandel → Sri Lanka','Periplus Onward','Rounding southern India to the pearl coast and Taprobane — a major transshipment hub for the further eastern trade.'));
+  L.polyline([[11.9,79.8], [10.5,80.0], [9.0,80.5], [7.0,82.0], [6.0,80.5], [7.0,80.0]], { color:'#d48a33', weight:1.8, dashArray:'5,4', opacity:0.85 }).addTo(map);
+  L.polyline([[7.0,80.0], [5.5,95.0], [3.14,101.69], [5.0,105.0], [9.0,107.5], [15.0,109.5], [18.5,107.0], [21.5,109.1]], { color:'#a0e870', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Chinese Segment — East→West','⚠ Chinese / SE Asian Vessels','Roman merchants did not sail east of Sri Lanka. Chinese silk reached the South China Sea from Hepu/Jiaozhi, moving westward through Austronesian maritime networks toward India.'));
 
   // Ghost silk road
   L.polyline([[31.2,29.9],[33.1,44.6],[37.16,38.79],[36.2,36.2]], { color:'#c8982a', weight:1.2, dashArray:'3,7', opacity:0.22, interactive:false }).addTo(map);
@@ -702,11 +721,11 @@ function initSilkRoad() {
   L.polyline([[34.27,108.93],[28.0,108.0],[21.5,109.1]], { color:'#e8c060', weight:2.2, dashArray:'6,4', opacity:0.75 }).addTo(map).bindPopup(popup('Circuit: Chang\'an → Hepu','Western Han: Inland–Maritime Junction','These interconnected systems linked the Han trading world, Southeast Asia, the Malabar ports, and Alexandria — a chain of overlapping networks, not a single circuit.'));
 
   // Ghost maritime
-  L.polyline([[31.2,29.9],[23.9,35.5],[14.5,48.2],[12.5,54.0],[10.17,76.2]], { color:'#3acc80', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
-  L.polyline([[12.5,54.0],[18,60],[21.7,72.98]], { color:'#3acc80', weight:1.2, dashArray:'4,6', opacity:0.22, interactive:false }).addTo(map);
-  L.polyline([[30.4,48.0],[26.0,54.0],[24.0,60.0],[21.7,72.98],[10.17,76.2]], { color:'#bb70cc', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
-  L.polyline([[10.17,76.2],[8.8,76.6],[9.0,78.5],[7.0,80.0]], { color:'#cc9922', weight:1.2, dashArray:'4,6', opacity:0.25, interactive:false }).addTo(map);
-  L.polyline([[7.0,80.0],[5.5,95.0],[3.14,101.69],[5.0,108.0],[10.82,106.63],[21.5,109.1]], { color:'#a0e870', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
+  L.polyline([[31.2,29.9], [30.08,31.24], [25.99,32.82], [23.9,35.5], [21.5,38.5], [17.0,40.5], [13.0,43.2], [12.0,44.5], [13.5,47.0], [14.5,48.2], [12.5,54.0], [10.17,76.2]], { color:'#3acc80', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
+  L.polyline([[12.5,54.0], [18.0,60.0], [20.0,70.0], [20.7,71.5], [21.7,72.98]], { color:'#3acc80', weight:1.2, dashArray:'4,6', opacity:0.22, interactive:false }).addTo(map);
+  L.polyline([[30.4,48.0], [27.0,51.0], [26.56,56.25], [24.0,60.0], [20.0,70.0], [20.7,71.5], [21.7,72.98], [15.0,73.0], [10.17,76.2]], { color:'#bb70cc', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
+  L.polyline([[10.17,76.2], [8.8,76.4], [8.0,77.5], [8.5, 78.5], [7.0,80.0]], { color:'#cc9922', weight:1.2, dashArray:'4,6', opacity:0.25, interactive:false }).addTo(map);
+  L.polyline([[7.0,80.0], [5.5,95.0], [3.14,101.69], [5.0,105.0], [9.0,107.5], [15.0,109.5], [18.5,107.0], [21.5,109.1]], { color:'#a0e870', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
 
   const srCities = [
     [34.27,108.93,'Chang\'an (Xi\'an)','Western Han Capital · Silk Road Terminus','Chang\'an was the capital of the Western Han (206 BCE–9 CE) and eastern terminus of the Silk Road. Southern routes ran to Hepu/Jiaozhi connecting to the maritime system.','#c44040'],
@@ -733,7 +752,7 @@ function initEvidence() {
   L.control.zoom({ position: 'topright' }).addTo(map);
   maps['evidence'] = map;
 
-  L.polyline([[23.9,35.5],[14.5,48.2],[12.5,54.0],[10.17,76.2]], { color:'#3a78cc', weight:1.5, dashArray:'5,5', opacity:0.4 }).addTo(map);
+  L.polyline([[23.9,35.5], [21.5,38.5], [17.0,40.5], [13.0,43.2], [12.0,44.5], [13.5,47.0], [14.5,48.2], [12.5,54.0], [10.17,76.2]], { color:'#3a78cc', weight:1.5, dashArray:'5,5', opacity:0.4 }).addTo(map);
 
   const sites = [
     [23.9,35.5,'Berenike, Egypt','KEY EXCAVATION — S. Sidebotham','7.55 kg black pepper in one container; teak of Indian origin; a Tamil Brahmi graffito scratched into pottery — proving an Indian was physically present at this Egyptian port.','#cc3333',12],
@@ -761,8 +780,11 @@ function initEvidence() {
   sites.forEach(([lat,lng,name,stage,desc,col,r]) => cityMark(map,lat,lng,name,stage,desc,col,r||8));
 
   const brahmiHtml = '<div style="color:#ff9090;font-family:Cinzel,serif;font-size:8px;background:rgba(30,0,0,0.88);border:1px solid #cc3333;padding:2px 6px;border-radius:2px;white-space:nowrap;margin-top:-26px">★ Tamil Brahmi here</div>';
-  [[23.9,35.5], [26.10,34.25], [17.03,54.43], [12.5,54.0], [9.87,98.60]].forEach(([lat, lng]) => {
-    L.marker([lat, lng], { icon: L.divIcon({ html: brahmiHtml, className:'', iconAnchor:[0,26] }), interactive:false }).addTo(map);
+  [[23.9,35.5,4], [26.10,34.25,4], [17.03,54.43,5], [12.5,54.0,4], [9.87,98.60,4]].forEach(([lat, lng, mz]) => {
+    const m = L.marker([lat, lng], { icon: L.divIcon({ html: brahmiHtml, className:'', iconAnchor:[0,26] }), interactive:false });
+    m.minZoom = mz;
+    if (map.getZoom() >= mz) m.addTo(map);
+    map._cityMarkers.push(m);
   });
 }
 
