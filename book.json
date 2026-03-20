@@ -18,6 +18,11 @@
       "id": "chapter-01",
       "title": "The Cosmopolitan Matrix",
       "file": "chapters/chapter-01.html"
+    },
+    {
+      "id": "chapter-02",
+      "title": "The Apostolic Imprint",
+      "file": "chapters/chapter-02.html"
     }
   ]
 }
