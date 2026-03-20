@@ -284,7 +284,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0600; f
 }
 
 /* ── LEAFLET OVERRIDES ── */
-.leaflet-tile-pane { filter: sepia(0.6) contrast(1.05) brightness(0.55) saturate(0.8) hue-rotate(-10deg); }
+.leaflet-tile-pane { filter: brightness(0.4) contrast(1.2) sepia(0.4) saturate(0.8) hue-rotate(-10deg); }
 .leaflet-popup-content-wrapper {
   background: #130d04 !important;
   border: 1px solid var(--border) !important;
@@ -568,14 +568,10 @@ function showTab(name, btn) {
 // ─────────────────────────────────────────────
 function tiles() {
   const base = L.tileLayer(
-    'https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg',
-    { attribution: '&copy; Stadia Maps &copy; Stamen Design &copy; OpenStreetMap', maxZoom: 16 }
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    { attribution: 'Tiles &copy; Esri', maxZoom: 17 }
   );
-  const labels = L.tileLayer(
-    'https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}{r}.png',
-    { maxZoom: 16, opacity: 0.4 }
-  );
-  return L.layerGroup([base, labels]);
+  return L.layerGroup([base]);
 }
 
 
@@ -622,8 +618,8 @@ function addLegend() { /* handled by drawer */ }
 function addMapLabels(map) {
   const regionStyle = 'font-family:Cinzel,serif;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(232,208,152,0.7);text-shadow:0 2px 8px rgba(0,0,0,0.9);pointer-events:none;white-space:nowrap;';
   const subStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;font-size:0.7em;color:rgba(200,176,122,0.55);letter-spacing:1px;text-transform:none;display:block;margin-top:2px;';
-  const oceanStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;letter-spacing:5px;color:rgba(130,170,210,0.45);text-shadow:0 1px 6px rgba(0,0,0,0.7);pointer-events:none;white-space:nowrap;';
-  const oceanSubStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;font-size:0.65em;color:rgba(130,170,210,0.3);letter-spacing:1px;display:block;margin-top:2px;';
+  const oceanStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;letter-spacing:5px;color:rgba(255,255,255,0.85);text-shadow:0 0 10px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.9);pointer-events:none;white-space:nowrap;';
+  const oceanSubStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;font-size:0.65em;color:rgba(255,255,255,0.55);letter-spacing:1px;display:block;margin-top:2px;';
 
   const regions = [
     [44, 5, 'ITALIA', '(Roman Heartland)', 12, 3],
@@ -643,6 +639,7 @@ function addMapLabels(map) {
     [28, 85, 'MAGADHA', '(Bihar / Bengal)', 10, 5],
     [42, 58, 'HYRCANIA', '(Caspian South)', 9, 5],
     [24, 70, 'SINDH', '(Lower Indus)', 10, 5],
+    [30, 108, 'HAN', '(China)', 12, 3],
   ];
 
   regions.forEach(([lat, lng, name, modern, size, minZ]) => {
