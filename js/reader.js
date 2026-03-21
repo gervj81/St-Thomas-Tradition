@@ -119,7 +119,7 @@
     const chapter = state.chapters[index];
 
     try {
-      const res = await fetch(chapter.file);
+      const res = await fetch(`${chapter.file}?v=${new Date().getTime()}`);
       if (!res.ok) throw new Error(`Failed to load ${chapter.file}`);
       const html = await res.text();
 
@@ -128,6 +128,7 @@
 
       // Process footnotes
       processFootnotes();
+      makeTablesResponsive();
 
       // Animate progress bars if visible
       requestAnimationFrame(() => {
@@ -335,19 +336,19 @@
     if (window.innerWidth >= 768) {
       const rect = ref.getBoundingClientRect();
       const popHeight = dom.footnotePopover.offsetHeight;
-      
+
       let topPos = rect.bottom + 12;
-      
+
       // If it overflows the viewport bottom, flip it to show above the footnote reference
       if (topPos + popHeight > window.innerHeight - 20) {
         topPos = rect.top - popHeight - 12;
       }
-      
+
       // Safety clamp so it doesn't push off the top of the screen either
       if (topPos < 20) {
         topPos = 20;
       }
-      
+
       dom.footnotePopover.style.top = topPos + 'px';
     } else {
       dom.footnotePopover.style.top = '';
@@ -365,6 +366,26 @@
     state.footnoteOpen = false;
   }
 
+
+  // ══════════════════════════════════════
+  //  TABLES
+  // ══════════════════════════════════════
+
+  function makeTablesResponsive() {
+    const tables = dom.chapterContent.querySelectorAll('.comparison-table');
+    tables.forEach(table => {
+      const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.trim());
+      const rows = table.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        cells.forEach((cell, i) => {
+          if (headers[i]) {
+            cell.setAttribute('data-label', headers[i]);
+          }
+        });
+      });
+    });
+  }
 
   // ══════════════════════════════════════
   //  MEDIA MODAL
@@ -537,7 +558,7 @@
 
     // Media modal
     dom.mediaModalClose.addEventListener('click', closeMediaModal);
-    
+
     // Interactive Feature Cards (Event Delegation)
     document.addEventListener('click', (e) => {
       const card = e.target.closest('.interactive-feature-card');
@@ -573,11 +594,11 @@
 
     // Touch swipe for chapter navigation
     let touchStartX = 0;
-    let touchEndX = 0;
-    const minSwipe = 80;
+    let touchStartTarget = null;
 
     document.addEventListener('touchstart', (e) => {
       touchStartX = e.changedTouches[0].screenX;
+      touchStartTarget = e.target;
     }, { passive: true });
 
     document.addEventListener('touchend', (e) => {
@@ -586,6 +607,11 @@
 
       if (Math.abs(diff) < minSwipe) return;
       if (state.tocOpen || state.footnoteOpen) return;
+
+      // Prevent swiping if the touch started inside a table or scrollable element
+      if (touchStartTarget && (touchStartTarget.closest('table') || touchStartTarget.closest('pre'))) {
+        return;
+      }
 
       if (diff > 0 && state.currentChapter < state.chapters.length - 1) {
         // Swipe left → next chapter

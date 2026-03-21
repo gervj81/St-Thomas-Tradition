@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Apostolic Imprint — Maps</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0600; font-family: 'EB Garamond', Georgia, serif; }
+
+:root {
+  --gold: #c9963a;
+  --gold-light: #e8c06a;
+  --ink: #0a0600;
+  --border: #6a4e1e;
+  --text: #f0e4c0;
+  --text-muted: #c8a870;
+  --panel-bg: rgba(10,6,0,0.97);
+  --tab-h: 58px;
+  --header-h: 52px;
+}
+
+/* ── HEADER ── */
+#app-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: linear-gradient(180deg, #050300 0%, #0e0800 100%);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 2000;
+}
+#app-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gold-light);
+  text-transform: uppercase;
+  flex: 1;
+}
+
+/* ── MAP CONTAINER ── */
+#map-container {
+  position: fixed;
+  top: var(--header-h);
+  left: 0; right: 0;
+  bottom: var(--tab-h);
+  z-index: 1;
+}
+.map-pane {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+.map-pane.active { display: block; }
+
+/* ── TAB BAR ── */
+#tab-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--tab-h);
+  background: #050300;
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 2000;
+}
+.tab-btn {
+  flex: 1;
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-top: 3px solid transparent;
+  color: #c8a85a;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72em;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.tab-btn.active { color: var(--gold-light); border-top-color: var(--gold); background: rgba(201,150,58,0.1); }
+
+/* ── INFO PANEL ── */
+#info-panel {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: var(--tab-h);
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border);
+  z-index: 1500;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  padding: 16px 18px;
+}
+#info-panel.open { transform: translateY(0); }
+#info-panel-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78em;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+#info-panel-text {
+  font-size: 1em;
+  color: #c8b07a;
+  line-height: 1.6;
+}
+
+/* ── LEAFLET OVERRIDES ── */
+.leaflet-tile-pane { filter: brightness(0.4) contrast(1.2) sepia(0.4) saturate(0.8) hue-rotate(-10deg); }
+.leaflet-popup-content-wrapper { background: #130d04 !important; border: 1px solid var(--border) !important; color: var(--text) !important; font-family: 'EB Garamond', Georgia, serif !important; }
+.popup-city { font-family: 'Cinzel', serif; font-size: 1.15em; color: var(--gold-light); margin-bottom: 2px; }
+.popup-body { font-size: 1.05em; color: #c8b47a; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div id="app-header">
+  <div id="app-title">The Apostolic Imprint</div>
+</div>
+
+<div id="map-container">
+  <div id="pane-gondophares" class="map-pane active"></div>
+  <div id="pane-patristic" class="map-pane"></div>
+</div>
+
+<div id="info-panel">
+  <div id="info-panel-title"></div>
+  <div id="info-panel-text"></div>
+</div>
+
+<nav id="tab-bar">
+  <button class="tab-btn active" onclick="showTab('gondophares',this)">Gondophares Record</button>
+  <button class="tab-btn" onclick="showTab('patristic',this)">Patristic Chain</button>
+</nav>
+
+<script>
+const tabInfo = {
+  gondophares: {
+    title: 'The Archaeological Record: Gondophares Confirmed',
+    text: 'Archaeological discovery of 1st-century coins and the Takht-i-Bahi inscription validated the existence of King Gondophares, naming him precisely as the Acts of Thomas does.'
+  },
+  patristic: {
+    title: 'The Patristic Chain: A Global Tradition',
+    text: 'Spanning four centuries, the tradition of Thomas in India was recorded by writers from Spain to Mesopotamia, showing its widespread reception in the late antique world.'
+  }
+};
+
+function showTab(name, btn) {
+  document.querySelectorAll('.map-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  btn.classList.add('active');
+  
+  const info = tabInfo[name];
+  document.getElementById('info-panel-title').textContent = info.title;
+  document.getElementById('info-panel-text').innerHTML = info.text;
+  document.getElementById('info-panel').classList.add('open');
+  
+  setTimeout(() => maps[name].invalidateSize(), 100);
+}
+
+const maps = {};
+
+function initMap(id, center, zoom) {
+  const map = L.map(id, { center: center, zoom: zoom, zoomControl: false });
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+  maps[id.replace('pane-', '')] = map;
+  return map;
+}
+
+const gMap = initMap('pane-gondophares', [30, 65], 4);
+const pMap = initMap('pane-patristic', [35, 30], 3);
+
+function cityMark(map, lat, lng, name, desc, color) {
+  L.circleMarker([lat, lng], { radius: 8, color: '#e8d498', fillColor: color, fillOpacity: 0.9 }).addTo(map)
+    .bindPopup(`<div class="popup-city">${name}</div><div class="popup-body">${desc}</div>`);
+}
+
+// Gondophares Markers
+cityMark(gMap, 33.74, 72.83, 'Taxila', 'The historical capital of the Indo-Parthian kings, where Gondophares reigned in the 1st century CE.', '#3a9a58');
+cityMark(gMap, 34.33, 71.93, 'Takht-i-Bahi', 'Site of the Kharosthi inscription mentioning "The Great King Guduphara" (Gondophares).', '#c44040');
+cityMark(gMap, 37.16, 38.79, 'Edessa', 'The Syriac city where the Acts of Thomas was composed and the relics were eventually translated.', '#aa55cc');
+cityMark(gMap, 21.7, 72.98, 'Barygaza', 'The major port connecting the Indo-Parthian northwest to the maritime trade routes.', '#c87820');
+
+// Patristic Markers
+cityMark(pMap, 37.16, 38.79, 'Edessa', 'The theological home of the Thomas tradition and repository of his relics.', '#aa55cc');
+cityMark(pMap, 31.2, 29.9, 'Alexandria', 'Where Origen (c. 230 CE) first recorded Thomas being assigned to Parthia.', '#3a7acc');
+cityMark(pMap, 31.77, 35.23, 'Palestine/Jerome', 'Jerome (c. 400 CE) records Thomas martyred in "Calamina, India".', '#c44040');
+cityMark(pMap, 47.39, 0.68, 'Tours', 'Gregory of Tours (c. 590 CE) records a report of a monastery at the Indian tomb.', '#c87820');
+cityMark(pMap, 37.38, -5.98, 'Seville', 'Isidore of Seville (c. 636 CE) confirms the tradition in his global encyclopedia.', '#88aa44');
+
+// Default info
+showTab('gondophares', document.querySelector('.tab-btn.active'));
+
+// Close info panel on map click
+[gMap, pMap].forEach(m => m.on('click', () => document.getElementById('info-panel').classList.remove('open')));
+
+</script>
+</body>
+</html>
