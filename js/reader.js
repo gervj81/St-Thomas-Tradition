@@ -176,6 +176,7 @@
   function buildTOC() {
     dom.tocList.innerHTML = '';
 
+    let chapterCounter = 1;
     state.chapters.forEach((ch, i) => {
       const li = document.createElement('li');
       const a = document.createElement('a');
@@ -183,7 +184,13 @@
 
       const numSpan = document.createElement('span');
       numSpan.className = 'chapter-number';
-      numSpan.textContent = String(i + 1).padStart(2, '0');
+      
+      if (ch.id.startsWith('chapter-')) {
+        numSpan.textContent = String(chapterCounter).padStart(2, '0');
+        chapterCounter++;
+      } else {
+        numSpan.textContent = '';
+      }
 
       const titleSpan = document.createElement('span');
       titleSpan.textContent = ch.title;
