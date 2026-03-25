@@ -1313,6 +1313,51 @@ body {
   line-height: 1.5;
 }
 
+/* ── Timeline Themes ── */
+.timeline.theme-gold::before {
+  background: rgba(180, 83, 9, 0.25);
+}
+.timeline.theme-gold .timeline-date {
+  color: #B45309; /* Deep Golden Amber */
+}
+.timeline.theme-gold .timeline-title {
+  color: #78350F;
+}
+.timeline.theme-gold .timeline-item::before {
+  background: #B45309;
+  box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.15);
+}
+
+/* Dark mode overrides for gold theme */
+[data-theme="dark"] .timeline.theme-gold::before {
+  background: rgba(251, 191, 36, 0.25);
+}
+[data-theme="dark"] .timeline.theme-gold .timeline-date {
+  color: #FBBF24; /* Bright Gold */
+}
+[data-theme="dark"] .timeline.theme-gold .timeline-title {
+  color: #FDE68A;
+}
+[data-theme="dark"] .timeline.theme-gold .timeline-item::before {
+  background: #FBBF24;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.15);
+}
+
+/* Sepia mode overrides for gold theme */
+[data-theme="sepia"] .timeline.theme-gold::before {
+  background: rgba(146, 64, 14, 0.2);
+}
+[data-theme="sepia"] .timeline.theme-gold .timeline-date {
+  color: #92400E; /* Deep Burnt Gold */
+}
+[data-theme="sepia"] .timeline.theme-gold .timeline-title {
+  color: #451A03;
+}
+[data-theme="sepia"] .timeline.theme-gold .timeline-item::before {
+  background: #92400E;
+  box-shadow: 0 0 0 2px rgba(146, 64, 14, 0.15);
+}
+
 /* ── Infographic Cards (Grid Layout) ── */
 .infographic-cards {
   display: grid;
