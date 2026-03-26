@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>The Grand Master Graph</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAF6F0;
+      --spine: #94a3b8;
+      --node: #1e293b;
+      --active: #B45309;
+      --text: #334155;
+      --bg-card: #ffffff;
+      
+      --panel-bg: #f8f9fa;
+      --card-title: #0f172a;
+      --card-border: #f1f5f9;
+      
+      --geo-bg: #fef2f2;
+      --geo-border: #ef4444;
+      --geo-title: #b91c1c;
+      
+      --trad-bg: #faf5ff;
+      --trad-border: #a855f7;
+      --trad-title: #7e22ce;
+      
+      --ev-bg: #ecfdf5;
+      --ev-border: #10b981;
+      --ev-title: #047857;
+      
+      --sub-title: #111;
+      --text-muted: #374151;
+      --hover-bg: #f1f5f9;
+      --timeline-border: #e2e8f0;
+    }
+
+    /* Dark Mode Theme */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141418;
+        --spine: #475569;
+        --node: #cbd5e1;
+        --active: #E8B86D;
+        --text: #E8E4DF;
+        --bg-card: #22222A;
+        --panel-bg: #1C1C22;
+        --card-title: #E8E4DF;
+        --card-border: rgba(255,255,255,0.06);
+        --geo-bg: rgba(239, 68, 68, 0.1);
+        --geo-border: rgba(239, 68, 68, 0.4);
+        --geo-title: #fca5a5;
+        --trad-bg: rgba(168, 85, 247, 0.1);
+        --trad-border: rgba(168, 85, 247, 0.4);
+        --trad-title: #d8b4fe;
+        --ev-bg: rgba(16, 185, 129, 0.1);
+        --ev-border: rgba(16, 185, 129, 0.4);
+        --ev-title: #6ee7b7;
+        --sub-title: #f8fafc;
+        --text-muted: #A09B94;
+        --hover-bg: #2d2d35;
+        --timeline-border: rgba(255,255,255,0.06);
+      }
+    }
+
+    [data-theme="dark"] {
+      --bg: #141418;
+      --spine: #475569;
+      --node: #cbd5e1;
+      --active: #E8B86D;
+      --text: #E8E4DF;
+      --bg-card: #22222A;
+      --panel-bg: #1C1C22;
+      --card-title: #E8E4DF;
+      --card-border: rgba(255,255,255,0.06);
+      --geo-bg: rgba(239, 68, 68, 0.1);
+      --geo-border: rgba(239, 68, 68, 0.4);
+      --geo-title: #fca5a5;
+      --trad-bg: rgba(168, 85, 247, 0.1);
+      --trad-border: rgba(168, 85, 247, 0.4);
+      --trad-title: #d8b4fe;
+      --ev-bg: rgba(16, 185, 129, 0.1);
+      --ev-border: rgba(16, 185, 129, 0.4);
+      --ev-title: #6ee7b7;
+      --sub-title: #f8fafc;
+      --text-muted: #A09B94;
+      --hover-bg: #2d2d35;
+      --timeline-border: rgba(255,255,255,0.06);
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+    }
+    #timeline-container {
+      flex: 0 0 320px;
+      height: 100%;
+      border-right: 1px solid var(--timeline-border);
+      position: relative;
+    }
+    #content-panel {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      background: var(--panel-bg);
+    }
+    
+    /* D3 SVG Styles */
+    .axis-line { stroke: var(--spine); stroke-width: 3px; stroke-dasharray: 4 4; transition: all 0.3s ease; }
+    .node circle {
+      fill: var(--bg);
+      stroke: var(--node);
+      stroke-width: 3px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .node text {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      fill: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+    .node:hover circle {
+      fill: var(--hover-bg);
+      transform: scale(1.1);
+    }
+    .node.active circle {
+      stroke: var(--active);
+      fill: var(--active);
+      transform: scale(1.25);
+    }
+    .node.active text {
+      fill: var(--active);
+    }
+
+    /* Content Card Styles */
+    .card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05);
+      width: 100%;
+      max-width: 800px;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      border-top: 6px solid var(--active);
+    }
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .card h2 {
+      margin: 0 0 24px 0;
+      font-size: 26px;
+      color: var(--card-title);
+      border-bottom: 2px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+    
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    
+    .data-category {
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .geo { background: var(--geo-bg); border-left: 5px solid var(--geo-border); }
+    .trad { background: var(--trad-bg); border-left: 5px solid var(--trad-border); }
+    .ev { background: var(--ev-bg); border-left: 5px solid var(--ev-border); }
+
+    .category-title {
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .geo .category-title { color: var(--geo-title); }
+    .trad .category-title { color: var(--trad-title); }
+    .ev .category-title { color: var(--ev-title); }
+
+    .category-subtitle {
+      font-weight: 700;
+      font-size: 17px;
+      margin-bottom: 10px;
+      color: var(--sub-title);
+    }
+    .category-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+    .category-text p { margin: 0 0 8px 0; }
+    .category-text ul { padding-left: 20px; margin: 0; }
+    .category-text li { margin-bottom: 6px; }
+    
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      #timeline-container { flex: 0 0 100px; width: 100%; border-right: none; border-bottom: 1px solid var(--timeline-border); }
+      #content-panel { padding: 20px; }
+      .data-grid { gap: 16px; }
+      .data-category { padding: 16px; }
+      .card h2 { font-size: 22px; margin-bottom: 20px; }
+      .node text { font-size: 12px; }
+    }
+  </style>
+  <script>
+    // Sync theme with parent window or URL parameter
+    try {
+      // 1. First try checking URL parameters (works in file:// and cross-origin)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlTheme = urlParams.get('theme');
+      if (urlTheme) {
+        document.documentElement.setAttribute('data-theme', urlTheme);
+      }
+      
+      // 2. Then try syncing with parent window (works in same-origin localhost)
+      if (window.parent && window.parent.document) {
+        let parentTheme = window.parent.document.documentElement.getAttribute('data-theme');
+        if (parentTheme && !urlTheme) {
+          document.documentElement.setAttribute('data-theme', parentTheme);
+        }
+        
+        // Listen to live changes if accessible
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'data-theme') {
+              document.documentElement.setAttribute('data-theme', window.parent.document.documentElement.getAttribute('data-theme'));
+            }
+          });
+        });
+        observer.observe(window.parent.document.documentElement, { attributes: ['data-theme'] });
+      }
+    } catch(e) {
+      // Cross-origin issues, ignore
+    }
+  </script>
+</head>
+<body>
+  <div id="timeline-container"></div>
+  <div id="content-panel">
+    <div id="empty-state" style="color: #94a3b8; font-size: 16px; margin-top: 100px;">
+      Rendering timeline...
+    </div>
+  </div>
+
+  <script>
+    const db = [
+      {
+        id: "era1", date: "1st – 3rd Century",
+        geoTitle: "The Cosmopolitan Matrix", geo: "Three major arteries connect the world: the Greco-Roman Red Sea route (Alexandrian vector), the Persian-Arab axis, and the overland Silk Road. Greek and Aramaic act as universal commercial passports.",
+        tradTitle: "Parthia & The Edessan Anchor", trad: "• Early patristics (Origen, Eusebius) explicitly place Thomas in \"Parthia\" (the Indo-Parthian northwest).<br>• <em>Acts of Judas Thomas</em> (authored in Edessa) establishes the core narrative: an apostolic mission, martyrdom, and the vital <strong>translation of relics</strong> out of India back to the West.",
+        evTitle: "1st Century Silence & Tradition", ev: "<strong>NW India:</strong> King Gondophares is archaeologically confirmed (Sirkap, coins). Zero Christian documentation.<br><br><strong>Tamilakam (South India):</strong><br>• <em>East Coast (Coromandel):</em> Puhar is a major port. Zero physical evidence of Christians, but oral and textual traditions consistently point here for the ultimate Tomb.<br>• <em>West Coast (Malabar):</em> Muziris is a booming global pepper port accommodating foreign (Yavana) merchants. Zero early Christian documentation."
+      },
+      {
+        id: "era2", date: "4th Century",
+        geoTitle: "Sasanian Consolidation", geo: "The Roman Empire shifts center to Constantinople. In the East, Shah Shapur II heavily persecutes the Church of the East in Persia, straining institutional ties but solidifying an independent, Syriac-speaking ecclesiastical identity.",
+        tradTitle: "The Relic Divergence", trad: "• Ephrem the Syrian (d. 373) explicitly anchors the relic tradition in the West, attesting the physical bones were brought to Edessa.<br>• The textual relic tradition (bones in the West) and the physical tomb tradition (empty shrine in India) permanently split.",
+        evTitle: "Subcontinental Silence", ev: "<strong>East & West Coasts:</strong> The ancient Sangam political order shifts under Kalabhra dominance. The commercial world persists, but no indigenous Christian documentation or artifacts from either Northwest or South India survive. A profound silence."
+      },
+      {
+        id: "era3", date: "5th – 6th Century",
+        geoTitle: "The Justinian Revival", geo: "Direct maritime contact between the Mediterranean and India briefly revives via Aksumite and Byzantine stimulus, before the Sasanian Persians gradually monopolize the Indian Ocean shipping lanes.",
+        tradTitle: "South Indian Specificity & \"Calamina\"", trad: "The documentary horizon expands.<br>• Anonymous itineraries (c. 500) introduce the specific toponym \"Kalamene/Calamina.\"<br>• Jacob of Serug details a dark-skinned, sunburnt Indian demographic, physically differentiating the narrative from the Indo-Parthian northwest.",
+        evTitle: "Pahlavi Crosses & Cosmas", ev: "<strong>East Coast:</strong> ⚓ 6th-c. Pahlavi cross appears at Mylapore (the oldest known physical artifact). Similar Pahlavi crosses from this Persian network are also found in <strong>Anuradhapura (Sri Lanka)</strong> and <strong>Goa</strong>.<br><br><strong>West Coast:</strong> Alexandrian merchant Cosmas Indicopleustes (c. 550) physically verifies an active Christian community at \"Male\" (pepper coast), a bishop at Kalyan, and a Persian church in Taprobane (Sri Lanka)."
+      },
+      {
+        id: "era4", date: "7th – 9th Century",
+        geoTitle: "The Network Collapse (Dark Age)", geo: "Islamic conquests destroy the Alexandrian vector, severing Latin Europe. The Church of the East survives and expands under the Abbasid Caliphate. Tamilakam undergoes the sweeping Bhakti religious transformation.",
+        tradTitle: "Documentary Stagnation", trad: "• The Latin West falls into ignorance, relying on static memory (Anglo-Saxon envoys seek the tomb in 883).<br>• The Syriac world maintains the \"Calamina\" toponym but adds no new geographic detail.",
+        evTitle: "The Asymmetrical Dark Age", ev: "<strong>East Coast:</strong> Massive political continuity (Pallavas/Pandyas) and temple building (Bhakti movement). Yet, TOTAL DOCUMENTARY SILENCE regarding Christians.<br><br><strong>West Coast:</strong> An absolute 5-century political blackout with zero documentation. Out of this silence, the new pluralistic Cēra Perumal state emerges, issuing the <strong>Tharisapalli Copper Plates (849 CE)</strong> at Quilon. This formally embeds Persian Christian merchants (Mar Sapor) into the polity."
+      },
+      {
+        id: "era5", date: "10th – 12th Century",
+        geoTitle: "European Isolation", geo: "Turkic Seljuk expansions and the subsequent Crusades erect a hard geopolitical curtain between Latin Europe and the East. The Church of the East loses direct overland links to its Indian province.",
+        tradTitle: "Prester John & Wandering Relics", trad: "• Cut off from reality, Latin Europe invents the utopian Prester John myth (1145, 1165)—a Christian king guarding the tomb of St. Thomas.<br>• Edessan relics are moved to Chios (post-1144) to escape Islamic warlords (Zengi).",
+        evTitle: "The Institutional Chasm", ev: "<strong>West Coast:</strong> The Malabar Christians function seamlessly within the Cēra state's pan-Tamil <em>Manigramam</em> and <em>Añcuvaṇṇam</em> guild structures. They expand as a local commercial elite, completely invisible to the squabbling Mediterranean powers.<br><br><strong>East Coast:</strong> Continues to purely house the tomb, while the living commercial community anchors on the West."
+      },
+      {
+        id: "era6", date: "13th – 15th Century",
+        geoTitle: "Pax Mongolica & Malabar Consolidation", geo: "The Mongol Empire forces open trans-Asian transit, creating a superhighway to Ming China. In Kerala, the 1341 Periyar flood destroys Muziris, forcing the commercial hub to consolidate southward at Quilon.",
+        tradTitle: "Toponymic Precision", trad: "• Syriac texts finally update: Bar Hebraeus (1286) officially equates Calamina with <strong>Mylapore</strong>.<br>• Authentic Saint Thomas relics reach Ortona, Italy (1258).",
+        evTitle: "The Western Convergence", ev: "<strong>East Coast:</strong> A transit hub housing <em>only</em> the Tomb. Latin friars and merchants (Marco Polo, Odoric) pass through Mylapore en route to China.<br><br><strong>West Coast:</strong> The living community is entirely concentrated here. John of Marignolli notes them as <em>'masters of the pepper gardens'</em>. Vatican MS 22 (1301) is inscribed at Kodungallur. Vasco da Gama eventually lands (1498) seeking 'Christians and spices'."
+      }
+    ];
+
+    let currentEraId = null;
+
+    const svg = d3.select("#timeline-container").append("svg")
+      .attr("width", "100%")
+      .attr("height", "100%");
+
+    svg.append("line").attr("class", "axis-line");
+
+    const nodes = svg.selectAll(".node")
+      .data(db).enter().append("g")
+      .attr("class", "node")
+      .attr("id", d => "node-" + d.id)
+      .on("click", (event, d) => selectNode(d.id));
+
+    nodes.append("circle").attr("r", 10);
+    nodes.append("text").text(d => d.date);
+
+    function selectNode(id) {
+      if (currentEraId === id) return;
+      currentEraId = id;
+      
+      d3.selectAll(".node").classed("active", false);
+      d3.select("#node-" + id).classed("active", true);
+
+      const era = db.find(d => d.id === id);
+      const panel = document.getElementById("content-panel");
+      
+      // We force a micro-transition by clearing then setting
+      panel.innerHTML = '';
+      
+      setTimeout(() => {
+        panel.innerHTML = `
+          <div class="card visible">
+            <h2>${era.date}</h2>
+            <div class="data-grid">
+              <div class="data-category geo">
+                <div class="category-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  Geopolitics & Information Networks
+                </div>
+                <div class="category-subtitle">${era.geoTitle}</div>
+                <div class="category-text">${era.geo}</div>
+              </div>
+              
+              <div class="data-category trad">
+                <div class="category-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                  The Textual & Relic Tradition
+                </div>
+                <div class="category-subtitle">${era.tradTitle}</div>
+                <div class="category-text">${era.trad}</div>
+              </div>
+
+              <div class="data-category ev">
+                <div class="category-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                  India: Physical Evidence
+                </div>
+                <div class="category-subtitle">${era.evTitle}</div>
+                <div class="category-text">${era.ev}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }, 50);
+    }
+
+    function updateLayout() {
+      const container = document.getElementById("timeline-container");
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      const isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        const xPad = 30;
+        const scale = d3.scalePoint().domain(db.map(d => d.id)).range([xPad, w - xPad]);
+        
+        d3.select(".axis-line").attr("x1", xPad).attr("y1", h/2 + 10).attr("x2", w - xPad).attr("y2", h/2 + 10);
+        d3.selectAll(".node").attr("transform", d => `translate(${scale(d.id)}, ${h/2 + 10})`);
+        d3.selectAll(".node text").attr("x", 0).attr("y", -20).attr("text-anchor", "middle");
+      } else {
+        const yPad = 60;
+        const scale = d3.scalePoint().domain(db.map(d => d.id)).range([yPad, h - yPad]);
+        
+        d3.select(".axis-line").attr("x1", 60).attr("y1", yPad).attr("x2", 60).attr("y2", h - yPad);
+        d3.selectAll(".node").attr("transform", d => `translate(60, ${scale(d.id)})`);
+        d3.selectAll(".node text").attr("x", 24).attr("y", 5).attr("text-anchor", "start");
+      }
+    }
+
+    window.addEventListener('resize', updateLayout);
+    updateLayout(); // Initial setup
+    selectNode(db[0].id); // Select first node
+
+  </script>
+</body>
+</html>

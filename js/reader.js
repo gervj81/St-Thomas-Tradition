@@ -400,7 +400,17 @@
 
   function openMediaModal(url, title = 'Interactive Feature') {
     dom.mediaModalTitle.textContent = title;
-    dom.mediaModalIframe.src = url;
+    
+    // Pass current theme to iframe via URL query parameter for file:// protocol support
+    let finalUrl = url;
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    if (finalUrl.includes('?')) {
+      finalUrl += `&theme=${currentTheme}`;
+    } else {
+      finalUrl += `?theme=${currentTheme}`;
+    }
+    
+    dom.mediaModalIframe.src = finalUrl;
     dom.mediaModal.classList.add('active');
     dom.mediaModal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';

@@ -33,6 +33,11 @@
       "id": "chapter-04",
       "title": "The Legend, the Witnesses, and the Collision",
       "file": "chapters/chapter-04.html"
+    },
+    {
+      "id": "part-1-synthesis",
+      "title": "Part 1 Grand Synthesis",
+      "file": "chapters/part-1-synthesis.html"
     }
   ]
 }
