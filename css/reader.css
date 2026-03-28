@@ -2050,6 +2050,27 @@ button:focus:not(:focus-visible) {
   color: #2c3e50 !important;
 }
 
+/* Dark mode overrides for infographic cards */
+[data-theme="dark"] #chapter-content .infographic-card.gold-border,
+.dark-mode #chapter-content .infographic-card.gold-border {
+  border-left-color: #d4af37 !important;
+}
+
+[data-theme="dark"] #chapter-content .infographic-card.gold-border h4,
+.dark-mode #chapter-content .infographic-card.gold-border h4 {
+  color: #e5c158 !important;
+}
+
+[data-theme="dark"] #chapter-content .infographic-card.slate-border,
+.dark-mode #chapter-content .infographic-card.slate-border {
+  border-left-color: #7b9cbe !important;
+}
+
+[data-theme="dark"] #chapter-content .infographic-card.slate-border h4,
+.dark-mode #chapter-content .infographic-card.slate-border h4 {
+  color: #8da9c4 !important;
+}
+
 #chapter-content .infographic-list {
   padding-left: 20px;
   font-family: var(--font-ui) !important;
@@ -2065,4 +2086,4 @@ button:focus:not(:focus-visible) {
 
 #chapter-content .infographic-list li:last-child {
   margin-bottom: 0;
-}
+}
