@@ -1380,7 +1380,7 @@ body {
 
 .infographic-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   margin-bottom: 10px;
   padding-bottom: 10px;
@@ -1390,6 +1390,7 @@ body {
 .infographic-card-icon {
   color: var(--accent);
   display: flex;
+  flex-shrink: 0;
 }
 
 .infographic-card-title {
@@ -1956,13 +1957,14 @@ button:focus:not(:focus-visible) {
   padding: 16px 24px;
   font-family: var(--font-heading) !important;
   font-size: 1.05rem !important;
+  line-height: 1.4 !important;
   font-weight: 700 !important;
   letter-spacing: 0.2px;
   color: var(--accent) !important;
   cursor: pointer;
   background: linear-gradient(to bottom, rgba(0,0,0,0.01), rgba(0,0,0,0.03));
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   user-select: none;
   border-bottom: 1px solid transparent;
   transition: all 0.2s ease;
@@ -1980,6 +1982,11 @@ button:focus:not(:focus-visible) {
 
 #chapter-content details.infographic-container > summary::-webkit-details-marker {
   display: none;
+}
+
+#chapter-content details.infographic-container > summary svg {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 #chapter-content details.infographic-container > summary svg.toggle-icon {
