@@ -71,7 +71,7 @@
     bindEvents();
 
     try {
-      const res = await fetch('book.json');
+      const res = await fetch(`book.json?v=${new Date().getTime()}`);
       if (!res.ok) throw new Error('Could not load book.json');
       state.book = await res.json();
       state.chapters = state.book.chapters || [];

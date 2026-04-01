@@ -15,6 +15,11 @@
       "file": "chapters/preface.html"
     },
     {
+      "id": "part-1-intro",
+      "title": "Part 1 Introduction",
+      "file": "chapters/part-1-intro.html"
+    },
+    {
       "id": "chapter-01",
       "title": "The Cosmopolitan Matrix",
       "file": "chapters/chapter-01.html"
@@ -38,6 +43,11 @@
       "id": "part-1-synthesis",
       "title": "Part 1 Grand Synthesis",
       "file": "chapters/part-1-synthesis.html"
+    },
+    {
+      "id": "part-2-intro",
+      "title": "Part 2 Introduction",
+      "file": "chapters/part-2-intro.html"
     }
   ]
 }
