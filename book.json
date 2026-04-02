@@ -48,6 +48,11 @@
       "id": "part-2-intro",
       "title": "Part 2 Introduction",
       "file": "chapters/part-2-intro.html"
+    },
+    {
+      "id": "chapter-05",
+      "title": "The Encounter That Never Was",
+      "file": "chapters/chapter-05.html"
     }
   ]
 }
