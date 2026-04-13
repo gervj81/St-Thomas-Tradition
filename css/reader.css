@@ -2093,4 +2093,48 @@ button:focus:not(:focus-visible) {
 
 #chapter-content .infographic-list li:last-child {
   margin-bottom: 0;
-}
+}
+
+
+/* ── Direct Quotations (In-text citations) ── */
+#chapter-content blockquote.direct-quote {
+  position: relative;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  margin: 2.5em 0;
+  padding: 10px 45px;
+  border: none !important;
+  background: transparent !important;
+  color: var(--text-primary);
+  font-style: italic;
+  border-radius: 0;
+}
+
+#chapter-content blockquote.direct-quote::before {
+  content: '“';
+  position: absolute;
+  left: 0;
+  top: -15px;
+  font-family: var(--font-heading);
+  font-size: 4.5rem;
+  color: var(--accent);
+  opacity: 0.35;
+  line-height: 1;
+}
+
+#chapter-content blockquote.direct-quote::after {
+  content: '”';
+  position: absolute;
+  right: 0;
+  bottom: -40px;
+  font-family: var(--font-heading);
+  font-size: 4.5rem;
+  color: var(--accent);
+  opacity: 0.35;
+  line-height: 1;
+}
+
+[data-theme="dark"] #chapter-content blockquote.direct-quote::before,
+[data-theme="dark"] #chapter-content blockquote.direct-quote::after {
+  color: var(--text-muted);
+}

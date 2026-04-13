@@ -63,6 +63,11 @@
       "id": "chapter-07",
       "title": "The Empire of Souls",
       "file": "chapters/chapter-07.html"
+    },
+    {
+      "id": "chapter-08",
+      "title": "Shadow Worlds",
+      "file": "chapters/chapter-08.html"
     }
   ]
 }
