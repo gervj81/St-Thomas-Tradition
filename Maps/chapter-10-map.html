@@ -112,6 +112,36 @@ svg { width: 100%; height: 100%; }
 .tt-emp.portuguese { color: var(--sea-green); }
 
 /* ── CONTROLS ── */
+#zoom-controls {
+  position: absolute;
+  top: calc(var(--header-h) + 20px);
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+#zoom-controls button {
+  width: 36px;
+  height: 36px;
+  background: var(--panel-bg);
+  border: 1px solid rgba(201,150,58,0.4);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-family: inherit;
+  padding-bottom: 2px; /* slight vertical centering tweak */
+}
+#zoom-controls button:hover, #zoom-controls button:active {
+  background: rgba(201,150,58,0.2);
+  border-color: var(--gold);
+}
+
 #controls {
   position: absolute;
   bottom: 20px;
@@ -196,6 +226,11 @@ svg { width: 100%; height: 100%; }
   <button class="filter-btn" data-filter="diocesan">Diocesan Centres</button>
 </div>
 
+<div id="zoom-controls">
+  <button id="zoom-in" aria-label="Zoom In">+</button>
+  <button id="zoom-out" aria-label="Zoom Out">−</button>
+</div>
+
 <div id="legend">
   <div class="legend-item"><div class="legend-circle l-crown"></div> Crown / State Institution</div>
   <div class="legend-item"><div class="legend-circle l-papacy"></div> Papal Authority</div>
@@ -211,8 +246,9 @@ const width = window.innerWidth;
 const height = window.innerHeight;
 
 // Initial projection configuration
+const projWidth = Math.max(width, 900); // Prevent map from being crushed on mobile
 const projection = d3.geoMercator()
-  .scale(width / 6.5)
+  .scale(projWidth / 6.5)
   .translate([width / 2, height / 1.5]);
 
 const path = d3.geoPath().projection(projection);
@@ -446,9 +482,10 @@ function initNetwork() {
     .attr("opacity", 0.6);
 
   // Draw Nodes
-  const nodes = nodeGroup.selectAll("g")
+  const nodes = nodeGroup.selectAll("g.node")
     .data(nodesData)
     .enter().append("g")
+    .attr("class", "node")
     .attr("transform", d => `translate(${d.x},${d.y})`)
     .style("cursor", "pointer")
     .on("mouseover", showTooltip)
@@ -565,13 +602,33 @@ function hideTooltip(event, d) {
 
 // Add simple zoom/pan behavior
 const zoom = d3.zoom()
-  .scaleExtent([0.8, 5])
+  .scaleExtent([0.5, 8])
   .on("zoom", (event) => {
     mapGroup.attr("transform", event.transform);
-    networkGroup.attr("transform", event.transform);
+    linkGroup.attr("transform", event.transform);
+    nodeGroup.attr("transform", event.transform);
+    
+    // Inverse scale links so they don't get super thick
+    linkGroup.selectAll("path").style("stroke-width", function() {
+       const el = d3.select(this);
+       const isThin = el.classed("conflict") || el.classed("papal_historical");
+       const base = isThin ? 1 : 2;
+       return (base / event.transform.k) + "px";
+    });
+
+    // Inverse scale nodes so zooming actually un-crowds them instead of just making them huge
+    nodeGroup.selectAll("g.node")
+      .attr("transform", d => `translate(${d.x},${d.y}) scale(${1 / event.transform.k})`);
   });
 
 svg.call(zoom);
+
+d3.select("#zoom-in").on("click", () => {
+  svg.transition().duration(300).call(zoom.scaleBy, 1.4);
+});
+d3.select("#zoom-out").on("click", () => {
+  svg.transition().duration(300).call(zoom.scaleBy, 1 / 1.4);
+});
 
 </script>
 </body>
