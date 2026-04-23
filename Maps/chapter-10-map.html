@@ -208,6 +208,41 @@ svg { width: 100%; height: 100%; }
 .l-local { background: var(--red); }
 .l-spanish-line { width: 20px; height: 3px; background: var(--gold); }
 .l-port-line { width: 20px; height: 3px; background: var(--sea-green); }
+
+/* ── RESPONSIVE / MOBILE ── */
+@media (max-width: 768px) {
+  #controls {
+    bottom: auto;
+    top: calc(var(--header-h) + 15px);
+    width: 90%;
+    flex-wrap: wrap;
+    padding: 8px;
+    gap: 6px;
+    justify-content: center;
+  }
+  .filter-btn {
+    flex: 1 1 auto;
+    font-size: 0.65rem;
+    padding: 6px 10px;
+  }
+  #zoom-controls {
+    top: auto;
+    bottom: 20px;
+    left: 15px;
+    right: auto;
+  }
+  #legend {
+    bottom: 20px;
+    right: 15px;
+    padding: 10px;
+    background: rgba(20, 22, 26, 0.85); /* Slightly more transparent to not block map entirely */
+    backdrop-filter: blur(4px);
+  }
+  .legend-item {
+    font-size: 0.75rem;
+    margin-bottom: 5px;
+  }
+}
 </style>
 </head>
 <body>
@@ -574,16 +609,29 @@ function initNetwork() {
   });
 }
 
+let activeTooltipNode = null;
+
+function updateTooltipPosition() {
+  if (!activeTooltipNode) return;
+  const t = d3.zoomTransform(svg.node());
+  const screenX = activeTooltipNode.x * t.k + t.x;
+  const screenY = activeTooltipNode.y * t.k + t.y;
+  
+  tooltip.style("left", (screenX + 15) + "px")
+         .style("top", (screenY - 28) + "px");
+}
+
 function showTooltip(event, d) {
+  activeTooltipNode = d;
   tooltip.transition().duration(200).style("opacity", 1);
   tooltip.html(`
     <div class="tt-title">${d.id}</div>
     ${d.empire !== 'none' && d.empire !== 'local' ? `<div class="tt-emp ${d.empire}">${d.empire} Empire</div>` : ''}
     <div class="tt-cat">${d.type}</div>
     <div>${d.desc}</div>
-  `)
-  .style("left", (event.pageX + 15) + "px")
-  .style("top", (event.pageY - 28) + "px");
+  `);
+  
+  updateTooltipPosition();
 
   d3.select(this).select("circle")
     .transition().duration(200)
@@ -592,6 +640,7 @@ function showTooltip(event, d) {
 }
 
 function hideTooltip(event, d) {
+  activeTooltipNode = null;
   tooltip.transition().duration(500).style("opacity", 0);
   
   d3.select(this).select("circle")
@@ -619,6 +668,9 @@ const zoom = d3.zoom()
     // Inverse scale nodes so zooming actually un-crowds them instead of just making them huge
     nodeGroup.selectAll("g.node")
       .attr("transform", d => `translate(${d.x},${d.y}) scale(${1 / event.transform.k})`);
+      
+    // Update tooltip position so it stays glued to the node
+    updateTooltipPosition();
   });
 
 svg.call(zoom);
