@@ -38,6 +38,7 @@
     tocOverlay: $('#toc-overlay'),
     tocClose: $('#toc-close'),
     tocList: $('#toc-list'),
+    tocScrollIndicator: $('#toc-scroll-indicator'),
     chapterContent: $('#chapter-content'),
     prevBtn: $('#prev-chapter'),
     nextBtn: $('#next-chapter'),
@@ -207,6 +208,22 @@
       li.appendChild(a);
       dom.tocList.appendChild(li);
     });
+
+    // Initial check for scroll indicator
+    requestAnimationFrame(updateTocScrollIndicator);
+  }
+
+  function updateTocScrollIndicator() {
+    if (!dom.tocScrollIndicator) return;
+    const isScrollable = dom.tocList.scrollHeight > dom.tocList.clientHeight;
+    // Use a larger threshold in case of padding/floating point issues
+    const isAtBottom = dom.tocList.scrollHeight - Math.ceil(dom.tocList.scrollTop) - dom.tocList.clientHeight <= 20;
+    
+    if (isScrollable && !isAtBottom) {
+      dom.tocScrollIndicator.style.opacity = '1';
+    } else {
+      dom.tocScrollIndicator.style.opacity = '0';
+    }
   }
 
   function updateTOCActive() {
@@ -222,6 +239,8 @@
     dom.tocOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     dom.tocToggle.setAttribute('aria-expanded', 'true');
+    // Ensure dimensions are computed before checking scroll state
+    setTimeout(updateTocScrollIndicator, 150);
   }
 
   function closeTOC() {
@@ -553,6 +572,10 @@
     });
     dom.tocClose.addEventListener('click', closeTOC);
     dom.tocOverlay.addEventListener('click', closeTOC);
+    dom.tocList.addEventListener('scroll', updateTocScrollIndicator, { passive: true });
+    window.addEventListener('resize', () => {
+      if (state.tocOpen) updateTocScrollIndicator();
+    }, { passive: true });
 
     // Chapter navigation
     dom.prevBtn.addEventListener('click', () => {

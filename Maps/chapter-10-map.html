@@ -248,7 +248,7 @@ const nodesData = [
   { id: "Bogotá", lng: -74.1, lat: 4.7, type: "diocesan", empire: "spanish", desc: "Archdiocese of the New Kingdom of Granada." },
   { id: "Lima", lng: -77.0, lat: -12.0, type: "diocesan", empire: "spanish", desc: "Spanish Patronato Archdiocese governing South America." },
   { id: "Cuzco", lng: -71.9, lat: -13.5, type: "diocesan", empire: "spanish", desc: "Historic Inca capital, became a massive Diocese." },
-  { id: "Manila", lng: 121.0, lat: 14.6, type: "diocesan", empire: "spanish", desc: "Spanish Patronato outpost bridged to Mexico City via the galleon trade." },
+  { id: "Manila", lng: 121.0, lat: 14.6, type: "diocesan", empire: "spanish", desc: "Spanish Patronato outpost. Though in the Portuguese hemisphere under the Treaty of Zaragoza, Spain claimed it via the Pacific route from Mexico, exploiting imprecise longitude measurements." },
   
   // Portuguese Padroado
   { id: "Funchal", lng: -16.9, lat: 32.6, type: "diocesan", empire: "portuguese", desc: "The original global Archdiocese. Before Goa was elevated, Funchal held the largest jurisdiction in Catholic history, governing all overseas discoveries." },
@@ -258,6 +258,7 @@ const nodesData = [
   { id: "Elmina", lng: -1.3, lat: 5.0, type: "territorial", empire: "portuguese", desc: "São Jorge da Mina, the great Gold Coast fortress." },
   { id: "Olinda", lng: -34.8, lat: -8.0, type: "territorial", empire: "portuguese", desc: "Pernambuco, the sugar capital of Brazil." },
   { id: "Salvador (Bahia)", lng: -38.5, lat: -12.9, type: "diocesan", empire: "portuguese", desc: "Seat of the Primate of Brazil, under the Portuguese Padroado." },
+  { id: "Cape of Good Hope", lng: 18.4, lat: -34.3, type: "territorial", empire: "portuguese", desc: "Legendary navigational hinge of the Carreira da Índia. Left unsettled after the first Viceroy, Francisco de Almeida, was killed here in 1510. The Dutch VOC would eventually claim it." },
   { id: "Mozambique", lng: 40.7, lat: -15.0, type: "territorial", empire: "portuguese", desc: "Portuguese Padroado waypoint securing the Carreira da Índia." },
   { id: "Mombasa", lng: 39.6, lat: -4.0, type: "territorial", empire: "portuguese", desc: "Fort Jesus, built 1593 to secure the Swahili coast." },
   { id: "Socotra", lng: 53.8, lat: 12.5, type: "territorial", empire: "portuguese", desc: "Ancient waypoint at the mouth of the Red Sea, home to an isolated Christian community." },
@@ -300,7 +301,8 @@ const linksData = [
   { source: "Cape Verde", target: "Elmina", type: "portuguese" },
   { source: "Elmina", target: "São Tomé", type: "portuguese" },
   { source: "São Tomé", target: "Luanda", type: "portuguese" },
-  { source: "Luanda", target: "Mozambique", type: "portuguese" },
+  { source: "Luanda", target: "Cape of Good Hope", type: "portuguese" },
+  { source: "Cape of Good Hope", target: "Mozambique", type: "portuguese" },
   { source: "Mozambique", target: "Mombasa", type: "portuguese" },
   { source: "Mombasa", target: "Socotra", type: "portuguese" },
   { source: "Socotra", target: "Ormuz", type: "portuguese" },
@@ -357,6 +359,38 @@ d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(f
     .append("title")
     .text(d => d.properties.name);
 
+  // Line of Tordesillas
+  const tordesillasLine = {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [-46.6, 85],
+        [-46.6, -85]
+      ]
+    }
+  };
+
+  mapGroup.append("path")
+    .datum(tordesillasLine)
+    .attr("d", path)
+    .attr("stroke", "rgba(201, 150, 58, 0.5)")
+    .attr("stroke-width", 1.5)
+    .attr("stroke-dasharray", "4,4")
+    .attr("fill", "none");
+
+  // Label for Tordesillas Line
+  const [tx, ty] = projection([-46.6, 35]); // Position in North Atlantic
+  mapGroup.append("text")
+    .attr("x", tx - 8)
+    .attr("y", ty)
+    .attr("fill", "rgba(201, 150, 58, 0.7)")
+    .attr("font-size", "10px")
+    .attr("font-family", "Cinzel, serif")
+    .attr("letter-spacing", "2px")
+    .attr("transform", `rotate(-90, ${tx - 8}, ${ty})`)
+    .text("LINE OF TORDESILLAS (1494)");
+
   initNetwork();
 }).catch(e => {
   console.log("Could not load topojson map, drawing network only", e);
@@ -372,14 +406,26 @@ function initNetwork() {
     .attr("d", d => {
       const src = nodesData.find(n => n.id === d.source);
       const tgt = nodesData.find(n => n.id === d.target);
-      // Use slight curves for long distance links
-      const dx = tgt.x - src.x;
-      const dy = tgt.y - src.y;
-      const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
-      // Manila Galleon gets a big cross-pacific curve
-      if (d.source === "Mexico City" && d.target === "Manila" || d.source === "Acapulco" && d.target === "Manila") {
-        return `M${src.x},${src.y} A${dr},${dr} 0 0,1 ${tgt.x},${tgt.y}`;
+      
+      // Manila Galleon gets split across the Pacific (off-screen left/right)
+      if (d.source === "Acapulco" && d.target === "Manila") {
+        const midY = (src.y + tgt.y) / 2;
+        const p1 = `M${src.x},${src.y} Q${src.x - 250},${src.y} -50,${midY}`;
+        const p2 = `M${width + 50},${midY} Q${tgt.x + 250},${tgt.y} ${tgt.x},${tgt.y}`;
+        return p1 + " " + p2;
       }
+      
+      // Sea route curve for West Africa
+      if (d.source === "Luanda" && d.target === "Cape of Good Hope") {
+        return `M${src.x},${src.y} Q${src.x - 80},${(src.y + tgt.y)/2} ${tgt.x},${tgt.y}`;
+      }
+      
+      // Sea route curve for East Africa
+      if (d.source === "Cape of Good Hope" && d.target === "Mozambique") {
+        return `M${src.x},${src.y} Q${tgt.x + 80},${(src.y + tgt.y)/2 + 20} ${tgt.x},${tgt.y}`;
+      }
+
+      // Default straight line
       return `M${src.x},${src.y} L${tgt.x},${tgt.y}`;
     })
     .attr("stroke", d => {
@@ -443,6 +489,7 @@ function initNetwork() {
       if (d.empire === 'crown') return -18;
       if (d.id === 'Angamaly') return 4;
       if (d.id === 'Panama') return -10;
+      if (d.id === 'Cape of Good Hope') return 16;
       if (d.id === 'Elmina' || d.id === 'São Tomé') return -10;
       if (d.id === 'Olinda') return 4;
       if (d.id === 'Veracruz') return -10;
@@ -454,6 +501,7 @@ function initNetwork() {
       if (d.id === 'Rome') return -15;
       if (d.id === 'Angamaly') return 38;
       if (d.id === 'Cuzco') return 25;
+      if (d.id === 'Cape of Good Hope') return 45;
       if (d.id === 'Cartagena') return 30;
       if (d.id === 'Olinda') return 25;
       if (d.id === 'Diu') return -15;
