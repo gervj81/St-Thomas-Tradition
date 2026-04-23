@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Interactive Map: The Iberian Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/topojson-client@3"></script>
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { 
+  width: 100%; height: 100%; overflow: hidden; 
+  background: #14161a; 
+  font-family: 'EB Garamond', Georgia, serif; 
+}
+
+:root {
+  --gold: #c9963a;
+  --gold-light: #e8c06a;
+  --purple: #8338ec;
+  --purple-faded: #a882dd;
+  --red: #e63946;
+  --sea-green: #2e8b57;
+  --bg-color: #14161a;
+  --map-fill: #22252b;
+  --map-stroke: #333842;
+  --text: #f0e4c0;
+  --text-muted: #8c92a0;
+  --panel-bg: rgba(20, 22, 26, 0.95);
+  --header-h: 52px;
+}
+
+/* ── HEADER ── */
+#app-header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: linear-gradient(180deg, rgba(15,16,19,0.9) 0%, rgba(20,22,26,0.7) 100%);
+  border-bottom: 1px solid rgba(201,150,58,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 100;
+}
+#app-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gold-light);
+  text-transform: uppercase;
+}
+.subtitle {
+  font-size: 0.75em;
+  color: var(--text-muted);
+  font-family: 'EB Garamond', serif;
+  letter-spacing: 1px;
+  margin-left: 10px;
+}
+
+/* ── MAP CONTAINER ── */
+#map-container {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+}
+svg { width: 100%; height: 100%; }
+
+/* ── TOOLTIP ── */
+#tooltip {
+  position: absolute;
+  background: rgba(15, 16, 19, 0.95);
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 1000;
+  max-width: 250px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+.tt-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  color: var(--gold-light);
+  margin-bottom: 4px;
+  font-size: 1.05em;
+}
+.tt-cat {
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--purple-faded);
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 4px;
+}
+.tt-emp {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.tt-emp.spanish { color: var(--gold); }
+.tt-emp.portuguese { color: var(--sea-green); }
+
+/* ── CONTROLS ── */
+#controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  background: var(--panel-bg);
+  padding: 10px 15px;
+  border-radius: 30px;
+  border: 1px solid rgba(201,150,58,0.3);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+  z-index: 100;
+}
+.filter-btn {
+  background: transparent;
+  border: 1px solid rgba(201,150,58,0.2);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+.filter-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+.filter-btn.active {
+  background: rgba(201,150,58,0.15);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+/* ── LEGEND ── */
+#legend {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: var(--panel-bg);
+  border: 1px solid rgba(201,150,58,0.2);
+  border-radius: 8px;
+  padding: 15px;
+  z-index: 100;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.legend-item:last-child { margin-bottom: 0; }
+.legend-circle {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+}
+.l-papacy { background: var(--purple-faded); opacity: 0.7; }
+.l-crown { border: 2px solid var(--gold); background: var(--purple); }
+.l-local { background: var(--red); }
+.l-spanish-line { width: 20px; height: 3px; background: var(--gold); }
+.l-port-line { width: 20px; height: 3px; background: var(--sea-green); }
+</style>
+</head>
+<body>
+
+<div id="app-header">
+  <div id="app-title">The Iberian Network <span class="subtitle">Administrative Architecture c. 1599</span></div>
+</div>
+
+<div id="map-container"></div>
+
+<div id="tooltip"></div>
+
+<div id="controls">
+  <button class="filter-btn active" data-filter="all">Global Architecture</button>
+  <button class="filter-btn" data-filter="territorial">Territorial Centres</button>
+  <button class="filter-btn" data-filter="diocesan">Diocesan Centres</button>
+</div>
+
+<div id="legend">
+  <div class="legend-item"><div class="legend-circle l-crown"></div> Crown / State Institution</div>
+  <div class="legend-item"><div class="legend-circle l-papacy"></div> Papal Authority</div>
+  <div class="legend-item"><div class="legend-circle l-local"></div> Indigenous Resistance</div>
+  <div class="legend-item" style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;">
+    <div class="l-spanish-line"></div> Spanish Patronato
+  </div>
+  <div class="legend-item"><div class="l-port-line"></div> Portuguese Padroado</div>
+</div>
+
+<script>
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+// Initial projection configuration
+const projection = d3.geoMercator()
+  .scale(width / 6.5)
+  .translate([width / 2, height / 1.5]);
+
+const path = d3.geoPath().projection(projection);
+
+const svg = d3.select("#map-container").append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+// Map Group
+const mapGroup = svg.append("g");
+// Network Group (Links & Nodes)
+const networkGroup = svg.append("g");
+const linkGroup = networkGroup.append("g");
+const nodeGroup = networkGroup.append("g");
+
+const tooltip = d3.select("#tooltip");
+
+// --- Data ---
+const nodesData = [
+  { id: "Rome", lng: 12.5, lat: 41.9, type: "papal", empire: "none", desc: "The Spiritual Sword. Titular head of the Church, but operationally bypassed by the Crown." },
+  { id: "Madrid/Lisbon", lng: -3.7, lat: 40.4, type: "territorial", empire: "crown", desc: "The Temporal Sword. The Habsburg Crown, holding both Patronato and Padroado." },
+  
+  // Spanish Patronato
+  { id: "Havana", lng: -82.3, lat: 23.1, type: "territorial", empire: "spanish", desc: "Strategic naval fortress of the Spanish Caribbean." },
+  { id: "Veracruz", lng: -96.1, lat: 19.2, type: "territorial", empire: "spanish", desc: "Primary Spanish Gulf port linking New Spain to Europe." },
+  { id: "Acapulco", lng: -99.9, lat: 16.8, type: "territorial", empire: "spanish", desc: "Pacific port for the Manila Galleon." },
+  { id: "Cartagena", lng: -75.5, lat: 10.4, type: "territorial", empire: "spanish", desc: "Key fortress and port of the Spanish Main." },
+  { id: "Panama", lng: -79.5, lat: 9.0, type: "territorial", empire: "spanish", desc: "The vital bottleneck where Peruvian silver crossed the isthmus." },
+  { id: "Potosí", lng: -65.7, lat: -19.5, type: "territorial", empire: "spanish", desc: "The economic heart of the empire; the great silver mountain." },
+  { id: "Buenos Aires", lng: -58.3, lat: -34.6, type: "territorial", empire: "spanish", desc: "Gateway to the Río de la Plata." },
+  { id: "Santo Domingo", lng: -69.9, lat: 18.5, type: "diocesan", empire: "spanish", desc: "The first Catholic diocese in the New World (Primate of the Indies)." },
+  { id: "Mexico City", lng: -99.1, lat: 19.4, type: "diocesan", empire: "spanish", desc: "Spanish Patronato Archdiocese governing New Spain and the Philippines." },
+  { id: "Bogotá", lng: -74.1, lat: 4.7, type: "diocesan", empire: "spanish", desc: "Archdiocese of the New Kingdom of Granada." },
+  { id: "Lima", lng: -77.0, lat: -12.0, type: "diocesan", empire: "spanish", desc: "Spanish Patronato Archdiocese governing South America." },
+  { id: "Cuzco", lng: -71.9, lat: -13.5, type: "diocesan", empire: "spanish", desc: "Historic Inca capital, became a massive Diocese." },
+  { id: "Manila", lng: 121.0, lat: 14.6, type: "diocesan", empire: "spanish", desc: "Spanish Patronato outpost bridged to Mexico City via the galleon trade." },
+  
+  // Portuguese Padroado
+  { id: "Funchal", lng: -16.9, lat: 32.6, type: "diocesan", empire: "portuguese", desc: "The original global Archdiocese. Before Goa was elevated, Funchal held the largest jurisdiction in Catholic history, governing all overseas discoveries." },
+  { id: "Cape Verde", lng: -23.6, lat: 14.9, type: "diocesan", empire: "portuguese", desc: "Atlantic hub and Diocese (1533)." },
+  { id: "São Tomé", lng: 6.7, lat: 0.3, type: "diocesan", empire: "portuguese", desc: "Equatorial hub and Diocese (1534)." },
+  { id: "Luanda", lng: 13.2, lat: -8.8, type: "territorial", empire: "portuguese", desc: "Portuguese administrative center and Diocese of Angola and Congo." },
+  { id: "Elmina", lng: -1.3, lat: 5.0, type: "territorial", empire: "portuguese", desc: "São Jorge da Mina, the great Gold Coast fortress." },
+  { id: "Olinda", lng: -34.8, lat: -8.0, type: "territorial", empire: "portuguese", desc: "Pernambuco, the sugar capital of Brazil." },
+  { id: "Salvador (Bahia)", lng: -38.5, lat: -12.9, type: "diocesan", empire: "portuguese", desc: "Seat of the Primate of Brazil, under the Portuguese Padroado." },
+  { id: "Mozambique", lng: 40.7, lat: -15.0, type: "territorial", empire: "portuguese", desc: "Portuguese Padroado waypoint securing the Carreira da Índia." },
+  { id: "Mombasa", lng: 39.6, lat: -4.0, type: "territorial", empire: "portuguese", desc: "Fort Jesus, built 1593 to secure the Swahili coast." },
+  { id: "Socotra", lng: 53.8, lat: 12.5, type: "territorial", empire: "portuguese", desc: "Ancient waypoint at the mouth of the Red Sea, home to an isolated Christian community." },
+  { id: "Ormuz", lng: 56.4, lat: 27.1, type: "territorial", empire: "portuguese", desc: "Portuguese fortress controlling the Persian Gulf." },
+  { id: "Diu", lng: 70.9, lat: 20.7, type: "territorial", empire: "portuguese", desc: "Portuguese fortress controlling the Arabian Sea trade." },
+  { id: "Goa", lng: 73.8, lat: 15.5, type: "diocesan", empire: "portuguese", desc: "Seat of the Primate of the East. The operational headquarters of the Padroado." },
+  { id: "Colombo", lng: 79.8, lat: 6.9, type: "territorial", empire: "portuguese", desc: "Portuguese stronghold in Sri Lanka." },
+  { id: "Malacca", lng: 102.2, lat: 2.2, type: "diocesan", empire: "portuguese", desc: "Padroado chokepoint controlling the route to the South China Sea." },
+  { id: "Ternate", lng: 127.4, lat: 0.8, type: "territorial", empire: "portuguese", desc: "Portuguese fortress in the Spice Islands." },
+  { id: "Macau", lng: 113.5, lat: 22.2, type: "diocesan", empire: "portuguese", desc: "Padroado bridgehead to China." },
+  { id: "Nagasaki", lng: 129.8, lat: 32.7, type: "diocesan", empire: "portuguese", desc: "Farthest reach of the Padroado mission in Japan." },
+  
+  // Local/Conflict
+  // Visually offset Angamaly and Cochin slightly so they don't overlap entirely
+  { id: "Angamaly", lng: 77.2, lat: 11.0, type: "diocesan", empire: "local", desc: "Ancient Metropolitan See of the Thomas Christians. Targeted for subjugation to Goa." },
+  { id: "Cochin", lng: 75.8, lat: 9.3, type: "diocesan", empire: "portuguese", desc: "Portuguese commercial and military stronghold pressing against the Thomas Christians." }
+];
+
+const linksData = [
+  // Spanish Routes
+  { source: "Madrid/Lisbon", target: "Havana", type: "spanish" },
+  { source: "Havana", target: "Veracruz", type: "spanish" },
+  { source: "Veracruz", target: "Mexico City", type: "spanish" },
+  { source: "Mexico City", target: "Acapulco", type: "spanish" },
+  { source: "Acapulco", target: "Manila", type: "spanish" },
+  { source: "Havana", target: "Santo Domingo", type: "spanish" },
+  { source: "Havana", target: "Panama", type: "spanish" },
+  { source: "Santo Domingo", target: "Cartagena", type: "spanish" },
+  { source: "Cartagena", target: "Bogotá", type: "spanish" },
+  { source: "Panama", target: "Lima", type: "spanish" },
+  { source: "Lima", target: "Cuzco", type: "spanish" },
+  { source: "Lima", target: "Potosí", type: "spanish" },
+  { source: "Potosí", target: "Buenos Aires", type: "spanish" },
+  
+  // Portuguese Routes
+  { source: "Madrid/Lisbon", target: "Funchal", type: "portuguese" },
+  { source: "Funchal", target: "Cape Verde", type: "portuguese" },
+  { source: "Funchal", target: "Olinda", type: "portuguese" },
+  { source: "Olinda", target: "Salvador (Bahia)", type: "portuguese" },
+  { source: "Cape Verde", target: "Elmina", type: "portuguese" },
+  { source: "Elmina", target: "São Tomé", type: "portuguese" },
+  { source: "São Tomé", target: "Luanda", type: "portuguese" },
+  { source: "Luanda", target: "Mozambique", type: "portuguese" },
+  { source: "Mozambique", target: "Mombasa", type: "portuguese" },
+  { source: "Mombasa", target: "Socotra", type: "portuguese" },
+  { source: "Socotra", target: "Ormuz", type: "portuguese" },
+  { source: "Socotra", target: "Goa", type: "portuguese" },
+  { source: "Ormuz", target: "Diu", type: "portuguese" },
+  { source: "Goa", target: "Diu", type: "portuguese" },
+  { source: "Goa", target: "Cochin", type: "portuguese" },
+  { source: "Cochin", target: "Colombo", type: "portuguese" },
+  { source: "Colombo", target: "Malacca", type: "portuguese" },
+  { source: "Malacca", target: "Ternate", type: "portuguese" },
+  { source: "Malacca", target: "Macau", type: "portuguese" },
+  { source: "Macau", target: "Nagasaki", type: "portuguese" },
+
+  // Conflict / Papal
+  { source: "Goa", target: "Angamaly", type: "conflict" },
+  { source: "Rome", target: "Madrid/Lisbon", type: "papal" },
+  { source: "Rome", target: "Angamaly", type: "papal_historical" }
+];
+
+// Initialize node positions based STRICTLY on Mercator projection (no force jumping)
+nodesData.forEach(d => {
+  const [x, y] = projection([d.lng, d.lat]);
+  d.x = x;
+  d.y = y;
+});
+
+// Modern countries serving as historical proxies for shading
+const spanishTerritories = [
+  "Spain", "Mexico", "Peru", "Colombia", "Argentina", "Chile", "Cuba", 
+  "Dominican Rep.", "Philippines", "Ecuador", "Venezuela", "Bolivia", 
+  "Paraguay", "Uruguay", "Guatemala", "Honduras", "Nicaragua", 
+  "El Salvador", "Costa Rica", "Panama"
+];
+const portugueseTerritories = [
+  "Portugal", "Brazil", "Angola", "Mozambique", "Guinea-Bissau", "Timor-Leste"
+];
+
+// --- Fetch and Draw Map ---
+d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(function(world) {
+  const countries = topojson.feature(world, world.objects.countries).features;
+  
+  mapGroup.selectAll("path")
+    .data(countries)
+    .enter().append("path")
+    .attr("d", path)
+    .attr("fill", d => {
+      const name = d.properties.name;
+      if (spanishTerritories.includes(name)) return "rgba(201, 150, 58, 0.12)"; // Faint Gold
+      if (portugueseTerritories.includes(name)) return "rgba(46, 139, 87, 0.15)"; // Faint Sea Green
+      return "var(--map-fill)";
+    })
+    .attr("stroke", "var(--map-stroke)")
+    .attr("stroke-width", 0.5)
+    .append("title")
+    .text(d => d.properties.name);
+
+  initNetwork();
+}).catch(e => {
+  console.log("Could not load topojson map, drawing network only", e);
+  initNetwork();
+});
+
+function initNetwork() {
+  // Draw Links
+  const links = linkGroup.selectAll("path")
+    .data(linksData)
+    .enter().append("path")
+    .attr("class", d => `link ${d.type}`)
+    .attr("d", d => {
+      const src = nodesData.find(n => n.id === d.source);
+      const tgt = nodesData.find(n => n.id === d.target);
+      // Use slight curves for long distance links
+      const dx = tgt.x - src.x;
+      const dy = tgt.y - src.y;
+      const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+      // Manila Galleon gets a big cross-pacific curve
+      if (d.source === "Mexico City" && d.target === "Manila" || d.source === "Acapulco" && d.target === "Manila") {
+        return `M${src.x},${src.y} A${dr},${dr} 0 0,1 ${tgt.x},${tgt.y}`;
+      }
+      return `M${src.x},${src.y} L${tgt.x},${tgt.y}`;
+    })
+    .attr("stroke", d => {
+      if (d.type === 'spanish') return 'var(--gold)';
+      if (d.type === 'portuguese') return 'var(--sea-green)';
+      if (d.type === 'conflict') return 'var(--red)';
+      if (d.type === 'papal') return 'var(--purple-faded)';
+      if (d.type === 'papal_historical') return 'rgba(168, 130, 221, 0.3)';
+      return '#666';
+    })
+    .attr("stroke-width", d => (d.type === 'conflict' || d.type === 'papal_historical') ? 1 : 2)
+    .attr("stroke-dasharray", d => {
+      if (d.type === 'papal' || d.type === 'papal_historical') return '4,4';
+      if (d.type === 'conflict') return '2,4';
+      return 'none';
+    })
+    .attr("fill", "none")
+    .attr("opacity", 0.6);
+
+  // Draw Nodes
+  const nodes = nodeGroup.selectAll("g")
+    .data(nodesData)
+    .enter().append("g")
+    .attr("transform", d => `translate(${d.x},${d.y})`)
+    .style("cursor", "pointer")
+    .on("mouseover", showTooltip)
+    .on("mouseout", hideTooltip);
+
+  // Styling based on Empire and Type
+  nodes.each(function(d) {
+    const el = d3.select(this);
+    if (d.type === 'papal') {
+      el.append("circle")
+        .attr("r", 8)
+        .attr("fill", "var(--purple-faded)")
+        .attr("opacity", 0.7);
+    } else if (d.empire === 'spanish' || d.empire === 'portuguese' || d.empire === 'crown') {
+      // Differentiate Territorial vs Diocesan via shape or size.
+      // We will stick to circles but vary size and stroke width
+      const r = d.empire === 'crown' ? 12 : (d.type === 'diocesan' ? 9 : 6);
+      const strokeColor = d.empire === 'portuguese' ? 'var(--sea-green)' : 'var(--gold)';
+      
+      el.append("circle")
+        .attr("r", r)
+        .attr("fill", "var(--purple)") // Always purple core representing spiritual authority
+        .attr("stroke", strokeColor)
+        .attr("stroke-width", d.empire === 'crown' ? 4 : 2);
+    } else if (d.empire === 'local') {
+      el.append("circle")
+        .attr("r", 8)
+        .attr("fill", "var(--red)")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1);
+    }
+  });
+
+  // Labels
+  nodes.append("text")
+    // Use custom dy for nodes that are close to each other
+    .attr("dy", d => {
+      if (d.empire === 'crown') return -18;
+      if (d.id === 'Angamaly') return 4;
+      if (d.id === 'Panama') return -10;
+      if (d.id === 'Elmina' || d.id === 'São Tomé') return -10;
+      if (d.id === 'Olinda') return 4;
+      if (d.id === 'Veracruz') return -10;
+      return 16;
+    })
+    // Use custom dx for nodes that are close to each other
+    .attr("dx", d => {
+      if (d.id === 'Macau' || d.id === 'Havana') return -20;
+      if (d.id === 'Rome') return -15;
+      if (d.id === 'Angamaly') return 38;
+      if (d.id === 'Cuzco') return 25;
+      if (d.id === 'Cartagena') return 30;
+      if (d.id === 'Olinda') return 25;
+      if (d.id === 'Diu') return -15;
+      return 0;
+    })
+    .attr("text-anchor", "middle")
+    .text(d => d.id)
+    .attr("fill", "var(--text)")
+    .attr("font-family", "Cinzel, serif")
+    .attr("font-size", d => (d.empire === 'crown') ? "12px" : "10px")
+    .attr("font-weight", d => (d.empire === 'crown') ? "bold" : "normal")
+    .style("pointer-events", "none")
+    .style("text-shadow", "0 2px 4px rgba(0,0,0,0.9)");
+
+  // Filtering Logic
+  d3.selectAll(".filter-btn").on("click", function() {
+    d3.selectAll(".filter-btn").classed("active", false);
+    d3.select(this).classed("active", true);
+    
+    const filter = d3.select(this).attr("data-filter");
+    
+    nodes.transition().duration(400).style("opacity", d => {
+      if (filter === 'all') return 1;
+      if (filter === 'territorial' && (d.type === 'territorial' || d.empire === 'crown')) return 1;
+      if (filter === 'diocesan' && (d.type === 'diocesan' || d.type === 'papal' || d.empire === 'crown')) return 1;
+      return 0.15;
+    });
+
+    links.transition().duration(400).style("opacity", d => {
+      if (filter === 'all') return 0.6;
+      return 0.05; // Fade all links when filtering to just nodes
+    });
+  });
+}
+
+function showTooltip(event, d) {
+  tooltip.transition().duration(200).style("opacity", 1);
+  tooltip.html(`
+    <div class="tt-title">${d.id}</div>
+    ${d.empire !== 'none' && d.empire !== 'local' ? `<div class="tt-emp ${d.empire}">${d.empire} Empire</div>` : ''}
+    <div class="tt-cat">${d.type}</div>
+    <div>${d.desc}</div>
+  `)
+  .style("left", (event.pageX + 15) + "px")
+  .style("top", (event.pageY - 28) + "px");
+
+  d3.select(this).select("circle")
+    .transition().duration(200)
+    .attr("r", d.empire === 'crown' ? 14 : (d.type === 'diocesan' ? 11 : 8))
+    .style("filter", "drop-shadow(0 0 6px var(--gold))");
+}
+
+function hideTooltip(event, d) {
+  tooltip.transition().duration(500).style("opacity", 0);
+  
+  d3.select(this).select("circle")
+    .transition().duration(200)
+    .attr("r", d.empire === 'crown' ? 12 : (d.type === 'diocesan' ? 9 : (d.empire === 'local' || d.type === 'papal' ? 8 : 6)))
+    .style("filter", "none");
+}
+
+// Add simple zoom/pan behavior
+const zoom = d3.zoom()
+  .scaleExtent([0.8, 5])
+  .on("zoom", (event) => {
+    mapGroup.attr("transform", event.transform);
+    networkGroup.attr("transform", event.transform);
+  });
+
+svg.call(zoom);
+
+</script>
+</body>
+</html>
