@@ -336,7 +336,7 @@ const nodesData = [
   { id: "Socotra", lng: 53.8, lat: 12.5, type: "territorial", empire: "portuguese", desc: "Ancient waypoint at the mouth of the Red Sea, home to an isolated Christian community." },
   { id: "Ormuz", lng: 56.4, lat: 27.1, type: "territorial", empire: "portuguese", desc: "Portuguese fortress controlling the Persian Gulf." },
   { id: "Diu", lng: 70.9, lat: 20.7, type: "territorial", empire: "portuguese", desc: "Portuguese fortress controlling the Arabian Sea trade." },
-  { id: "Goa", lng: 73.8, lat: 15.5, type: "diocesan", empire: "portuguese", desc: "Seat of the Primate of the East. The operational headquarters of the Padroado." },
+  { id: "Goa", lng: 73.8, lat: 15.5, type: "both", empire: "portuguese", desc: "Capital of the Estado da Índia and Seat of the Primate of the East. The dual operational headquarters of the Padroado." },
   { id: "Colombo", lng: 79.8, lat: 6.9, type: "territorial", empire: "portuguese", desc: "Portuguese stronghold in Sri Lanka." },
   { id: "Malacca", lng: 102.2, lat: 2.2, type: "diocesan", empire: "portuguese", desc: "Padroado chokepoint controlling the route to the South China Sea." },
   { id: "Ternate", lng: 127.4, lat: 0.8, type: "territorial", empire: "portuguese", desc: "Portuguese fortress in the Spice Islands." },
@@ -538,7 +538,7 @@ function initNetwork() {
     } else if (d.empire === 'spanish' || d.empire === 'portuguese' || d.empire === 'crown') {
       // Differentiate Territorial vs Diocesan via shape or size.
       // We will stick to circles but vary size and stroke width
-      const r = d.empire === 'crown' ? 12 : (d.type === 'diocesan' ? 9 : 6);
+      const r = d.empire === 'crown' ? 12 : ((d.type === 'diocesan' || d.type === 'both') ? 9 : 6);
       const strokeColor = d.empire === 'portuguese' ? 'var(--sea-green)' : 'var(--gold)';
       
       el.append("circle")
@@ -598,8 +598,8 @@ function initNetwork() {
     
     nodes.transition().duration(400).style("opacity", d => {
       if (filter === 'all') return 1;
-      if (filter === 'territorial' && (d.type === 'territorial' || d.empire === 'crown')) return 1;
-      if (filter === 'diocesan' && (d.type === 'diocesan' || d.type === 'papal' || d.empire === 'crown')) return 1;
+      if (filter === 'territorial' && (d.type === 'territorial' || d.type === 'both' || d.empire === 'crown')) return 1;
+      if (filter === 'diocesan' && (d.type === 'diocesan' || d.type === 'both' || d.type === 'papal' || d.empire === 'crown')) return 1;
       return 0.15;
     });
 
@@ -636,7 +636,7 @@ function showTooltip(event, d) {
 
   d3.select(this).select("circle")
     .transition().duration(200)
-    .attr("r", d.empire === 'crown' ? 14 : (d.type === 'diocesan' ? 11 : 8))
+    .attr("r", d.empire === 'crown' ? 14 : ((d.type === 'diocesan' || d.type === 'both') ? 11 : 8))
     .style("filter", "drop-shadow(0 0 6px var(--gold))");
 }
 
@@ -646,7 +646,7 @@ function hideTooltip(event, d) {
   
   d3.select(this).select("circle")
     .transition().duration(200)
-    .attr("r", d.empire === 'crown' ? 12 : (d.type === 'diocesan' ? 9 : (d.empire === 'local' || d.type === 'papal' ? 8 : 6)))
+    .attr("r", d.empire === 'crown' ? 12 : ((d.type === 'diocesan' || d.type === 'both') ? 9 : (d.empire === 'local' || d.type === 'papal' ? 8 : 6)))
     .style("filter", "none");
 }
 
