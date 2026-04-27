@@ -2192,6 +2192,13 @@ button:focus:not(:focus-visible) {
   overflow: hidden; /* Prevent watermark from bleeding out */
 }
 
+@media (max-width: 768px) {
+  .title-card {
+    padding-left: 56px; /* Clear the 48px book spine shadow */
+    padding-right: 24px;
+  }
+}
+
 /* Grunge Texture Overlay */
 .title-card::before {
   content: "";
