@@ -1,4 +1,8 @@
 <!-- Title Page -->
+<style>
+  /* Hide the global chapter nav on the title page */
+  #chapter-nav { display: none !important; }
+</style>
 <div class="title-card">
   <div class="title-card-bg" aria-hidden="true">
     <div class="title-card-stripes"></div>
@@ -14,5 +18,10 @@
       <span>Origins</span>
     </h1>
     <p class="title-card-deck">An Investigative synthesis by <span class="title-card-author">Gerald Johnson</span></p>
+    
+    <div class="title-card-nav">
+      <button class="pill-btn primary" onclick="document.querySelectorAll('#toc-list a')[1].click()">Begin reading</button>
+      <button class="pill-btn secondary" onclick="document.querySelectorAll('#toc-list a')[3].click()">Skip to Chapter 01 &rarr;</button>
+    </div>
   </div>
 </div>
