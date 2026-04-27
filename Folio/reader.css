@@ -5,26 +5,26 @@
 /* ── CSS Custom Properties (Theme Tokens) ── */
 :root {
   /* Light Theme (default) */
-  --bg-primary: #f5f1ea;
-  --bg-secondary: #ebe6df;
-  --bg-toolbar: rgba(245, 241, 234, 0.94);
-  --bg-sidebar: rgba(235, 230, 223, 0.98);
-  --bg-card: #FCFAF8;
-  --bg-popover: #FCFAF8;
+  --bg-primary: #FAF6F0;
+  --bg-secondary: #F0EBE3;
+  --bg-toolbar: rgba(250, 246, 240, 0.92);
+  --bg-sidebar: rgba(240, 235, 227, 0.97);
+  --bg-card: #FFFFFF;
+  --bg-popover: #FFFFFF;
 
   --text-primary: #2D2A26;
-  --text-secondary: #4A4540;
-  --text-muted: #7A736B;
+  --text-secondary: #6B6560;
+  --text-muted: #9E9891;
   --text-accent: #B8860B;
 
   --border-color: rgba(0, 0, 0, 0.08);
   --border-strong: rgba(0, 0, 0, 0.15);
 
-  --accent: #C0492B;
-  --accent-glow: rgba(192, 73, 43, 0.15);
-  --accent-gradient: linear-gradient(135deg, #C0492B, #D4A574);
+  --accent: #C4803C;
+  --accent-glow: rgba(196, 128, 60, 0.15);
+  --accent-gradient: linear-gradient(135deg, #C4803C, #D4A574);
 
-  --progress-gradient: linear-gradient(90deg, #C0492B, #D4A574, #E8C99B);
+  --progress-gradient: linear-gradient(90deg, #C4803C, #D4A574, #E8C99B);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -35,7 +35,7 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --font-body: 'Merriweather', 'Georgia', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-heading: 'Lora', 'Georgia', 'Times New Roman', serif;
   --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-size-base: 16px;
@@ -176,7 +176,7 @@ body {
   background: var(--bg-toolbar);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 2px solid var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
   z-index: 900;
   transition: background-color var(--transition-smooth), border-color var(--transition-smooth);
 }
@@ -469,147 +469,57 @@ body {
 
 /* ── Typography within chapters ── */
 
-#chapter-content .chapter-opening-unit {
-  position: relative;
-  padding-top: 16px;
-  padding-bottom: 48px;
-  margin-bottom: 64px;
-  border-top: none;
-  border-bottom: none;
-}
-
-#chapter-content .chapter-opening-unit::after {
-  content: "";
-  position: absolute;
-  left: calc(-50vw + 50%);
-  right: calc(-50vw + 50%);
-  height: 2px;
-  background-color: var(--text-primary);
-  bottom: 0;
-}
-
-#chapter-content .chapter-header {
-  margin-bottom: 16px;
-}
-
-#chapter-content .chapter-number {
+#chapter-content h1 {
   font-family: var(--font-heading);
-  font-size: 5rem;
-  font-weight: 500;
-  line-height: 1;
-  color: var(--accent);
-  margin-bottom: 16px;
-  letter-spacing: -0.02em;
+  font-size: 2.2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
 }
 
 #chapter-content .chapter-subtitle {
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
+  font-family: var(--font-heading);
+  font-size: 1rem;
   font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.35em;
-  color: var(--text-secondary);
-  margin-bottom: 12px;
-  padding-bottom: 0;
-  border-bottom: none;
-  font-style: normal;
-}
-
-#chapter-content h1 {
-  font-family: var(--font-heading);
-  font-size: 2.4rem;
-  font-weight: 500;
-  line-height: 1.2;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: -0.01em;
-  text-transform: none;
-}
-
-#chapter-content .folio-epigraph {
-  margin: 0;
-  position: relative;
-  padding-top: 0;
-}
-
-#chapter-content .folio-epigraph blockquote {
-  position: relative;
-  border-left: none;
-  padding: 0;
-  margin: 0;
-  background: none;
-}
-
-#chapter-content .folio-epigraph blockquote p {
-  font-family: var(--font-heading);
-  font-size: 1.1rem;
   font-style: italic;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-#chapter-content .folio-epigraph cite,
-#chapter-content .folio-epigraph strong {
-  display: block;
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: var(--text-secondary);
-  margin-top: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.25em;
-  font-style: normal;
-}
-
-#chapter-content p.drop-cap::first-letter {
-  float: left;
-  font-family: var(--font-heading);
-  font-size: 3.8rem;
-  line-height: 0.85;
-  margin-right: 0.1em;
-  margin-top: 0.05em;
-  margin-bottom: -0.1em;
-  color: var(--accent);
-  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 #chapter-content h2 {
-  font-family: 'Inter', var(--font-ui);
-  font-size: 11px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--accent);
-  font-weight: 600;
-  margin: 64px 0 8px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-color);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-muted);
+  margin: 2.5rem 0 1rem;
+  letter-spacing: 0;
+  line-height: 1.3;
 }
 
 #chapter-content h3 {
-  font-family: 'Lora', var(--font-heading);
-  font-weight: 500;
-  font-size: clamp(22px, 3vw, 28px);
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  margin: 40px 0 18px;
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 600;
   color: var(--text-primary);
-  border-bottom: none;
-  padding-bottom: 0;
+  margin: 2rem 0 0.75rem;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
 }
 
 #chapter-content h4 {
-  font-family: 'Lora', var(--font-heading);
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
   font-weight: 600;
-  font-style: italic;
-  font-size: 19px;
-  line-height: 1.3;
-  margin: 32px 0 12px;
   color: var(--text-primary);
+  margin: 2.5rem 0 1rem;
 }
 
 #chapter-content p {
-  font-size: 18px;
-  line-height: 1.7;
   margin-bottom: 1.2em;
   color: var(--text-primary);
   word-wrap: break-word;
@@ -639,17 +549,15 @@ body {
 }
 
 #chapter-content blockquote {
-  margin: 36px 0;
-  padding: 24px 28px;
-  background: var(--bg-secondary);
-  border: none;
-  border-left: 3px solid var(--accent);
-  border-radius: 0 4px 4px 0;
-  font-family: 'Lora', var(--font-heading);
-  font-size: 18px !important;
-  line-height: 1.55;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  margin: 1.5em 0;
+  padding: 16px 20px;
+  border-left: 4px solid var(--accent);
+  background: var(--accent-glow);
+  border-radius: var(--radius-md);
   font-style: italic;
-  color: var(--text-primary);
+  color: var(--text-secondary);
 }
 
 #chapter-content blockquote p:last-child {
@@ -1266,66 +1174,21 @@ body {
    ══════════════════════════════════════ */
 
 .infographic {
-  margin: 48px -8px;
-  padding: 32px 32px 28px;
-  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+  margin: 2em 0;
+  padding: 24px;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  position: relative;
-}
-
-.infographic::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 32%, transparent 32%);
-}
-
-.infographic-eyebrow {
-  font-family: 'Inter', var(--font-ui);
-  font-size: 10px;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--accent);
-  font-weight: 700;
-  margin: 4px 0 10px;
+  border-radius: var(--radius-lg);
 }
 
 .infographic-title {
-  font-family: 'Lora', var(--font-heading);
-  font-weight: 500;
-  font-size: 24px;
-  line-height: 1.18;
-  margin: 0 0 28px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--border-color);
-  letter-spacing: -0.012em;
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--text-primary);
-}
-
-.infographic-footer {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border-color);
-  font-family: 'Inter', var(--font-ui);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
   text-align: center;
-}
-
-.infographic-footer a {
-  color: var(--accent);
-  border-bottom: none;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.infographic-footer a:hover {
-  color: var(--text-primary);
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
 }
 
 /* Stat Cards */
@@ -1422,23 +1285,24 @@ body {
 /* Timeline */
 .timeline {
   position: relative;
-  padding-left: 32px;
-  margin: 0;
+  padding-left: 28px;
+  margin: 1.5em 0;
 }
 
 .timeline::before {
-  content: "";
+  content: '';
   position: absolute;
-  left: 6px;
-  top: 8px;
-  bottom: 8px;
+  left: 8px;
+  top: 4px;
+  bottom: 4px;
   width: 2px;
-  background: var(--border-color);
+  background: var(--border-strong);
+  border-radius: 1px;
 }
 
 .timeline-item {
   position: relative;
-  padding-bottom: 26px;
+  padding-bottom: 24px;
 }
 
 .timeline-item:last-child {
@@ -1446,45 +1310,40 @@ body {
 }
 
 .timeline-item::before {
-  content: "";
+  content: '';
   position: absolute;
-  left: -32px;
+  left: -22px;
   top: 6px;
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--accent);
-  border: 3px solid var(--bg-card);
-  box-shadow: 0 0 0 2px var(--accent);
+  border: 2px solid var(--bg-primary);
+  box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
 .timeline-date {
-  font-family: 'Inter', var(--font-ui);
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--accent);
-  font-weight: 700;
-  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
 }
 
 .timeline-title {
-  font-family: 'Lora', var(--font-heading);
-  font-weight: 500;
-  font-style: italic;
-  font-size: 17px;
-  line-height: 1.3;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 6px;
-  letter-spacing: -0.005em;
+  margin-bottom: 4px;
 }
 
 .timeline-desc {
-  font-family: 'Lora', var(--font-heading);
-  font-size: 14.5px !important;
-  line-height: 1.65;
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  margin: 0 !important;
+  line-height: 1.5;
 }
 
 /* ── Timeline Themes ── */
@@ -1632,7 +1491,6 @@ body {
   border-radius: var(--radius-md);
   border-left: 4px solid;
   font-size: 0.92rem;
-  font-family: var(--font-ui);
 }
 
 .callout-info {
@@ -2274,16 +2132,14 @@ button:focus:not(:focus-visible) {
 /* ── Direct Quotations (In-text citations) ── */
 #chapter-content blockquote.direct-quote {
   position: relative;
-  font-family: 'Lora', var(--font-heading);
-  font-size: clamp(22px, 3vw, 32px);
-  line-height: 1.35;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
   margin: 2.5em 0;
   padding: 10px 45px;
   border: none !important;
   background: transparent !important;
   color: var(--text-primary);
   font-style: italic;
-  letter-spacing: -0.01em;
   border-radius: 0;
 }
 
@@ -2314,229 +2170,4 @@ button:focus:not(:focus-visible) {
 [data-theme="dark"] #chapter-content blockquote.direct-quote::before,
 [data-theme="dark"] #chapter-content blockquote.direct-quote::after {
   color: var(--text-muted);
-}
-
-/* ══════════════════════════════════════
-   TITLE CARD (FOLIO COVER STYLE)
-   ══════════════════════════════════════ */
-.title-card {
-  position: relative; 
-  padding: 56px 24px 72px 56px; /* 56px left padding to clear the 48px spine shadow at all screen sizes */
-  min-height: calc(100vh - var(--toolbar-height));
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  
-  /* Break out of #reader-content max-width and padding */
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  margin-top: calc(-1 * (var(--toolbar-height) + var(--progress-height) + 32px));
-  padding-top: calc(18vh + var(--toolbar-height) + var(--progress-height));
-  
-  overflow: hidden; /* Prevent watermark from bleeding out */
-}
-
-/* Grunge Texture Overlay */
-.title-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 48px;
-  background: linear-gradient(to right, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0) 100%);
-  z-index: 3;
-  pointer-events: none;
-}
-
-[data-theme="dark"] .title-card::before {
-  background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0) 100%);
-}
-
-.title-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
-  z-index: 1;
-}
-
-[data-theme="dark"] .title-card::after {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-}
-
-/* Mar Thoma Cross Watermark */
-.title-card-watermark {
-  position: absolute;
-  right: -5%;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 110%;
-  width: auto;
-  opacity: 0.04;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-  z-index: 0;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%);
-  mask-image: linear-gradient(to right, transparent 0%, black 15%);
-}
-
-[data-theme="dark"] .title-card-watermark {
-  mix-blend-mode: screen;
-  opacity: 0.12;
-  filter: invert(1);
-}
-
-.title-card-bg { 
-  position: absolute; 
-  inset: 0; 
-  pointer-events: none; 
-  overflow: hidden; 
-  z-index: 0;
-}
-
-.title-card-stripes {
-  position: absolute; 
-  inset: 0;
-  background-image: repeating-linear-gradient(135deg, rgba(192,73,43,0.04) 0 2px, transparent 2px 30px);
-}
-
-[data-theme="dark"] .title-card-stripes {
-  background-image: repeating-linear-gradient(135deg, rgba(192,73,43,0.08) 0 2px, transparent 2px 30px);
-}
-
-.title-card-content { 
-  position: relative; 
-  max-width: 920px; 
-  margin: 0 auto; 
-  width: 100%; 
-  z-index: 2; /* Keep text above watermark and grunge */
-}
-
-#chapter-content .title-card-eyebrow { 
-  font-family: var(--font-heading); 
-  font-style: italic; 
-  font-size: clamp(17px, 2.2vw, 22px); 
-  line-height: 1.45; 
-  color: var(--text-secondary); 
-  margin-bottom: 24px; 
-}
-
-#chapter-content .title-card-title {
-  font-family: var(--font-heading); 
-  font-weight: 700;
-  font-size: clamp(48px, 11vw, 132px);
-  line-height: 0.92; 
-  letter-spacing: -0.035em;
-  display: flex; 
-  flex-wrap: wrap; 
-  gap: 0 0.22em;
-  margin-bottom: 28px;
-  color: var(--text-primary);
-}
-
-#chapter-content .title-card-title span { 
-  display: block; 
-}
-
-#chapter-content .title-card-amp { 
-  font-style: italic; 
-  color: #c0492b; 
-  font-weight: 400; 
-}
-
-[data-theme="dark"] #chapter-content .title-card-amp {
-  color: #e89764;
-}
-
-#chapter-content .title-card-deck { 
-  font-family: var(--font-ui); 
-  font-size: 11px; 
-  letter-spacing: 0.25em; 
-  text-transform: uppercase; 
-  color: var(--text-muted); 
-  margin-bottom: 32px; 
-  font-weight: 600;
-}
-
-#chapter-content .title-card-author {
-  font-family: var(--font-ui);
-  color: #ffffff;
-  background-color: #c0492b;
-  font-weight: 700;
-  font-style: normal;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  font-size: 14px;
-  display: inline-block;
-  margin-left: 12px;
-  padding: 6px 12px;
-  border-radius: 4px;
-  box-shadow: var(--shadow-sm);
-  transform: rotate(-1deg);
-  position: relative;
-  vertical-align: middle;
-}
-
-@media (max-width: 600px) {
-  #chapter-content .title-card-author {
-    display: block;
-    width: max-content;
-    margin-left: 0;
-    margin-top: 12px;
-  }
-}
-
-[data-theme="dark"] #chapter-content .title-card-author {
-  background-color: #e89764;
-  color: #14110D;
-}
-
-/* Title Card Navigation Pills */
-.title-card-nav {
-  margin-top: 48px;
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  flex-wrap: wrap;
-  z-index: 3;
-  position: relative;
-}
-
-.pill-btn {
-  font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 12px 24px;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  text-decoration: none !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid transparent;
-}
-
-.pill-btn.primary {
-  background: var(--text-primary);
-  color: var(--bg-primary) !important;
-}
-
-.pill-btn.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  opacity: 0.9;
-}
-
-.pill-btn.secondary {
-  background: transparent;
-  color: var(--text-primary) !important;
-  border-color: var(--border-strong);
-}
-
-.pill-btn.secondary:hover {
-  background: var(--bg-secondary);
-  transform: translateY(-2px);
 }
