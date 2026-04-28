@@ -179,6 +179,14 @@
 
     let chapterCounter = 1;
     state.chapters.forEach((ch, i) => {
+      // If this chapter has a section marker, insert it before the chapter link
+      if (ch.sectionMarker) {
+        const markerLi = document.createElement('li');
+        markerLi.className = 'toc-section-marker';
+        markerLi.textContent = ch.sectionMarker;
+        dom.tocList.appendChild(markerLi);
+      }
+
       const li = document.createElement('li');
       const a = document.createElement('a');
       a.href = '#';
@@ -227,7 +235,7 @@
   }
 
   function updateTOCActive() {
-    const items = dom.tocList.querySelectorAll('li');
+    const items = dom.tocList.querySelectorAll('li:not(.toc-section-marker)');
     items.forEach((li, i) => {
       li.classList.toggle('active', i === state.currentChapter);
     });

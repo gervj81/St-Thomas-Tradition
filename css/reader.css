@@ -372,13 +372,16 @@ body {
   z-index: 10;
 }
 
-#toc-scroll-indicator svg {
+#toc-scroll-indicator .bounce-wrapper {
   animation: bounce-subtle 2s infinite ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes bounce-subtle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(4px); }
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: 8px; }
 }
 
 #toc-list li {
@@ -435,6 +438,17 @@ body {
 
 #toc-list li.toc-sub a:hover {
   color: var(--text-secondary);
+}
+
+/* Section Markers */
+#toc-list li.toc-section-marker {
+  padding: 16px 20px 8px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  pointer-events: none;
 }
 
 

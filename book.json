@@ -16,6 +16,7 @@
     },
     {
       "id": "part-1-intro",
+      "sectionMarker": "PART I · ORIGINS AND THE COMMONWEALTH",
       "title": "Part 1 Introduction",
       "file": "chapters/part-1-intro.html"
     },
@@ -41,11 +42,12 @@
     },
     {
       "id": "part-1-synthesis",
-      "title": "Part 1 Grand Synthesis",
+      "title": "Part I Synthesis: Beyond the Apostolic Question",
       "file": "chapters/part-1-synthesis.html"
     },
     {
       "id": "part-2-intro",
+      "sectionMarker": "PART II · THE LONG DISRUPTION",
       "title": "Part 2 Introduction",
       "file": "chapters/part-2-intro.html"
     },
@@ -78,6 +80,16 @@
       "id": "chapter-10",
       "title": "The Collapsed Sword",
       "file": "chapters/chapter-10.html"
+    },
+    {
+      "id": "chapter-11",
+      "title": "The Rosian Puzzle",
+      "file": "chapters/chapter-11.html"
+    },
+    {
+      "id": "chapter-12",
+      "title": "The Wreckage",
+      "file": "chapters/chapter-12.html"
     }
   ]
 }
