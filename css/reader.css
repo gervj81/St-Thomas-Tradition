@@ -573,6 +573,51 @@ body {
   font-weight: 600;
 }
 
+#chapter-content p.chapter-lead {
+  color: var(--text-muted);
+  background-color: var(--bg-secondary);
+  padding: 1.2em 1.5em;
+  margin-bottom: 0;
+}
+
+/* Ensure the first paragraph in the sequence gets rounded top corners */
+#chapter-content p.chapter-lead:first-of-type {
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+  margin-top: 1.5em;
+}
+
+/* Remove top padding between adjacent chapter-lead paragraphs to merge them into one block */
+#chapter-content p.chapter-lead + p.chapter-lead {
+  padding-top: 0;
+}
+
+/* The last paragraph in the sequence gets rounded bottom corners and the divider */
+#chapter-content p.chapter-lead-last {
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+  margin-bottom: 3.5em;
+  position: relative;
+}
+
+/* The elegant divider flourish via ::after */
+#chapter-content p.chapter-lead-last::after {
+  content: "";
+  position: absolute;
+  bottom: -1.75em;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background-color: var(--accent);
+  opacity: 0.4;
+  border-radius: 2px;
+}
+
+#chapter-content p.chapter-lead.drop-cap::first-letter {
+  color: var(--text-muted);
+}
+
 #chapter-content h2 {
   font-family: var(--font-heading);
   font-size: clamp(26px, 4vw, 34px);
