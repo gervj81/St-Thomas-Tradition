@@ -838,10 +838,10 @@ body {
   width: 100%;
   overflow-x: auto;
   margin: 2em 0;
-  border-radius: var(--radius-md);
+  border-radius: 4px;
   border: 1px solid var(--border-color);
+  border-top: 3px solid var(--accent);
   background: var(--bg-card);
-  box-shadow: var(--shadow-sm);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -849,7 +849,6 @@ body {
   width: 100%;
   max-width: 100%;
   border-collapse: collapse;
-  font-size: clamp(0.78rem, 0.43vw + 0.58rem, 0.88rem) !important; /* Scale smoothly between 768px-1100px */
   table-layout: auto;
   min-width: 800px; /* Give it more space on desktop to prevent heavy squishing */
   display: table !important; /* Override #chapter-content table { display: block } */
@@ -857,31 +856,32 @@ body {
 }
 
 .comparison-table th {
-  background: var(--bg-secondary);
+  background: transparent;
   font-family: var(--font-ui);
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
   padding: 16px 20px;
   text-align: left;
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   min-width: 110px; /* Ensure a baseline width that allows graceful 2-3 line wraps without squishing to 1 word per line */
   text-wrap: balance; /* Prevent typographical orphans on the last line */
 }
 
 .comparison-table th:first-child {
-  border-top-left-radius: var(--radius-md);
 }
 
 .comparison-table th:last-child {
-  border-top-right-radius: var(--radius-md);
 }
 
 .comparison-table td {
   padding: 14px 20px;
   border-bottom: 1px solid var(--border-color);
   vertical-align: top;
+  font-family: var(--font-heading);
+  font-size: 15.5px;
   line-height: 1.6;
   color: var(--text-primary);
   white-space: normal !important;
@@ -891,6 +891,7 @@ body {
 /* Make sure the first column (e.g. Date or Church) doesn't wrap unnecessarily */
 .comparison-table td:first-child {
   font-weight: 500;
+  font-style: italic;
   white-space: nowrap !important;
   color: var(--text-primary);
 }
@@ -949,8 +950,8 @@ body {
     margin-bottom: 1.5rem !important;
     background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
-    border-radius: var(--radius-md) !important;
-    box-shadow: var(--shadow-sm) !important;
+    border-top: 3px solid var(--accent) !important;
+    border-radius: 4px !important;
     overflow: hidden !important;
   }
   
@@ -979,10 +980,10 @@ body {
   #chapter-content table.comparison-table td::before {
     content: attr(data-label) !important;
     font-family: var(--font-ui) !important;
-    font-size: 0.72rem !important;
+    font-size: 11px !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.2em !important;
     color: var(--accent) !important;
     margin-bottom: 4px !important;
     display: block !important;
@@ -2043,22 +2044,23 @@ button:focus:not(:focus-visible) {
 }
 
 .interactive-feature-text h4 {
-  margin: 0 0 8px !important;
+  margin: 0 0 4px !important;
   font-family: var(--font-heading) !important;
-  font-size: 1.4rem !important;
-  font-weight: 600 !important;
+  font-size: 19px !important;
+  font-weight: 500 !important;
   font-style: italic !important;
+  line-height: 1.2 !important;
   color: var(--text-primary) !important;
-  letter-spacing: -0.01em !important;
+  letter-spacing: -0.008em !important;
   text-transform: none !important;
 }
 
 .interactive-feature-text p {
   margin: 0 !important;
-  font-family: var(--font-body) !important;
-  font-size: 0.95rem !important;
+  font-family: var(--font-heading) !important;
+  font-size: 14px !important;
   color: var(--text-secondary) !important;
-  line-height: 1.5 !important;
+  line-height: 1.45 !important;
 }
 
 .interactive-feature-arrow {
