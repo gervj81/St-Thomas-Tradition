@@ -1366,6 +1366,9 @@ body {
 }
 
 .infographic-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   font-family: 'Lora', var(--font-heading);
   font-weight: 500;
   font-size: 24px;
@@ -1375,6 +1378,14 @@ body {
   border-bottom: 1px solid var(--border-color);
   letter-spacing: -0.012em;
   color: var(--text-primary);
+}
+
+.infographic-title svg {
+  flex-shrink: 0;
+  margin: 0 !important; /* Override inline styles */
+  vertical-align: baseline !important;
+  position: relative;
+  top: 4px; /* Visually align with the capital letters of the first line */
 }
 
 .infographic-footer {
