@@ -583,7 +583,15 @@ function showLayer(t){
 document.querySelectorAll('.layer-row').forEach(b => b.addEventListener('click', () => showLayer(b.dataset.tab)));
 document.querySelectorAll('.mobile-tabs button').forEach(b => b.addEventListener('click', () => showLayer(b.dataset.tab)));
 
-showLayer('political');
+const urlParams = new URLSearchParams(window.location.search);
+const initialTab = urlParams.get('tab');
+const validTabs = ['political', 'maritime', 'silkroad', 'evidence', 'languages'];
+
+if (initialTab && validTabs.includes(initialTab)) {
+  showLayer(initialTab);
+} else {
+  showLayer('political');
+}
 </script>
 </body>
 </html>
