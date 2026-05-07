@@ -2,935 +2,561 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>The Cosmopolitan Matrix — Maps</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Cosmopolitan Matrix — Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="../js/map-data.js"></script>
 <style>
-/* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0600; font-family: 'EB Garamond', Georgia, serif; }
-
 :root {
-  --gold: #c9963a;
-  --gold-light: #e8c06a;
-  --ink: #0a0600;
-  --border: #6a4e1e;
-  --text: #f0e4c0;
-  --text-muted: #c8a870;
-  --panel-bg: rgba(10,6,0,0.97);
-  --tab-h: 58px;
-  --header-h: 52px;
+  --paper: #f4ede0;
+  --paper-2: #ede4d2;
+  --paper-3: #e3d7be;
+  --ink: #1a1612;
+  --ink-2: #443a2e;
+  --ink-3: #6e6151;
+  --line: #c8b89a;
+  --line-2: #d8c8a8;
+  --rule: #1a1612;
+  --accent: #b8421f;
+  --serif: 'Source Serif 4', Georgia, serif;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+html, body { height: 100%; width: 100%; overflow: hidden; background: var(--paper); color: var(--ink); font-family: var(--serif); }
+
+#root { position: fixed; inset: 0; display: grid; }
+@media (min-width: 880px) {
+  #root { grid-template-columns: 360px 1fr; }
 }
 
-/* ── HEADER ── */
-#app-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--header-h);
-  background: linear-gradient(180deg, #050300 0%, #0e0800 100%);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
-  z-index: 2000;
-}
-#app-title {
-  font-family: 'Cinzel', serif;
-  font-size: 0.78em;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--gold-light);
-  text-transform: uppercase;
-  white-space: nowrap;
+/* ─── STORY RAIL (left sidebar on desktop, bottom on mobile) ─── */
+.rail {
+  background: var(--paper);
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column;
+  position: relative;
   overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
 }
-/* Legend pull-tab */
-@keyframes arrow-bounce {
-  0%   { transform: translateX(0); }
-  30%  { transform: translateX(5px); }
-  60%  { transform: translateX(0px); }
-  80%  { transform: translateX(3px); }
-  100% { transform: translateX(0); }
+.rail-head {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  background: var(--paper);
 }
-.arrow-animate {
-  animation: arrow-bounce 0.7s ease-in-out;
+.masthead { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.masthead-mark {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--ink); color: var(--paper);
+  display: grid; place-items: center;
+  font-family: var(--serif); font-weight: 700; font-size: 14px;
+  font-variation-settings: 'opsz' 60;
 }
-#legend-pull-tab {
-  position: fixed;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1600;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+.masthead-name {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--ink-2);
 }
-#legend-pull-tab.open {
-  left: 270px;
+.chapter-eyebrow {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
 }
-#legend-tab-body {
-  background: linear-gradient(180deg, #1e1204 0%, #0e0800 100%);
-  border: 1px solid var(--border);
-  border-left: none;
-  border-radius: 0 8px 8px 0;
-  padding: 22px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 3px 0 14px rgba(0,0,0,0.6);
-}
-#legend-tab-body .tab-label {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  font-family: 'Cinzel', serif;
-  font-size: 0.7em;
-  font-weight: 700;
-  letter-spacing: 3px;
-  color: var(--gold-light);
-  text-transform: uppercase;
-  white-space: nowrap;
-  user-select: none;
-}
-#legend-tab-body .tab-arrow {
-  font-size: 1.1em;
-  color: var(--gold);
-  transition: transform 0.3s;
-  line-height: 1;
-  user-select: none;
-}
-#legend-pull-tab.open #legend-tab-body .tab-arrow {
-  transform: rotate(180deg);
+.chapter-title {
+  font-family: var(--serif); font-weight: 600;
+  font-size: 28px; line-height: 1.05; letter-spacing: -0.4px;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 60;
 }
 
-
-/* ── MAP CONTAINER ── */
-#map-container {
-  position: fixed;
-  top: var(--header-h);
-  left: 0; right: 0;
-  bottom: var(--tab-h);
-  z-index: 1;
-}
-.map-pane {
-  position: absolute;
-  inset: 0;
-  display: none;
-}
-.map-pane.active { display: block; }
-
-/* ── TAB BAR (bottom) ── */
-#tab-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: var(--tab-h);
-  background: #050300;
-  border-top: 1px solid var(--border);
-  display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  z-index: 2000;
-}
-#tab-bar::-webkit-scrollbar { display: none; }
-.tab-btn {
-  flex: 0 0 auto;
-  padding: 0 18px;
-  height: 100%;
-  background: transparent;
-  border: none;
-  border-top: 3px solid transparent;
-  color: #c8a85a;
-  font-family: 'Cinzel', serif;
-  font-size: 0.72em;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-  display: flex; align-items: center;
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
-  min-width: 44px;
-}
-.tab-btn:hover, .tab-btn:active { color: var(--gold-light); background: rgba(201,150,58,0.08); }
-.tab-btn.active { color: var(--gold-light); border-top-color: var(--gold); background: rgba(201,150,58,0.1); }
-
-/* ── LEGEND DRAWER (slides from left) ── */
-#legend-drawer {
-  position: fixed;
-  top: var(--header-h);
-  left: 0;
-  bottom: var(--tab-h);
-  width: 270px;
-  background: var(--panel-bg);
-  border-right: 1px solid var(--border);
-  z-index: 1500;
-  transform: translateX(-100%);
-  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  display: flex;
-  flex-direction: column;
-}
-#legend-drawer.open { transform: translateX(0); }
-#legend-header {
-  padding: 16px 16px 10px;
-  border-bottom: 1px solid var(--border);
-  font-family: 'Cinzel', serif;
-  font-size: 0.72em;
-  letter-spacing: 2px;
-  color: var(--gold);
-  text-transform: uppercase;
+/* Layer rail nav (vertical on desktop) */
+.layer-nav {
+  display: flex; flex-direction: column;
+  border-bottom: 1px solid var(--line);
   flex-shrink: 0;
 }
-#legend-content {
-  padding: 14px 16px;
+.layer-row {
+  display: flex; align-items: stretch; gap: 12px;
+  padding: 14px 28px;
+  background: transparent; border: none;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: 0.16s;
+  border-bottom: 1px solid var(--line-2);
+  font-family: inherit;
+}
+.layer-row:last-child { border-bottom: none; }
+.layer-row:hover { background: var(--paper-2); }
+.layer-row.active {
+  background: var(--paper-2);
+  border-left-color: var(--accent);
+}
+.layer-num {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-3); letter-spacing: 1px;
+  width: 24px;
+  flex-shrink: 0;
+  padding-top: 3px;
+}
+.layer-row.active .layer-num { color: var(--accent); font-weight: 500; }
+.layer-text { flex: 1; min-width: 0; }
+.layer-name {
+  font-family: var(--serif); font-weight: 600;
+  font-size: 16px; color: var(--ink); line-height: 1.2;
+  letter-spacing: -0.2px;
+  font-variation-settings: 'opsz' 14;
+}
+.layer-blurb {
+  font-family: var(--sans); font-size: 12px;
+  color: var(--ink-3); line-height: 1.4;
+  margin-top: 3px;
+}
+
+/* Story body (current layer) */
+.rail-body {
   flex: 1;
   overflow-y: auto;
+  padding: 18px 28px 28px;
 }
-.legend-section { margin-bottom: 16px; }
-.legend-title {
-  font-family: 'Cinzel', serif;
-  font-size: 0.75em;
-  letter-spacing: 1.5px;
-  color: var(--gold);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid var(--border);
+.story-eyebrow {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
 }
+.story-h {
+  font-family: var(--serif); font-weight: 600;
+  font-size: 19px; line-height: 1.2;
+  color: var(--ink); margin-bottom: 12px;
+  letter-spacing: -0.2px;
+  font-variation-settings: 'opsz' 24;
+}
+.story-p {
+  font-family: var(--serif); font-size: 14.5px;
+  line-height: 1.65; color: var(--ink-2);
+  margin-bottom: 14px;
+}
+.story-p strong { color: var(--ink); font-weight: 600; }
+.pull-quote {
+  font-family: var(--serif); font-style: italic; font-weight: 500;
+  font-size: 17px; line-height: 1.35;
+  color: var(--ink); padding: 12px 0 12px 16px;
+  border-left: 3px solid var(--accent);
+  margin: 18px 0 18px;
+  font-variation-settings: 'opsz' 24;
+}
+.legend-h {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--ink-3);
+  margin: 18px 0 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.legend-list { display: flex; flex-direction: column; gap: 5px; }
 .legend-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 7px 0;
-  color: #e8d8b0;
-  font-size: 1em;
-  line-height: 1.4;
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--sans); font-size: 13px; color: var(--ink-2);
+  padding: 2px 0;
 }
-.lc { width: 24px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-.lc-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.3); }
-.lc-line { width: 24px; height: 3px; border-radius: 1px; flex-shrink: 0; }
-.legend-note {
-  font-style: italic;
-  color: #c8ab70;
-  font-size: 0.92em;
-  line-height: 1.5;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(106,78,30,0.5);
+.lg-line { width: 22px; height: 2.5px; flex-shrink: 0; }
+.lg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.15); }
+.lg-box { width: 18px; height: 10px; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.1); }
+
+/* ─── MAP STAGE ─── */
+.stage {
+  position: relative;
+  overflow: hidden;
+  background: #e0d4be;
+}
+.map-pane { position: absolute; inset: 0; display: none; }
+.map-pane.active { display: block; }
+
+/* Tile filter — light, parchment-friendly */
+.leaflet-tile-pane {
+  filter: grayscale(1) brightness(1.15) contrast(0.6) sepia(0.65) saturate(0.5);
 }
 
-/* ── OVERLAY (dim map when drawer open) ── */
-#overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 1400;
+/* ─── MOBILE NAV ─── */
+.mobile-tabs {
   display: none;
-  opacity: 0;
-  transition: opacity 0.3s;
 }
-#overlay.active { display: block; opacity: 1; }
+@media (max-width: 879px) {
+  #root { grid-template-rows: auto 1fr auto; grid-template-columns: 1fr; }
+  .rail {
+    grid-row: 3;
+    border-right: none; border-top: 1px solid var(--line);
+    max-height: 50vh;
+  }
+  .rail-head { padding: 14px 18px 12px; }
+  .chapter-title { font-size: 21px; }
+  .layer-nav { display: none; }
+  .rail-body { padding: 14px 18px 22px; }
 
-/* ── INFO PANEL (tab description, slides from bottom) ── */
-#info-panel {
-  position: fixed;
-  left: 0; right: 0;
-  bottom: var(--tab-h);
-  background: var(--panel-bg);
-  border-top: 1px solid var(--border);
-  z-index: 1500;
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-  padding: 16px 18px;
-  max-height: 40vh;
-  overflow-y: auto;
-}
-#info-panel.open { transform: translateY(0); }
-#info-panel-title {
-  font-family: 'Cinzel', serif;
-  font-size: 0.78em;
-  letter-spacing: 1.5px;
-  color: var(--gold);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-#info-panel-text {
-  font-size: 1em;
-  color: #c8b07a;
-  line-height: 1.65;
-}
-#info-panel-text strong { color: var(--gold-light); }
-#info-close {
-  position: absolute;
-  top: 12px; right: 14px;
-  width: 34px; height: 34px;
-  background: rgba(201,150,58,0.15);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gold);
-  font-size: 1.1em;
-  cursor: pointer;
+  .mobile-tabs {
+    display: flex;
+    grid-row: 1;
+    overflow-x: auto;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    scrollbar-width: none;
+  }
+  .mobile-tabs::-webkit-scrollbar { display: none; }
+  .mobile-tabs button {
+    flex-shrink: 0;
+    background: transparent; border: none;
+    padding: 14px 16px;
+    font-family: var(--sans); font-weight: 500; font-size: 13px;
+    color: var(--ink-3); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .mobile-tabs button.active {
+    color: var(--ink); border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .stage { grid-row: 2; }
 }
 
-/* ── LEAFLET OVERRIDES ── */
-.leaflet-tile-pane { filter: brightness(0.4) contrast(1.2) sepia(0.4) saturate(0.8) hue-rotate(-10deg); }
+/* ─── POPUP ─── */
 .leaflet-popup-content-wrapper {
-  background: #130d04 !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 6px !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.8) !important;
-  color: var(--text) !important;
-  font-family: 'EB Garamond', Georgia, serif !important;
-  max-width: min(290px, 85vw) !important;
+  background: var(--paper) !important;
+  border: 1px solid var(--ink) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 rgba(26,22,18,0.12) !important;
+  color: var(--ink) !important;
+  font-family: var(--serif) !important;
+  max-width: min(280px, 80vw) !important;
 }
-.leaflet-popup-content {
-  margin: 14px 16px 12px !important;
-  font-size: 1.1em !important;
-  line-height: 1.55 !important;
-}
+.leaflet-popup-content { margin: 14px 16px !important; font-size: 13.5px !important; line-height: 1.55 !important; }
 .leaflet-popup-tip-container { display: none !important; }
 .leaflet-popup-close-button {
-  color: var(--gold) !important;
-  font-size: 22px !important;
-  top: 6px !important; right: 8px !important;
-  width: 36px !important; height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  color: var(--ink) !important; font-size: 18px !important;
+  top: 4px !important; right: 6px !important; padding: 4px 8px !important;
 }
-.popup-city {
-  font-family: 'Cinzel', serif;
-  font-size: 1.15em;
-  font-weight: 600;
-  color: var(--gold-light);
-  margin-bottom: 2px;
+.popup-name {
+  font-family: var(--serif); font-weight: 600; color: var(--ink);
+  font-size: 16px; letter-spacing: -0.2px; margin-bottom: 1px;
+  font-variation-settings: 'opsz' 24;
 }
 .popup-stage {
-  font-family: 'Cinzel', serif;
-  font-size: 0.85em;
-  letter-spacing: 1px;
-  color: var(--gold);
-  text-transform: uppercase;
-  margin-bottom: 7px;
-  opacity: 0.85;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.3px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
 }
-.popup-body { font-size: 1.05em; color: #c8b47a; line-height: 1.55; }
+.popup-body { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+
+/* ─── ZOOM CONTROL ─── */
 .leaflet-control-zoom {
-  border: 1px solid var(--border) !important;
-  border-radius: 4px !important;
+  border: 1px solid var(--ink) !important;
+  margin: 14px !important;
+  box-shadow: 3px 3px 0 rgba(26,22,18,0.15) !important;
+  border-radius: 0 !important;
   overflow: hidden;
 }
 .leaflet-control-zoom a {
-  background: rgba(10,6,0,0.9) !important;
-  color: var(--gold) !important;
-  border-color: var(--border) !important;
-  width: 40px !important;
-  height: 40px !important;
-  line-height: 40px !important;
-  font-size: 18px !important;
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  border-color: var(--ink) !important;
+  width: 34px !important; height: 34px !important;
+  line-height: 34px !important; font-size: 16px !important;
+  font-family: var(--serif) !important; font-weight: 500 !important;
+}
+.leaflet-control-zoom a:hover { background: var(--paper-2) !important; }
+
+/* Map credit */
+.credit {
+  position: absolute; bottom: 8px; right: 12px;
+  font-family: var(--mono); font-size: 9px;
+  color: rgba(26,22,18,0.4);
+  pointer-events: none;
+  letter-spacing: 0.4px;
+  background: rgba(244,237,224,0.7);
+  padding: 2px 6px;
+}
+
+/* Caption strip on map (current layer) */
+.map-caption {
+  position: absolute;
+  top: 14px; left: 14px;
+  z-index: 800;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 9px 14px;
+  max-width: calc(100% - 80px);
+  box-shadow: 3px 3px 0 rgba(26,22,18,0.15);
+}
+.map-caption .num {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 2px;
+}
+.map-caption .ttl {
+  font-family: var(--serif); font-weight: 600;
+  font-size: 14px; line-height: 1.15; color: var(--ink);
+  letter-spacing: -0.1px;
+}
+@media (max-width: 879px){
+  .map-caption { top: 10px; left: 10px; padding: 6px 10px; }
+  .map-caption .ttl { font-size: 12.5px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ── HEADER ── -->
-<div id="app-header">
-  <div id="app-title">The Cosmopolitan Matrix</div>
-</div>
+<div id="root">
+  <!-- Mobile tabs -->
+  <nav class="mobile-tabs" id="mobile-tabs">
+    <button class="active" data-tab="political">Political</button>
+    <button data-tab="maritime">Maritime</button>
+    <button data-tab="silkroad">Silk Roads</button>
+    <button data-tab="evidence">Archaeology</button>
+    <button data-tab="languages">Languages</button>
+  </nav>
 
-<!-- ── MAP PANES ── -->
-<div id="map-container">
-  <div id="pane-political" class="map-pane active"></div>
-  <div id="pane-maritime" class="map-pane"></div>
-  <div id="pane-silkroad" class="map-pane"></div>
-  <div id="pane-evidence" class="map-pane"></div>
-  <div id="pane-languages" class="map-pane"></div>
-</div>
+  <!-- Story rail -->
+  <aside class="rail">
+    <div class="rail-head">
+      <div class="masthead">
+        <div class="masthead-mark">M</div>
+        <div class="masthead-name">Oikouménē - the inhabited world</div>
+	</div>
+            <div class="chapter-eyebrow">Chapter I · c. 50 CE</div>
+    </div>
 
-<!-- ── OVERLAY ── -->
-<div id="overlay" onclick="closeAll()"></div>
+    <nav class="layer-nav" id="layer-nav">
+      <button class="layer-row active" data-tab="political">
+        <div class="layer-num">01</div>
+        <div class="layer-text">
+          <div class="layer-name">The Political World</div>
+          <div class="layer-blurb">Overlapping empires of the 1st century</div>
+        </div>
+      </button>
+      <button class="layer-row" data-tab="maritime">
+        <div class="layer-num">02</div>
+        <div class="layer-text">
+          <div class="layer-name">The Maritime Web</div>
+          <div class="layer-blurb">Alexandria to Malabar in four stages</div>
+        </div>
+      </button>
+      <button class="layer-row" data-tab="silkroad">
+        <div class="layer-num">03</div>
+        <div class="layer-text">
+          <div class="layer-name">The Overland Silk Roads</div>
+          <div class="layer-blurb">Chang'an to Antioch through Central Asia</div>
+        </div>
+      </button>
+      <button class="layer-row" data-tab="evidence">
+        <div class="layer-num">04</div>
+        <div class="layer-text">
+          <div class="layer-name">Archaeological Evidence</div>
+          <div class="layer-blurb">Coins, pepper, graffiti — material proof</div>
+        </div>
+      </button>
+      <button class="layer-row" data-tab="languages">
+        <div class="layer-num">05</div>
+        <div class="layer-text">
+          <div class="layer-name">Language Zones</div>
+          <div class="layer-blurb">Greek + Aramaic — a universal passport</div>
+        </div>
+      </button>
+    </nav>
 
-<!-- ── LEGEND DRAWER ── -->
-<!-- ── LEGEND PULL TAB ── -->
-<div id="legend-pull-tab" onclick="toggleLegend()">
-  <div id="legend-tab-body">
-    <div class="tab-label">Legend</div>
-    <div class="tab-arrow">›</div>
+    <div class="rail-body" id="rail-body"></div>
+  </aside>
+
+  <!-- Map stage -->
+  <div class="stage">
+    <div class="map-pane active" id="pane-political"></div>
+    <div class="map-pane" id="pane-maritime"></div>
+    <div class="map-pane" id="pane-silkroad"></div>
+    <div class="map-pane" id="pane-evidence"></div>
+    <div class="map-pane" id="pane-languages"></div>
+
+    <div class="map-caption">
+      <div class="num" id="cap-num">FIG. 01</div>
+      <div class="ttl" id="cap-ttl">The Political World · c. 50 CE</div>
+    </div>
+    <div class="credit">Tiles © Esri · After the Periplus Maris Erythraei</div>
   </div>
 </div>
-
-<div id="legend-drawer">
-  <div id="legend-header">Legend</div>
-  <div id="legend-content">
-    <!-- filled by JS per active tab -->
-  </div>
-</div>
-
-<!-- ── INFO PANEL ── -->
-<div id="info-panel">
-    <div id="info-panel-title"></div>
-  <div id="info-panel-text"></div>
-</div>
-
-<!-- ── TAB BAR ── -->
-<nav id="tab-bar">
-  <button class="tab-btn active" onclick="showTab('political',this)">Political World</button>
-  <button class="tab-btn" onclick="showTab('maritime',this)">Maritime Route</button>
-  <button class="tab-btn" onclick="showTab('silkroad',this)">Silk Roads</button>
-  <button class="tab-btn" onclick="showTab('evidence',this)">Archaeology</button>
-  <button class="tab-btn" onclick="showTab('languages',this)">Languages</button>
-</nav>
 
 <script>
-// ─────────────────────────────────────────────
-// UI CONTROLS
-// ─────────────────────────────────────────────
-function toggleLegend() {
-  const d = document.getElementById('legend-drawer');
-  const ov = document.getElementById('overlay');
-  const tab = document.getElementById('legend-pull-tab');
-  const ip = document.getElementById('info-panel');
-  ip.classList.remove('open');
-  const isOpen = d.classList.toggle('open');
-  ov.classList.toggle('active', isOpen);
-  tab.classList.toggle('open', isOpen);
-  if (isOpen) updateLegend(currentTab);
-}
+const D = window.MAP_DATA;
 
-
-function closeAll() {
-  document.getElementById('legend-drawer').classList.remove('open');
-  document.getElementById('info-panel').classList.remove('open');
-  document.getElementById('overlay').classList.remove('active');
-  const tab = document.getElementById('legend-pull-tab');
-  if (tab) tab.classList.remove('open');
-}
-
-// ─────────────────────────────────────────────
-// TAB INFO TEXT
-// ─────────────────────────────────────────────
-const tabInfo = {
-  political: {
-    title: 'The Political World · c. 50 CE',
-    text: 'The 1st century CE was a world of overlapping empires: Rome, Parthia, the Indo-Parthian kingdoms, and the South Indian polities. <strong>The Parthian Empire was the great middleman</strong> — all overland trade between Rome and India was mediated through Parthian territory. Click any empire or city for details.'
-  },
-  maritime: {
-    title: 'The Maritime Web: Alexandria to Malabar',
-    text: 'A four-stage chain: Nile → Red Sea → Arabia → monsoon crossing. <strong>Strabo records 120 ships per year</strong> making the crossing from Egypt to India. The entire voyage Alexandria → Muziris took approximately 90–100 days. The green line shows the Chinese-operated eastward extension. Tap any port for details.'
-  },
-  silkroad: {
-    title: 'The Overland Silk Roads',
-    text: 'Running parallel to the maritime route, the Silk Road linked Chang\'an to Antioch through Central Asia and Parthian Mesopotamia. <strong>Its critical feature was not the silk but the human infrastructure</strong> — Aramaic, Sogdian, Jewish, Buddhist, and later Christian diaspora communities at every oasis. The gold line shows the circuit junction to the Han maritime ports. Tap any city for details.'
-  },
-  evidence: {
-    title: 'Archaeological Evidence',
-    text: '<strong>The trade was not a literary conceit — it was a physical reality.</strong> Roman coins of Augustus, Tiberius, Claudius and Nero found across South India and Sri Lanka. A Tamil Brahmi graffito scratched into pottery at Berenike, Egypt. Roman glass and coins in Han-dynasty tombs at Luoyang. Tap any site for excavation details.'
-  },
-  languages: {
-    title: 'Language Zones · c. 50 CE',
-    text: '<strong>Greek and Aramaic between them covered virtually the entire inhabited world from Britain to India.</strong> For a 1st-century apostle, these were not foreign languages — they were the languages of his community. Aramaic was spoken in Galilee; Greek in every commercial port from Alexandria to Barygaza. Tap zones and cities for details.'
-  }
+// Light-paper-friendly palette: deeper, slightly desaturated colors
+const C = {
+  rome:'#a83232', parthian:'#2f5fa8', indoparth:'#2f7a4d',
+  india:'#a85f1c', chera:'#b8702a', arabia:'#8a6028', hinge:'#7a3aa8',
+  blue:'#3a6ba8', pink:'#a8408a', green:'#2fa86a', olive:'#6e8a30',
+  gold:'#a8782a', red:'#a82a2a', chinese:'#5a8a2a',
+  orange:'#a85020', purple:'#7a30a8'
 };
+const POLY_OPTS = (c, op=0.22) => ({ color: c, fillColor: c, fillOpacity: op, weight: 1.4 });
 
-function updateInfo(tab) {
-  const info = tabInfo[tab] || {};
-  document.getElementById('info-panel-title').textContent = info.title || '';
-  document.getElementById('info-panel-text').innerHTML = info.text || '';
-}
-
-// ─────────────────────────────────────────────
-// LEGEND CONTENT PER TAB
-// ─────────────────────────────────────────────
-const legendHTML = {
-  political: `
-    <div class="legend-section">
-      <div class="legend-title">Empires · c. 50 CE</div>
-      <div class="legend-item"><div class="lc" style="background:#c44040;opacity:.7"></div>Roman Empire</div>
-      <div class="legend-item"><div class="lc" style="background:#3a7acc;opacity:.7"></div>Parthian Empire</div>
-      <div class="legend-item"><div class="lc" style="background:#3a9a58;opacity:.7"></div>Indo-Parthian</div>
-      <div class="legend-item"><div class="lc" style="background:#c87820;opacity:.7"></div>South Indian Kingdoms</div>
-      <div class="legend-item"><div class="lc" style="background:#aa7020;opacity:.7"></div>Arabian Zone</div>
-    </div>
-    <div class="legend-section">
-      <div class="legend-title">Cities</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#c44040"></div>Roman world</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#aa55cc"></div>Syriac / Hinge zone</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#3a7acc"></div>Parthian world</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#c87820"></div>Indian world</div>
-    </div>`,
-  maritime: `
-    <div class="legend-section">
-      <div class="legend-title">Roman-Operated Route</div>
-      <div class="legend-item"><div class="lc-line" style="background:#6a90cc"></div>Stage 1a: Nile River</div>
-      <div class="legend-item"><div class="lc-line" style="background:#c87820"></div>Stage 1b: Desert Caravan</div>
-      <div class="legend-item"><div class="lc-line" style="background:#cc55aa"></div>Stage 2: Red Sea → Arabia</div>
-      <div class="legend-item"><div class="lc-line" style="background:#3acc80"></div>Stage 3: Monsoon Crossing</div>
-      <div class="legend-item"><div class="lc-line" style="background:#88aa44"></div>NW India Branch</div>
-      <div class="legend-item"><div class="lc-line" style="background:#aa6622;opacity:.5"></div>Return Voyage</div>
-    </div>
-    <div class="legend-section">
-      <div class="legend-title">Persian-Operated Route</div>
-      <div class="legend-item"><div class="lc-line" style="background:#bb70cc"></div>Persian Gulf to India</div>
-    </div>
-    <div class="legend-section">
-      <div class="legend-title">Chinese-Operated Segment</div>
-      <div class="legend-item"><div class="lc-line" style="background:#a0e870"></div>Sri Lanka → China</div>
-      <div class="legend-note">⚠ Chinese / SE Asian vessels only — travelling east→west. Roman merchants did not sail east of Sri Lanka.</div>
-    </div>
-    <div class="legend-note">Alexandria → Muziris: ~90–100 days · 120 ships/year (Strabo)</div>`,
-  silkroad: `
-    <div class="legend-section">
-      <div class="legend-title">Overland Silk Road</div>
-      <div class="legend-item"><div class="lc-line" style="background:#c8982a"></div>Northern Route</div>
-      <div class="legend-item"><div class="lc-line" style="background:#9a7018"></div>Persian Route</div>
-      <div class="legend-item"><div class="lc-line" style="background:#3a9a58"></div>Branch to India</div>
-      <div class="legend-item"><div class="lc-line" style="background:#e8c060"></div>Circuit: Chang'an → Hepu</div>
-    </div>
-    <div class="legend-section">
-      <div class="legend-title">Ghost: Maritime Route</div>
-      <div class="legend-item" style="opacity:0.6"><div class="lc-line" style="background:#3acc80;opacity:.5"></div>Sea route (faded)</div>
-    </div>
-    <div class="legend-note">These interconnected systems linked Chang'an, the Malabar ports, and Alexandria — a chain of overlapping networks.</div>`,
-  evidence: `
-    <div class="legend-section">
-      <div class="legend-title">Archaeological Finds</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#cc3333;width:14px;height:14px"></div>Key excavation site</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#c87820;width:12px;height:12px"></div>Major trade site</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#d4a843;width:10px;height:10px"></div>Roman coin hoards</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#aa8830;width:8px;height:8px"></div>Trade evidence</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#a0e870;width:10px;height:10px"></div>Roman goods via intermediaries</div>
-      <div class="legend-item"><div class="lc-dot" style="background:#c8982a;width:10px;height:10px"></div>Silk Road terminus</div>
-    </div>
-    <div class="legend-note">★ Tamil Brahmi graffito at Berenike = Indian presence in Egypt</div>`,
-  languages: `
-    <div class="legend-section">
-      <div class="legend-title">Language Zones · c. 50 CE</div>
-      <div class="legend-item"><div class="lc" style="background:#3a78cc;opacity:.6"></div>Greek (Koinē) Zone</div>
-      <div class="legend-item"><div class="lc" style="background:#3a78cc;opacity:.3;border:1px dashed #3a78cc"></div>Greek Commercial Reach East</div>
-      <div class="legend-item"><div class="lc" style="background:#c87028;opacity:.6"></div>Aramaic / Syriac Zone</div>
-      <div class="legend-item"><div class="lc" style="background:#9944cc;opacity:.7"></div>Bilingual Overlap Zone</div>
-    </div>
-    <div class="legend-note">"A universal passport across the ancient world" — Greek + Aramaic between them covered the inhabited world from Britain to India.</div>`
-};
-
-function updateLegend(tab) {
-  document.getElementById('legend-content').innerHTML = legendHTML[tab] || '';
-}
-
-// ─────────────────────────────────────────────
-// TAB SYSTEM
-// ─────────────────────────────────────────────
-const maps = {};
-let currentTab = 'political';
-
-// Fix Leaflet popup close button
-document.addEventListener('click', function(e) {
-  const el = e.target.closest ? e.target.closest('.leaflet-popup-close-button') : null;
-  if (el) e.preventDefault();
-}, true);
-
-function showTab(name, btn) {
-  currentTab = name;
-  document.querySelectorAll('.map-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('pane-' + name).classList.add('active');
-  btn.classList.add('active');
-  closeAll();
-  lazyInit(name);
-  setTimeout(function(){ if (maps[name]) maps[name].invalidateSize(); }, 300);
-  btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  // Auto-show info panel for this tab, then auto-dismiss after 4s
-  updateInfo(name);
-  const ip = document.getElementById('info-panel');
-  const ov = document.getElementById('overlay');
-  ip.classList.add('open');
-  // No overlay dim for auto-show — less intrusive
-  if (ip._autoDismiss) clearTimeout(ip._autoDismiss);
-  ip._autoDismiss = setTimeout(function() {
-    ip.classList.remove('open');
-    ov.classList.remove('active');
-  }, 10000);
-}
-
-// ─────────────────────────────────────────────
-// TILE LAYER
-// ─────────────────────────────────────────────
-function tiles() {
-  const base = L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    { attribution: 'Tiles &copy; Esri', maxZoom: 17 }
-  );
-  return L.layerGroup([base]);
-}
-
-
-// ─────────────────────────────────────────────
-// HELPERS
-// ─────────────────────────────────────────────
 function popup(name, stage, body) {
-  // Use the full body text without truncation to prevent cut-offs
-  return `<div class="popup-city">${name}</div>${stage ? `<div class="popup-stage">${stage}</div>` : ''}<div class="popup-body">${body}</div>`;
+  return `<div class="popup-name">${name}</div>${stage?`<div class="popup-stage">${stage}</div>`:''}<div class="popup-body">${body}</div>`;
 }
-
 function cityMark(map, lat, lng, name, stage, desc, color, r) {
-  r = r || 12;
-  let mz = 3;
-  if (r === 11 || r === 10) mz = 4;
-  else if (r < 10) mz = 5;
-
-  const marker = L.circleMarker([lat, lng], {
-    radius: r, color: '#e8d498', weight: 2,
-    fillColor: color, fillOpacity: 0.92
-  }).bindPopup(popup(name, stage, desc), { maxWidth: 280, autoPan: true });
-
-  marker.minZoom = mz;
-  if (!map._cityMarkers) {
-    map._cityMarkers = [];
-    map.on('zoomend', function() {
-      const cz = map.getZoom();
-      map._cityMarkers.forEach(m => {
-        if (cz >= m.minZoom) { if (!map.hasLayer(m)) m.addTo(map); }
-        else { if (map.hasLayer(m)) map.removeLayer(m); }
-      });
-    });
+  r = r || 6;
+  L.circleMarker([lat, lng], {
+    radius: r, color: '#1a1612', weight: 1,
+    fillColor: color, fillOpacity: 1
+  }).bindPopup(popup(name, stage, desc), { maxWidth: 280, autoPan: true }).addTo(map);
+}
+function regionLabels(map) {
+  if (!map.getPane('regionLabels')) {
+    map.createPane('regionLabels');
+    map.getPane('regionLabels').style.zIndex = 350;
+    map.getPane('regionLabels').style.pointerEvents = 'none';
   }
-  map._cityMarkers.push(marker);
-  if (map.getZoom() >= mz) marker.addTo(map);
-  return marker;
-}
-
-function addLegend() { /* handled by drawer */ }
-
-// ─────────────────────────────────────────────
-// SHARED MAP LABELS (regions + oceans)
-// ─────────────────────────────────────────────
-function addMapLabels(map) {
-  const regionStyle = 'font-family:Cinzel,serif;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(232,208,152,0.7);text-shadow:0 2px 8px rgba(0,0,0,0.9);pointer-events:none;white-space:nowrap;';
-  const subStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;font-size:0.7em;color:rgba(200,176,122,0.55);letter-spacing:1px;text-transform:none;display:block;margin-top:2px;';
-  const oceanStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;letter-spacing:5px;color:rgba(255,255,255,0.85);text-shadow:0 0 10px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.9);pointer-events:none;white-space:nowrap;';
-  const oceanSubStyle = 'font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:400;font-size:0.65em;color:rgba(255,255,255,0.55);letter-spacing:1px;display:block;margin-top:2px;';
-
-  const regions = [
-    [44, 5, 'ITALIA', '(Roman Heartland)', 12, 3],
-    [34, 33, 'LEVANT', '(Syria-Palestine)', 11, 3],
-    [35, 47, 'MESOPOTAMIA', '(Iraq)', 12, 3],
-    [33, 55, 'PERSIA', '(Iran)', 13, 3],
-    [38, 66, 'BACTRIA', '(Afghanistan)', 10, 4],
-    [34, 74, 'GANDH\u0100RA', '(NW Pakistan)', 10, 4],
-    [20, 78, 'DAK\u1e62I\u1e46\u0100PATHA', '(Deccan India)', 11, 4],
-    [10, 77, 'TAMILAKAM', '(Tamil South)', 10, 4],
-    [28, 31, 'AEGYPTUS', '(Egypt)', 11, 3],
-    [20, 45, 'ARABIA FELIX', '(Yemen / Oman)', 10, 4],
-    [7, 81, 'TAPROBANE', '(Sri Lanka)', 9, 5],
-    [38, 25, 'GRAECIA', '(Greece)', 10, 4],
-    [40, 14, 'GALLIA', '(France)', 10, 5],
-    [52, -2, 'BRITANNIA', '(Britain)', 9, 5],
-    [28, 85, 'MAGADHA', '(Bihar / Bengal)', 10, 5],
-    [42, 58, 'HYRCANIA', '(Caspian South)', 9, 5],
-    [24, 70, 'SINDH', '(Lower Indus)', 10, 5],
-    [30, 108, 'HAN', '(China)', 12, 3],
-  ];
-
-  regions.forEach(([lat, lng, name, modern, size, minZ]) => {
-    const html = `<div style="${regionStyle}font-size:${size}px;">${name}<span style="${subStyle}">${modern}</span></div>`;
-    const m = L.marker([lat, lng], {
-      icon: L.divIcon({ html: html, className: '', iconAnchor: [0, 0] }),
-      interactive: false
+  const z = map.getZoom();
+  const showSub = z >= 4;
+  const rs = "font-family:'Source Serif 4',Georgia,serif;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#fbf6ec;text-shadow:0 0 3px #1a1612,0 0 3px #1a1612,0 0 6px rgba(26,22,18,0.85),0 1px 0 #1a1612;pointer-events:none;white-space:nowrap;-webkit-font-smoothing:antialiased;";
+  const ss = "font-family:'IBM Plex Sans',sans-serif;font-size:10px;color:#e8d9b8;letter-spacing:0.6px;display:block;margin-top:2px;text-transform:none;font-weight:500;text-shadow:0 0 3px #1a1612,0 0 3px #1a1612,0 1px 0 #1a1612;";
+  const os = "font-family:'Source Serif 4',Georgia,serif;font-style:italic;font-weight:500;letter-spacing:3px;color:#cfe3ff;text-shadow:0 0 3px #0d2440,0 0 3px #0d2440,0 0 6px rgba(13,36,64,0.9);pointer-events:none;white-space:nowrap;text-transform:uppercase;";
+  const layerGroup = L.layerGroup().addTo(map);
+  const render = () => {
+    layerGroup.clearLayers();
+    const zoom = map.getZoom();
+    const sub = zoom >= 4;
+    D.REGIONS.forEach(([lat,lng,name,modern,size]) => {
+      const fs = Math.max(9, size - (zoom < 4 ? 2 : 0));
+      const subHtml = sub ? `<span style="${ss}">${modern}</span>` : '';
+      L.marker([lat,lng], { pane:'regionLabels', icon: L.divIcon({ html: `<div style="${rs}font-size:${fs}px;">${name}${subHtml}</div>`, className:'', iconAnchor:[0,0] }), interactive:false }).addTo(layerGroup);
     });
-    m.minZoom = minZ;
-    if (!map._cityMarkers) map._cityMarkers = [];
-    map._cityMarkers.push(m);
-    if (map.getZoom() >= minZ) m.addTo(map);
-  });
-
-  // Ocean & Sea labels — always visible, italic blue-grey with brackets
-  const oceans = [
-    [15, 55, 'Mare Erythraeum', '(Arabian Sea)', 14],
-    [35, 18, 'Mare Internum', '(Mediterranean)', 12],
-    [-5, 70, 'Oceanus Indicus', '(Indian Ocean)', 13],
-    [22, 38, 'Sinus Arabicus', '(Red Sea)', 10],
-    [27, 52, 'Sinus Persicus', '(Persian Gulf)', 10],
-    [40, 50, 'Mare Caspium', '(Caspian Sea)', 9],
-    [38, -3, 'Mare Atlanticum', '(Atlantic Ocean)', 11],
-    [18, 90, 'Sinus Gangeticus', '(Bay of Bengal)', 11],
-    [5, 100, 'Mare Sinicum', '(South China Sea)', 10],
-    [42, 30, 'Pontus Euxinus', '(Black Sea)', 9],
-  ];
-
-  oceans.forEach(([lat, lng, name, modern, size]) => {
-    const html = `<div style="${oceanStyle}font-size:${size}px;">${name}<span style="${oceanSubStyle}">${modern}</span></div>`;
-    L.marker([lat, lng], {
-      icon: L.divIcon({ html: html, className: '', iconAnchor: [0, 0] }),
-      interactive: false
-    }).addTo(map);
-  });
+    D.OCEANS.forEach(([lat,lng,name,modern,size]) => {
+      const fs = Math.max(9, Math.round(size * 0.55));
+      L.marker([lat,lng], { pane:'regionLabels', icon: L.divIcon({ html: `<div style="${os}font-size:${fs}px;">${name}</div>`, className:'', iconAnchor:[0,0] }), interactive:false }).addTo(layerGroup);
+    });
+  };
+  render();
+  map.on('zoomend', render);
+}
+function makeMap(paneId, center, zoom){
+  const map = L.map(paneId, { center, zoom, zoomControl: false, preferCanvas: true });
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '', maxZoom: 12 }).addTo(map);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  return map;
 }
 
-// ─────────────────────────────────────────────
-// ── MAP 1: POLITICAL WORLD ──
-// ─────────────────────────────────────────────
-function initPolitical() {
-  const map = L.map('pane-political', { center: [28, 45], zoom: 3, preferCanvas: true, zoomControl: false });
-  tiles().addTo(map);
-  L.control.zoom({ position: 'topright' }).addTo(map);
-  maps['political'] = map;
+const inits = {
+  political(){
+    const m = makeMap('pane-political', [25, 50], 3);
+    L.polygon(D.POLY.roman, POLY_OPTS(C.rome)).addTo(m).bindPopup(popup('Roman Empire','c. 14–68 CE','Stretched from Britannia to Egypt. Western senators knew India only as abstraction; eastern merchants navigated Malabar annually.'));
+    L.polygon(D.POLY.britain, POLY_OPTS(C.rome)).addTo(m);
+    L.polygon(D.POLY.parthian, POLY_OPTS(C.parthian)).addTo(m).bindPopup(popup('Parthian Empire','247 BCE – 224 CE','The Great Middleman. All overland trade Rome↔India was mediated by Parthia.'));
+    L.polygon(D.POLY.indoParthian, POLY_OPTS(C.indoparth)).addTo(m).bindPopup(popup('Indo-Parthian','1st c. BCE – 3rd c. CE','Their coins bore Greek legends.'));
+    L.polygon(D.POLY.chera, POLY_OPTS(C.chera)).addTo(m).bindPopup(popup('Chera Kingdom','Malabar Coast','Home of Muziris and the pepper monopoly.'));
+    L.polygon(D.POLY.cholaPandya, POLY_OPTS(C.india)).addTo(m).bindPopup(popup('Chola & Pandya','Coromandel Coast','Hinge of two oceans.'));
+    L.polygon(D.POLY.arabia, POLY_OPTS(C.arabia)).addTo(m).bindPopup(popup('Arabian Zone','Nabataean, Himyarite','Frankincense control made Arabia essential.'));
+    D.CITIES.political.forEach(([lat,lng,n,s,d,c,r]) => cityMark(m,lat,lng,n,s,d,C[c],r));
+    regionLabels(m);
+  },
+  maritime(){
+    const m = makeMap('pane-maritime', [18, 65], 3);
+    L.polyline(D.ROUTES.nile, { color: C.blue, weight: 2.5, opacity: 0.9 }).addTo(m).bindPopup(popup('Nile Corridor','Stage 1a',''));
+    L.polyline(D.ROUTES.desert, { color: C.india, weight: 2.5, dashArray: '4,4', opacity: 0.85 }).addTo(m).bindPopup(popup('Eastern Desert','Stage 1b — 12 days',''));
+    L.polyline(D.ROUTES.redSea, { color: C.pink, weight: 2.5, opacity: 0.9 }).addTo(m).bindPopup(popup('Red Sea','Stage 2',''));
+    L.polyline(D.ROUTES.monsoon, { color: C.green, weight: 3.2, opacity: 0.95 }).addTo(m).bindPopup(popup('Monsoon Crossing','Stage 3 — c. 40 days',''));
+    L.polyline(D.ROUTES.returnVoyage, { color: '#856030', weight: 1.8, dashArray: '3,5', opacity: 0.55 }).addTo(m);
+    L.polyline(D.ROUTES.nwIndia, { color: C.olive, weight: 2.2, opacity: 0.85 }).addTo(m).bindPopup(popup('NW India Branch','Alternative','To Barygaza.'));
+    L.polyline(D.ROUTES.persian, { color: C.purple, weight: 2.4, opacity: 0.85 }).addTo(m).bindPopup(popup('Persian-Arab Maritime','Persian Gulf to India',''));
+    L.polyline(D.ROUTES.palghat, { color: C.gold, weight: 2.2, opacity: 0.9 }).addTo(m).bindPopup(popup('Palghat Gap','Internal Route',''));
+    L.polyline(D.ROUTES.deccan, { color: '#8a6028', weight: 2.2, dashArray: '4,5', opacity: 0.8 }).addTo(m).bindPopup(popup('Deccan Internal','N–S Corridor',''));
+    L.polyline(D.ROUTES.kollamLanka, { color: '#a8782a', weight: 1.8, opacity: 0.85 }).addTo(m).bindPopup(popup('Kollam → Sri Lanka','Periplus Onward',''));
+    L.polyline(D.ROUTES.lankaCircuit, { color: C.chera, weight: 1.8, opacity: 0.85 }).addTo(m);
+    L.polyline(D.ROUTES.chinese, { color: C.chinese, weight: 2.6, opacity: 0.9 }).addTo(m).bindPopup(popup('Chinese Segment','East→West','Roman merchants did not sail east of Sri Lanka.'));
+    D.CITIES.maritime.forEach(([lat,lng,n,s,d,c,r]) => cityMark(m,lat,lng,n,s,d,C[c],r));
+    regionLabels(m);
+  },
+  silkroad(){
+    const m = makeMap('pane-silkroad', [36, 65], 3);
+    L.polyline(D.ROUTES.silkMain, { color: C.gold, weight: 3.4, opacity: 0.95 }).addTo(m).bindPopup(popup('Main Silk Road',"Chang'an → Antioch",''));
+    L.polyline(D.ROUTES.silkPersian, { color: '#6e4818', weight: 2.6, opacity: 0.85 }).addTo(m).bindPopup(popup('Southern Persian Route','via Nishapur, Isfahan',''));
+    L.polyline(D.ROUTES.silkIndia, { color: C.indoparth, weight: 2.6, opacity: 0.9 }).addTo(m).bindPopup(popup('Branch to India','via Bactria, Taxila',''));
+    L.polyline(D.ROUTES.silkCircuit, { color: '#c8902a', weight: 2.2, dashArray: '5,4', opacity: 0.85 }).addTo(m).bindPopup(popup('Circuit',"Chang'an → Hepu",''));
+    L.polyline([...D.ROUTES.redSea, ...D.ROUTES.monsoon], { color: C.green, weight: 1.4, dashArray: '3,5', opacity: 0.32, interactive: false }).addTo(m);
+    D.CITIES.silkroad.forEach(([lat,lng,n,s,d,c,r]) => cityMark(m,lat,lng,n,s,d,C[c],r));
+    regionLabels(m);
+  },
+  evidence(){
+    const m = makeMap('pane-evidence', [16, 65], 3);
+    L.polyline([...D.ROUTES.redSea, ...D.ROUTES.monsoon], { color: C.blue, weight: 1.4, dashArray: '3,6', opacity: 0.4 }).addTo(m);
+    D.CITIES.evidence.forEach(([lat,lng,n,s,d,c,r]) => cityMark(m,lat,lng,n,s,d,C[c],r));
+    regionLabels(m);
+  },
+  languages(){
+    const m = makeMap('pane-languages', [28, 42], 3);
+    L.polygon(D.POLY.greek, POLY_OPTS(C.blue, 0.22)).addTo(m).bindPopup(popup('Greek (Koinē)','after 334 BCE','Common tongue from the Mediterranean to NW India.'));
+    L.polygon(D.POLY.greekEast, POLY_OPTS(C.blue, 0.12)).addTo(m).bindPopup(popup('Greek Reach East','Yavana Merchants',''));
+    L.polygon(D.POLY.aramaic, POLY_OPTS(C.orange, 0.22)).addTo(m).bindPopup(popup('Aramaic / Syriac','Lingua Franca','Spoken language of Jesus.'));
+    L.polygon(D.POLY.overlap, POLY_OPTS(C.purple, 0.36)).addTo(m).bindPopup(popup('Bilingual Overlap','Greek + Aramaic','The Levant.'));
+    D.CITIES.languages.forEach(([lat,lng,n,s,d,c]) => cityMark(m,lat,lng,n,s,d,C[c]));
+    regionLabels(m);
+  }
+};
 
-  const polyOpts = (c) => ({ color: c, fillColor: c, fillOpacity: 0.18, weight: 1.8, dashArray: '6,3' });
-  const roman = [[44,-10],[44,-2],[43,3],[47,7],[48,8],[47,12],[45,14],[43,17],[41,20],[40,24],[41,29],[40,33],[37,37],[31,35],[29,34],[24,37],[22,35],[22,28],[30,13],[32,12],[36,9],[36,3],[35,-1],[35,-6],[36,-9],[38,-9],[44,-10]];
-  const britain = [[50,-5],[51,1],[53,0],[55,-1],[56,-5],[55,-4],[53,-4],[50,-5]];
-  const parthian = [[37,37],[40,40],[40,44],[38,48],[36,50],[37,55],[38,60],[37,63],[35,66],[32,67],[28,65],[25,60],[24,55],[24,50],[26,46],[30,42],[32,40],[35,38],[37,37]];
-  const indoParthian = [[37,63],[38,66],[40,70],[36,72],[34,72],[30,72],[27,68],[24,67],[22,72],[21,70],[23,65],[25,63],[28,62],[32,63],[35,63],[37,63]];
-  const chera = [[14.0,74.5],[14.0,75.0],[11.0,76.5],[8.5,77.0],[8.5,76.5],[11.0,76.0],[14.0,74.0]];
-  const cholaPandya = [[16.0,80.0],[16.0,78.0],[14.0,75.0],[11.0,76.5],[8.5,77.0],[8.5,77.5],[9.5,79.5],[12.0,80.0],[16.0,80.0]];
-  const arabia = [[30,34],[26,34],[22,38],[20,42],[22,45],[28,47],[32,40],[30,34]];
+const pulls = {
+  political: '"All overland trade between Rome and India was mediated through Parthia."',
+  maritime: '"120 ships per year." — Strabo',
+  silkroad: '"Not the silk but the human infrastructure."',
+  evidence: '"7.55 kg of black pepper in one container at Berenike."',
+  languages: '"A universal passport across the ancient world."'
+};
+const legendHTML = {
+  political: `<div class="legend-h">Empires</div><div class="legend-list">
+    ${[['rome','Roman'],['parthian','Parthian'],['indoparth','Indo-Parthian'],['india','South Indian'],['arabia','Arabian Zone']].map(([k,n])=>`<div class="legend-item"><span class="lg-box" style="background:${C[k]};opacity:.5"></span>${n}</div>`).join('')}
+    </div>
+    <div style="margin-top:12px"><div class="legend-list">
+    ${[['rome','Roman cities'],['hinge','Syriac / Hinge'],['parthian','Parthian cities'],['india','Indian cities']].map(([k,n])=>`<div class="legend-item"><span class="lg-dot" style="background:${C[k]}"></span>${n}</div>`).join('')}
+    </div></div>`,
+  maritime: `<div class="legend-h">Roman-Operated</div><div class="legend-list">
+    ${[['blue','Stage 1a · Nile'],['india','Stage 1b · Desert'],['pink','Stage 2 · Red Sea'],['green','Stage 3 · Monsoon'],['olive','NW India branch']].map(([k,n])=>`<div class="legend-item"><span class="lg-line" style="background:${C[k]}"></span>${n}</div>`).join('')}
+    </div>
+    <div class="legend-h">Other Operators</div><div class="legend-list">
+      <div class="legend-item"><span class="lg-line" style="background:${C.purple}"></span>Persian Gulf route</div>
+      <div class="legend-item"><span class="lg-line" style="background:${C.chinese}"></span>Chinese / SE Asian</div>
+    </div>`,
+  silkroad: `<div class="legend-h">Overland</div><div class="legend-list">
+    <div class="legend-item"><span class="lg-line" style="background:${C.gold}"></span>Northern route</div>
+    <div class="legend-item"><span class="lg-line" style="background:#6e4818"></span>Persian route</div>
+    <div class="legend-item"><span class="lg-line" style="background:${C.indoparth}"></span>Branch to India</div>
+    <div class="legend-item"><span class="lg-line" style="background:#c8902a"></span>Chang'an → Hepu</div>
+    </div>`,
+  evidence: `<div class="legend-h">Find Types</div><div class="legend-list">
+    <div class="legend-item"><span class="lg-dot" style="background:${C.red}"></span>Tamil Brahmi inscription</div>
+    <div class="legend-item"><span class="lg-dot" style="background:${C.gold}"></span>Roman coin hoard</div>
+    <div class="legend-item"><span class="lg-dot" style="background:${C.india}"></span>Excavated site</div>
+    <div class="legend-item"><span class="lg-dot" style="background:${C.chinese}"></span>Roman goods (Han)</div>
+    </div>`,
+  languages: `<div class="legend-h">Zones</div><div class="legend-list">
+    <div class="legend-item"><span class="lg-box" style="background:${C.blue};opacity:.5"></span>Greek (Koinē)</div>
+    <div class="legend-item"><span class="lg-box" style="background:${C.orange};opacity:.5"></span>Aramaic / Syriac</div>
+    <div class="legend-item"><span class="lg-box" style="background:${C.purple};opacity:.6"></span>Bilingual Overlap</div>
+    </div>`
+};
+const figNum = { political:'01', maritime:'02', silkroad:'03', evidence:'04', languages:'05' };
 
-  L.polygon(roman, polyOpts('#c44040')).addTo(map).bindPopup(popup('Roman Empire','c. 14–68 CE','Stretched from Britannia to Egypt. Its western senators knew India only as abstraction; its eastern merchants navigated Malabar annually. These are not the same empire in terms of geographic knowledge.'));
-  L.polygon(britain, polyOpts('#c44040')).addTo(map);
-  L.polygon(parthian, polyOpts('#3a7acc')).addTo(map).bindPopup(popup('Parthian Empire','247 BCE – 224 CE','The Great Middleman. All overland trade between Rome and India was mediated by Parthia. A bilingual hinge civilisation: Greek on one side of their coins, Aramaic on the other.'));
-  L.polygon(indoParthian, polyOpts('#3a9a58')).addTo(map).bindPopup(popup('Indo-Parthian','1st c. BCE – 3rd c. CE','Gateway to northwest India from the overland routes. Deeply Hellenised — their coins bore Greek legends. Connected to both Silk Road and maritime trade at Barygaza.'));
-  L.polygon(chera, polyOpts('#d48a33')).addTo(map).bindPopup(popup('Chera Kingdom','Malabar Coast','Home of Muziris and the Malabar pepper monopoly. Tamil Sangam literature records Yavana (Greek/Roman) merchants arriving with gold, departing with pepper.'));
-  L.polygon(cholaPandya, polyOpts('#c87820')).addTo(map).bindPopup(popup('Chola & Pandya Kingdoms','Coromandel Coast','The hinge of two oceans. Known for Pandyan pearls and fine muslin. Centers like Arikamedu connected the Mediterranean-facing west with the Han-facing east.'));
-  L.polygon(arabia, polyOpts('#aa7020')).addTo(map).bindPopup(popup('Arabian Commercial Zone','Nabataean, Himyarite','Control of frankincense made Arabia essential between the Mediterranean and Indian Ocean. Every Rome-to-India traveller passed through this world.'));
-
-  const cities = [
-    [41.9,12.5,'Rome','Roman Capital','Senators here knew India only as rhetorical abstraction — a drain on gold. Every Latin poet treating India as flourish had never met an Indian.','#c44040'],
-    [31.2,29.9,'Alexandria','Roman Commercial Hub','Greek-speaking. Starting point for the India voyage. The world\'s largest Jewish diaspora. A Greek merchant here navigated to Malabar annually.','#c44040'],
-    [36.2,36.2,'Antioch','Roman Syria','Capital of Roman Syria. Greek-speaking. One of the first major Christian communities and primary launch point for eastward apostolic missions.','#c44040'],
-    [37.16,38.79,'Edessa','Syriac Hinge City','Capital of Osroene. Syriac-Aramaic speaking. The city of the Thomas tradition — where it was first committed to writing. Direct contacts with Indo-Parthian kingdoms.','#aa55cc'],
-    [31.77,35.23,'Jerusalem','Apostolic Origin','Bilingual: Aramaic in the streets, Greek in commerce. A Galilean apostle already had the two universal languages of the east.','#aa55cc'],
-    [33.1,44.6,'Ctesiphon','Parthian Capital','The overland trade entrepôt near Baghdad. Chinese silk, Indian spices, and Arabian aromatics redistributed westward from here.','#3a7acc'],
-    [32.54,44.42,'Babylon','Jewish Diaspora Centre','The Babylonian Jewish diaspora maintained Aramaic trading networks across the entire arc from the Mediterranean to the Persian Gulf.','#3a7acc'],
-    [34.55,38.28,'Palmyra','Desert Caravan City','A commercial power between Rome and Parthia. Palmyrene inscriptions record regular voyages to the Persian Gulf and northwestern India.','#aa7020'],
-    [30.4,48.0,'Charax Spasinu','Persian Gulf Emporium','The great emporium at the head of the Persian Gulf, where the overland trade met the sea. From Charax, maritime routes ran to India.','#3a7acc'],
-    [21.7,72.98,'Barygaza','NW Indian Port','Modern Bharuch. Premier port of NW India — gateway to the Indus valley and overland routes. The Periplus describes it in detail.','#c87820'],
-    [10.17,76.2,'Muziris','Malabar — The Central Emporium','Not the edge of the trade network — the collection point. Roman, Arabian, Indian, and eastern traders all converged here. The midpoint of the Old World trade system.','#d48a33',10],
-    [11.9,79.8,'Arikamedu (Podukē)','Coromandel Hinge','A manufacturing node in two overlapping commercial networks — the Indo-Mediterranean trade from the west and the bead-and-textile trade running eastward toward Southeast Asia.','#c87820',10],
-    [33.74,72.83,'Taxila','Indo Parthian and later Kushana Intellectual Hub','Deeply cosmopolitan intellectual and commercial capital of northwestern India. Greek, Aramaic, and Kharosthi inscriptions found at the same site.','#3a9a58',9],
-    [25.61,85.14,'Pataliputra','Mauryan Capital','Greek ambassador Megasthenes resided here c. 300 BCE and wrote the Indika. Pataliputra was known to the Greek world from direct diplomatic residence.','#c87820'],
-  ];
-  cities.forEach(([lat,lng,name,stage,desc,col,r]) => cityMark(map,lat,lng,name,stage,desc,col,r));
-  // ── LABELS ──
-  addMapLabels(map);
-}
-
-// ─────────────────────────────────────────────
-// ── MAP 2: MARITIME ROUTE ──
-// ─────────────────────────────────────────────
-function initMaritime() {
-  const map = L.map('pane-maritime', { center: [18, 65], zoom: 3, preferCanvas: true, zoomControl: false });
-  tiles().addTo(map);
-  L.control.zoom({ position: 'topright' }).addTo(map);
-  maps['maritime'] = map;
-
-  L.polyline([[31.2,29.9],[30.08,31.24],[25.99,32.82]], { color:'#6a90cc', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Nile Corridor','Stage 1a','Feluccas carried passengers from Alexandria down the Nile to Koptos — the pivot between the Mediterranean and the Red Sea.'));
-  L.polyline([[25.99,32.82],[23.9,35.5]], { color:'#c87820', weight:2.5, dashArray:'5,4', opacity:0.8 }).addTo(map).bindPopup(popup('Eastern Desert','Stage 1b — 12 days','Camel caravans of ~22 animals crossed to the Red Sea coast, passing Roman military forts providing water and security.'));
-  L.polyline([[23.9,35.5], [21.5,38.5], [17.0,40.5], [13.0,43.2], [12.0,44.5], [13.5,47.0], [14.5,48.2]], { color:'#cc55aa', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Red Sea to Arabia','Stage 2','Ships sailed south through the Red Sea to Qana on the southern Arabian coast, where frankincense was loaded and cargoes transshipped.'));
-  L.polyline([[14.5,48.2],[12.5,54.0],[11.0,65.0],[10.5,74.0],[10.17,76.2]], { color:'#3acc80', weight:3, dashArray:'8,3', opacity:0.9 }).addTo(map).bindPopup(popup('The Monsoon Crossing','Stage 3 — c. 40 days','From Socotra, the SW monsoon (Hippalus wind) drove ships in ~40 days to Malabar. Ships returned on the NE winter monsoon.'));
-  L.polyline([[10.17,76.2],[11.0,65.0],[13.0,54.5],[14.5,48.2]], { color:'#aa6622', weight:1.8, dashArray:'4,5', opacity:0.45 }).addTo(map);
-  L.polyline([[12.5,54.0], [18.0,60.0], [20.0,70.0], [20.7,71.5], [21.7,72.98]], { color:'#88aa44', weight:2, dashArray:'6,4', opacity:0.7 }).addTo(map).bindPopup(popup('Northwest India Branch','Alternative Route','Some vessels made for Barygaza (Gujarat) — accessing the Indo-Parthian hinterland and Silk Road routes to Central Asia.'));
-  L.polyline([[30.4,48.0], [27.0,51.0], [26.56,56.25], [24.0,60.0], [20.0,70.0], [20.7,71.5], [21.7,72.98], [15.0,73.0], [10.17,76.2]], { color:'#bb70cc', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Persian-Arab Maritime Route','Persian Gulf to India','Ships from Charax Spasinu sailed along the Makran coast or directly to Barygaza, and onward to Muziris, moving Parthian and Silk Road goods without relying on Roman-controlled Red Sea routes.'));
-  L.polyline([[10.17,76.2],[11.75,76.35],[11.0,77.5],[11.9,79.8]], { color:'#d4a843', weight:2, dashArray:'4,4', opacity:0.9 }).addTo(map).bindPopup(popup('The Palghat Gap','Internal Route: West-South to East-South','The Western Ghats were crossed by passes like the Palghat Gap, allowing overland movement between the Malabar coast and the Deccan plateau, flowing to the Coromandel coast.'));
-  L.polyline([[21.7,72.98],[19.5,74.5],[15.5,76.5],[11.0,77.5]], { color:'#c8982a', weight:2, dashArray:'5,5', opacity:0.8 }).addTo(map).bindPopup(popup('Deccan Internal Network','North-South Corridor','A traveller arriving at Barygaza could journey overland through the Deccan interior to reach the Tamil south, linking the different commercial personalities of the subcontinent.'));
-  L.polyline([[10.17,76.2], [8.8,76.4], [8.0,77.5], [8.5, 78.5], [7.0,80.0]], { color:'#cc9922', weight:1.8, dashArray:'5,4', opacity:0.75 }).addTo(map).bindPopup(popup('Kollam → Coromandel → Sri Lanka','Periplus Onward','Rounding southern India to the pearl coast and Taprobane — a major transshipment hub for the further eastern trade.'));
-  L.polyline([[11.9,79.8], [10.5,80.0], [9.0,80.5], [7.0,82.0], [6.0,80.5], [7.0,80.0]], { color:'#d48a33', weight:1.8, dashArray:'5,4', opacity:0.85 }).addTo(map);
-  L.polyline([[7.0,80.0], [5.5,95.0], [3.14,101.69], [5.0,105.0], [9.0,107.5], [15.0,109.5], [18.5,107.0], [21.5,109.1]], { color:'#a0e870', weight:2.5, dashArray:'7,4', opacity:0.85 }).addTo(map).bindPopup(popup('Chinese Segment — East→West','⚠ Chinese / SE Asian Vessels','Roman merchants did not sail east of Sri Lanka. Chinese silk reached the South China Sea from Hepu/Jiaozhi, moving westward through Austronesian maritime networks toward India.'));
-
-  // Ghost silk road
-  L.polyline([[31.2,29.9],[33.1,44.6],[37.16,38.79],[36.2,36.2]], { color:'#c8982a', weight:1.2, dashArray:'3,7', opacity:0.22, interactive:false }).addTo(map);
-
-  const ports = [
-    [31.2,29.9,'Alexandria','Stage 1 — Departure','Starting point for the India voyage. Greek-speaking commercial hub. 120 ships/year to India.','#3a7acc',10],
-    [25.99,32.82,'Koptos','Nile Pivot','The critical hinge city where goods left the Nile vessels and transferred to camel caravans for the desert journey.','#3a7acc',9],
-    [26.10,34.25,'Myos Hormos','Major Red Sea Port','The northernmost major Roman port on the Red Sea, handling intense initial Indian Ocean traffic due to its shorter desert crossing from Koptos.','#c44040',11],
-    [23.9,35.5,'Berenike','Red Sea Gateway','KEY SITE: Excavations yielded 7.55kg of black pepper in one container, teak of Indian origin, and a Tamil Brahmi graffito — an Indian in Egypt.','#c44040',11],
-    [14.5,48.2,'Qana','Arabian Waypoint','Obligatory waypoint on the southern Arabian coast. Frankincense loaded; cargoes transshipped.','#cc55aa',9],
-    [30.4,48.0,'Charax Spasinu','Persian-Arab Axis','The great emporium at the head of the Persian Gulf. Goods shipped from here sailed along the Arabian coast to NW India.','#cc55aa',9],
-    [12.5,54.0,'Socotra','Staging Island','Ships gathered here to wait for the SW monsoon, then launched the direct 40-day crossing to Malabar.','#3acc80',10],
-    [10.17,76.2,'Muziris / Pattanam','The Central Emporium','Not the edge of the trade network — the collection point. Roman, Arabian, Indian, and eastern traders converged here. The Malabar ports stood at the midpoint of the Old World trade system.','#c87820',12],
-    [21.7,72.98,'Barygaza','NW India Port','Premier NW Indian port. Trading cotton, aromatics, gems; receiving Roman wine, olive oil, and coral.','#88aa44',9],
-    [11.9,79.8,'Arikamedu (Podukē)','Coromandel Port','The hinge of two oceans. Exported fine muslin and manufactured beads. Handled the Bay of Bengal network running eastward.','#d48a33',10],
-    [10.8,79.84,'Kamara','Coromandel Port','A recognised commercial port mentioned in the Periplus where massive ships cut across the Bay of Bengal to the Ganges.','#d48a33',8],
-    [8.8,76.6,'Kollam (Quilon)','Malabar Southern Port','Southern Malabar port. Later the main node connecting Kerala to Far Eastern spice routes via Sri Lanka.','#c87820',9],
-    [7.0,80.0,'Taprobane (Sri Lanka)','Transshipment Hub','Taprobane (Sri Lanka) — major transshipment node between the western Indian Ocean and routes east to the Malay Peninsula and China.','#cc9922',9],
-    [3.14,101.69,'Malacca Strait','Eastern Bottleneck','The handoff point where Malay and Austronesian maritime traders connected the Chinese commercial world to the Indian Ocean system. Eastern limit of Roman commercial agency.','#a0e870',10],
-    [21.5,109.1,'Hepu / Jiaozhi','Han Maritime Terminus','Principal Han-dynasty ports for the maritime Silk Road. Chinese silk moved westward from here through SE Asian maritime networks toward India.','#a0e870',9],
-  ];
-  ports.forEach(([lat,lng,name,stage,desc,col,r]) => cityMark(map,lat,lng,name,stage,desc,col,r||9));
-
-  L.marker([12, 64], { icon: L.divIcon({ html: '<div style="color:#3acc80;font-family:Cinzel,serif;font-size:9px;background:rgba(10,6,0,0.75);border:1px solid #3a9a58;padding:2px 6px;border-radius:2px;white-space:nowrap">↗ SW MONSOON</div>', className:'', iconAnchor:[0,0] }), interactive:false }).addTo(map);
-  addMapLabels(map);
-}
-
-// ─────────────────────────────────────────────
-// ── MAP 3: SILK ROAD ──
-// ─────────────────────────────────────────────
-function initSilkRoad() {
-  const map = L.map('pane-silkroad', { center: [36, 65], zoom: 3, preferCanvas: true, zoomControl: false });
-  tiles().addTo(map);
-  L.control.zoom({ position: 'topright' }).addTo(map);
-  maps['silkroad'] = map;
-
-  L.polyline([[34.27,108.93],[39.5,94.0],[40.0,87.0],[40.5,80.0],[41.0,75.0],[39.65,66.96],[37.63,62.18],[37.9,57.0],[36.3,50.0],[33.1,44.6],[35.4,40.1],[37.16,38.79],[36.2,36.2]], { color:'#c8982a', weight:3.5, dashArray:'8,4', opacity:0.9 }).addTo(map).bindPopup(popup('Main Silk Road','Northern Route: Chang\'an → Antioch','Through the Tarim Basin oases, across Samarkand and Merv, through Parthian Persia to Ctesiphon and onward to the Roman east.'));
-  L.polyline([[37.63,62.18],[35.68,51.42],[32.66,51.67],[29.6,52.5],[30.2,47.8],[33.1,44.6]], { color:'#9a7018', weight:2.5, dashArray:'6,4', opacity:0.75 }).addTo(map).bindPopup(popup('Southern Persian Route','via Nishapur, Isfahan','Passing through the Iranian plateau cities, converging with the northern route at Ctesiphon.'));
-  L.polyline([[39.65,66.96],[37.1,67.8],[34.5,69.2],[33.74,72.83],[30.8,70.0],[21.7,72.98]], { color:'#3a9a58', weight:2.5, dashArray:'6,4', opacity:0.8 }).addTo(map).bindPopup(popup('Branch to India','via Bactria, Kabul, Taxila','The overland gateway to northwest India through the Khyber Pass to Taxila and down to Barygaza.'));
-  L.polyline([[34.27,108.93],[28.0,108.0],[21.5,109.1]], { color:'#e8c060', weight:2.2, dashArray:'6,4', opacity:0.75 }).addTo(map).bindPopup(popup('Circuit: Chang\'an → Hepu','Western Han: Inland–Maritime Junction','These interconnected systems linked the Han trading world, Southeast Asia, the Malabar ports, and Alexandria — a chain of overlapping networks, not a single circuit.'));
-
-  // Ghost maritime
-  L.polyline([[31.2,29.9], [30.08,31.24], [25.99,32.82], [23.9,35.5], [21.5,38.5], [17.0,40.5], [13.0,43.2], [12.0,44.5], [13.5,47.0], [14.5,48.2], [12.5,54.0], [10.17,76.2]], { color:'#3acc80', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
-  L.polyline([[12.5,54.0], [18.0,60.0], [20.0,70.0], [20.7,71.5], [21.7,72.98]], { color:'#3acc80', weight:1.2, dashArray:'4,6', opacity:0.22, interactive:false }).addTo(map);
-  L.polyline([[30.4,48.0], [27.0,51.0], [26.56,56.25], [24.0,60.0], [20.0,70.0], [20.7,71.5], [21.7,72.98], [15.0,73.0], [10.17,76.2]], { color:'#bb70cc', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
-  L.polyline([[10.17,76.2], [8.8,76.4], [8.0,77.5], [8.5, 78.5], [7.0,80.0]], { color:'#cc9922', weight:1.2, dashArray:'4,6', opacity:0.25, interactive:false }).addTo(map);
-  L.polyline([[7.0,80.0], [5.5,95.0], [3.14,101.69], [5.0,105.0], [9.0,107.5], [15.0,109.5], [18.5,107.0], [21.5,109.1]], { color:'#a0e870', weight:1.5, dashArray:'4,6', opacity:0.28, interactive:false }).addTo(map);
-
-  const srCities = [
-    [34.27,108.93,'Chang\'an (Xi\'an)','Western Han Capital · Silk Road Terminus','Chang\'an was the capital of the Western Han (206 BCE–9 CE) and eastern terminus of the Silk Road. Southern routes ran to Hepu/Jiaozhi connecting to the maritime system.','#c44040'],
-    [39.65,66.96,'Samarkand','Sogdian Commercial Hub','Sogdian merchants were primary carriers of Silk Road commerce. Syriac-speaking Christian traders pushing east from the 2nd century established communities here.','#c8982a'],
-    [37.63,62.18,'Merv','Critical Junction','Major junction between the northern and southern Silk Road routes. One of the earliest Syriac Christian communities east of Edessa was established here.','#3a7acc'],
-    [33.1,44.6,'Ctesiphon','Overland Entrepôt','The great redistribution centre. Chinese silk and Indian spices arrived here and were packaged for the Roman west. Jewish Babylonian diaspora deeply embedded here.','#3a7acc'],
-    [34.55,38.28,'Palmyra','Caravan Trade Hub','Palmyrene merchants rivalled the Roman state systems, connecting Antioch to the Persian Gulf.','#c8982a'],
-    [30.4,48.0,'Charax Spasinu','Overland Meets the Sea','The southern terminus of the Mesopotamian corridor, linking the Silk Road to the Persian Gulf maritime routes.','#3a7acc'],
-    [37.16,38.79,'Edessa','Western Terminus','The western anchor of the overland route. Direct contacts with Indo-Parthian kingdoms to the east. The city of the Thomas tradition.','#aa55cc'],
-    [36.2,36.2,'Antioch','Roman Endpoint','Where the Silk Road\'s luxury goods entered the Roman Empire. Silk arriving here had travelled over 10,000 km overland.','#c44040'],
-    [33.74,72.83,'Taxila','Indo-Parthian Gateway','Where the overland Silk Road connected to northwest Indian port commerce.','#3a9a58'],
-    [21.7,72.98,'Barygaza','India–Silk Road Junction','Where the overland Silk Road branch met the maritime India trade. Goods from Taxila and the Indus were loaded onto ships trading with the Roman world.','#c87820'],
-    [21.5,109.1,'Hepu / Jiaozhi','Silk Road → Maritime Junction','The node where overland and maritime systems connected. Under the Western Han, routes from Chang\'an ran south to these ports. When the Eastern Han moved to Luoyang, the commercial route continued.','#e8c060',9],
-  ];
-  srCities.forEach(([lat,lng,name,stage,desc,col,r]) => cityMark(map,lat,lng,name,stage,desc,col,r));
-  addMapLabels(map);
-}
-
-// ─────────────────────────────────────────────
-// ── MAP 4: ARCHAEOLOGICAL EVIDENCE ──
-// ─────────────────────────────────────────────
-function initEvidence() {
-  const map = L.map('pane-evidence', { center: [16, 65], zoom: 3, preferCanvas: true, zoomControl: false });
-  tiles().addTo(map);
-  L.control.zoom({ position: 'topright' }).addTo(map);
-  maps['evidence'] = map;
-
-  L.polyline([[23.9,35.5], [21.5,38.5], [17.0,40.5], [13.0,43.2], [12.0,44.5], [13.5,47.0], [14.5,48.2], [12.5,54.0], [10.17,76.2]], { color:'#3a78cc', weight:1.5, dashArray:'5,5', opacity:0.4 }).addTo(map);
-
-  const sites = [
-    [23.9,35.5,'Berenike, Egypt','KEY EXCAVATION — S. Sidebotham','7.55 kg black pepper in one container; teak of Indian origin; a Tamil Brahmi graffito scratched into pottery — proving an Indian was physically present at this Egyptian port.','#cc3333',12],
-    [26.10,34.25,'Myos Hormos (Quseir al-Qadim)','Red Sea Port','Tamil Brahmi inscriptions found on potsherds here, naming Tamil merchants. Alongside Berenike, this proves a sustained Indian physical presence at the Egyptian ports.','#cc3333',10],
-    [17.03,54.43,'Khor Rori (Sumhuram)','Omani Coast','Tamil Brahmi inscriptions discovered on pottery, indicating Tamil merchant presence at the frankincense ports of southern Arabia.','#cc3333',10],
-    [12.5,54.0,'Socotra (Hoq Cave)','Indian Ocean Junction','Archaeologists discovered 192 Brahmi inscriptions and one Kharosthi inscription left by Indian merchants waiting for the monsoon crossing.','#cc3333',10],
-    [9.87,98.60,'Phu Khao Thong, Thailand','Malay Peninsula','A goldsmith\'s touchstone bearing a Tamil Brahmi inscription was found here, confirming the eastward expansion of the Tamil merchant networks across the Bay of Bengal.','#cc3333',10],
-    [10.5,76.0,'Palayur & Eyyal','Malabar Coast Hoards','Roman gold and silver coins bearing images of Augustus to Nero found in substantial quantities, confirming the western trade route\'s Indian terminus.','#d4a843',9],
-    [10.17,76.2,'Pattanam / Muziris, Kerala','Archaeological Site','Roman amphora sherds, torpedo jars for liquid transport, imported Mediterranean glass, and wharf-like structural remains.','#c87820',11],
-    [10.96,78.08,'Karur','Inland Capital Hoard','Coin hoard at the inland Chera capital of Karur confirms commercial penetration deep into the political heartland, not just the coasts.','#d4a843',10],
-    [11.9,79.8,'Arikamedu (Podukē)','Roman Manufacturing Presence','Roman lamps, Mediterranean glass beads, and notably an unfinished intaglio gemstone: a piece still being carved by a Western craftsman on-site.','#d4a843',10],
-    [11.5,76.9,'Coimbatore Region','Roman Coin Hoards','One of the most significant concentrations of Roman gold and silver coins in India. Coins of Augustus, Tiberius, Claudius, and Nero recovered in multiple hoards.','#d4a843',9],
-    [10.5,78.8,'Alagankulam / Madurai','Roman Pottery + Coins','Roman amphorae, rouletted ware, and coins at the ancient Pandya capital. Confirms the pearl-fishing routes were embedded in the Roman commercial network.','#d4a843',9],
-    [8.5,78.1,'Gulf of Mannar','Pearl Fisheries','Pliny names Indian pearls alongside pepper as the principal drain on Roman gold. The Periplus describes the pearl trade in detail.','#aa8830',8],
-    [7.0,80.0,'Sri Lanka (Taprobane)','Roman Coins','Roman gold and silver coins found across Sri Lanka. Taprobane as major waystation between the western Indian Ocean trade and eastward routes.','#d4a843',9],
-    [10.28,105.47,'Oc Eo (Vietnam)','Malacca Corridor Evidence','KEY SITE: Roman coins and Mediterranean glass found here — placing datable Roman material culture in the intermediary zone between India and China. Confirms the Malacca corridor functioned.','#a0e870',10],
-    [22.3,114.2,'Guangzhou (Canton)','Roman Goods — Via Intermediaries','Roman glass beads, coins of Augustus and Tiberius, and Mediterranean coral found at Guangzhou Han-dynasty sites. Via South-East Asian maritime intermediaries — not direct Roman navigation.','#a0e870',9],
-    [34.68,112.45,'Luoyang','Eastern Han Capital · 25–220 CE','Roman glass vessels, amber, and luxury objects from Han-dynasty tombs. In 166 CE the Han court recorded "envoys of Antun" (Marcus Aurelius Antoninus). Luoyang is Eastern Han; Chang\'an is the Silk Road terminus (Western Han).','#a0e870',9],
-    [34.27,108.93,'Chang\'an (Xi\'an)','Western Han Capital · Silk Road Terminus','The Silk Road ran to Chang\'an under the Western Han (206 BCE–9 CE). The southern route to Hepu/Jiaozhi connected it to the maritime system. The Eastern Han moved the capital to Luoyang in 25 CE.','#c8982a',9],
-    [3.14,101.69,'Malay Peninsula','Eastern Limit of Roman Material Culture','Roman glass beads, coins, and trade goods found at early Malay Peninsula sites — the approximate eastern limit of Roman material culture in the maritime archaeological record.','#88aa44',9],
-    [15.5,74.5,'Deccan Interior','Inland Coin Hoards','Roman coin hoards deep in the Deccan interior — Roman commercial wealth flowing far beyond the coastal ports through indigenous trade networks.','#aa8830',8],
-    [21.5,109.1,'Hepu / Jiaozhi','Han Maritime Ports — Roman Goods Found','Roman glass and amber beads recovered from Han-dynasty tombs at Hepu. These were the actual Han maritime trade ports for the Indian Ocean route in the 1st century CE.','#a0e870',9],
-    [25.61,85.14,'Pataliputra (Patna)','Greek Diplomatic Record','Megasthenes\' Greek diplomatic residence here (c. 300 BCE) — Pataliputra was known to the Greek world from direct residence, two centuries before the apostolic period.','#3a78cc',8],
-  ];
-  sites.forEach(([lat,lng,name,stage,desc,col,r]) => cityMark(map,lat,lng,name,stage,desc,col,r||8));
-
-  const brahmiHtml = '<div style="color:#ff9090;font-family:Cinzel,serif;font-size:8px;background:rgba(30,0,0,0.88);border:1px solid #cc3333;padding:2px 6px;border-radius:2px;white-space:nowrap;margin-top:-26px">★ Tamil Brahmi here</div>';
-  [[23.9,35.5,4], [26.10,34.25,4], [17.03,54.43,5], [12.5,54.0,4], [9.87,98.60,4]].forEach(([lat, lng, mz]) => {
-    const m = L.marker([lat, lng], { icon: L.divIcon({ html: brahmiHtml, className:'', iconAnchor:[0,26] }), interactive:false });
-    m.minZoom = mz;
-    if (map.getZoom() >= mz) m.addTo(map);
-    map._cityMarkers.push(m);
-  });
-  addMapLabels(map);
-}
-
-// ─────────────────────────────────────────────
-// ── MAP 5: LANGUAGE ZONES ──
-// ─────────────────────────────────────────────
-function initLanguages() {
-  const map = L.map('pane-languages', { center: [28, 42], zoom: 3, preferCanvas: true, zoomControl: false });
-  tiles().addTo(map);
-  L.control.zoom({ position: 'topright' }).addTo(map);
-  maps['languages'] = map;
-
-  const greek = [[43,-9],[43,-3],[47,5],[48,8],[46,11],[43,16],[42,20],[40,25],[41,29],[40,33],[37,37],[36,36],[33,36],[31,35],[29,33],[24,37],[22,35],[20,29],[22,25],[25,15],[30,12],[32,12],[33,11],[36,8],[37,3],[36,-2],[35,-6],[37,-9],[43,-9]];
-  const greekEast = [[37,37],[38,42],[38,50],[37,60],[35,66],[32,67],[27,68],[22,72],[21,70],[24,65],[27,58],[25,60],[24,55],[24,50],[28,42],[35,38],[37,37]];
-  const aramaic = [[37,35],[40,38],[40,44],[38,50],[37,58],[38,64],[35,68],[30,68],[24,68],[22,72],[18,56],[12,46],[14,48],[20,42],[22,38],[24,37],[28,40],[30,38],[32,36],[37,35]];
-  const overlap = [[38,34],[38,40],[37,42],[36,42],[37,37],[36,36],[33,36],[31,35],[30,34],[31,33],[33,34],[36,36],[38,34]];
-
-  L.polygon(greek, { color:'#3a78cc', fillColor:'#3a78cc', fillOpacity:0.15, weight:1.8 }).addTo(map).bindPopup(popup('Greek Language Zone','Koinē Greek · after 334 BCE','After Alexander, Greek became the common tongue of educated and commercial life from the eastern Mediterranean to NW India. The Periplus was written in Greek. Indo-Parthian coins bore Greek legends.'));
-  L.polygon(greekEast, { color:'#3a78cc', fillColor:'#3a78cc', fillOpacity:0.08, weight:1.2, dashArray:'5,4' }).addTo(map).bindPopup(popup('Greek Commercial Reach East','Yavana Merchants in India','Yavana (Greek/Roman) merchants permanently established at Barygaza and Malabar. Tamil Sangam literature documents their presence.'));
-  L.polygon(aramaic, { color:'#c87028', fillColor:'#c87028', fillOpacity:0.15, weight:1.8 }).addTo(map).bindPopup(popup('Aramaic / Syriac Zone','Lingua Franca of the Semitic East','Aramaic was the administrative language of the Achaemenid Empire. Its scripts birthed Kharosthi in NW India. In the 1st century, it was the spoken language of Jesus ("Thomas" is Aramaic for twin).'));
-  L.polygon(overlap, { color:'#9944cc', fillColor:'#9944cc', fillOpacity:0.3, weight:1.8 }).addTo(map).bindPopup(popup('Bilingual Overlap Zone','Greek + Aramaic','The Levant — from Antioch through Edessa to Jerusalem — was densest linguistic overlap. A Galilean apostle was functionally at home in both worlds from birth.'));
-
-  const langCities = [
-    [31.2,29.9,'Alexandria','Greek Capital','Intellectual capital of the Greek-speaking world. Alexandrian merchants organised the annual India voyage in Greek.','#3a78cc'],
-    [37.16,38.79,'Edessa','Syriac / Aramaic Capital','The capital of Syriac-Aramaic literary Christianity. All early Christian writings in Syriac flow from here. "Thomas" is an Aramaic word.','#c87028'],
-    [31.77,35.23,'Jerusalem','Bilingual City','Aramaic in the streets, Greek in commerce. A Galilean apostle entered the world equipped with both universal languages.','#9944cc'],
-    [33.1,44.6,'Ctesiphon-Seleucia','Aramaic Metropolis','Aramaic was the commercial language. The vast Jewish Babylonian diaspora maintained Aramaic networks across the entire arc to the Mediterranean.','#c87028'],
-    [10.17,76.2,'Muziris','Greek Commercial Language','Yavana (Greek) merchants permanently established here. Tamil Sangam literature records their presence. Greek was the language of commercial negotiation at this Indian port.','#3a78cc'],
-  ];
-  langCities.forEach(([lat,lng,name,stage,desc,col]) => cityMark(map,lat,lng,name,stage,desc,col));
-  addMapLabels(map);
-}
-
-// ─────────────────────────────────────────────
-// LAZY INIT
-// ─────────────────────────────────────────────
-const inits = { political:initPolitical, maritime:initMaritime, languages:initLanguages, silkroad:initSilkRoad, evidence:initEvidence };
 const inited = {};
-
-function lazyInit(name) {
-  if (inited[name]) return;
-  inited[name] = true;
-  if (typeof L === 'undefined') {
-    const el = document.getElementById('pane-' + name);
-    if (el) el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#c9963a;font-family:Cinzel,serif;padding:20px;text-align:center">Map library failed to load — check internet connection</div>';
-    return;
-  }
-  inits[name]();
-  setTimeout(function(){ if (maps[name]) maps[name].invalidateSize(); }, 300);
+function showLayer(t){
+  document.querySelectorAll('.layer-row').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  document.querySelectorAll('.mobile-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  document.querySelectorAll('.map-pane').forEach(p => p.classList.toggle('active', p.id === 'pane-'+t));
+  if (!inited[t]) { inited[t] = true; inits[t](); }
+  const inf = D.tabInfo[t];
+  document.getElementById('cap-num').textContent = 'FIG. ' + figNum[t];
+  document.getElementById('cap-ttl').textContent = inf.title;
+  document.getElementById('rail-body').innerHTML = `
+    <div class="story-eyebrow">Layer ${figNum[t]} · ${inf.short}</div>
+    <div class="story-h">${inf.title}</div>
+    <div class="story-p">${inf.text}</div>
+    <div class="pull-quote">${pulls[t]}</div>
+    ${legendHTML[t]||''}
+  `;
 }
 
-window.addEventListener('load', function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  let initialTab = urlParams.get('tab') || window.location.hash.substring(1) || 'political';
-  const tabs = ['political', 'maritime', 'silkroad', 'evidence', 'languages'];
-  if (!tabs.includes(initialTab)) initialTab = 'political';
-  
-  const btns = document.querySelectorAll('.tab-btn');
-  const btn = btns[tabs.indexOf(initialTab)] || btns[0];
-  showTab(initialTab, btn);
+document.querySelectorAll('.layer-row').forEach(b => b.addEventListener('click', () => showLayer(b.dataset.tab)));
+document.querySelectorAll('.mobile-tabs button').forEach(b => b.addEventListener('click', () => showLayer(b.dataset.tab)));
 
-  // Bounce the arrow 5 times to attract attention
-  const arrow = document.querySelector('#legend-tab-body .tab-arrow');
-  if (!arrow) return;
-  let count = 0;
-  function bounce() {
-    if (count >= 5) return;
-    count++;
-    arrow.classList.remove('arrow-animate');
-    void arrow.offsetWidth; // force reflow
-    arrow.classList.add('arrow-animate');
-    arrow.addEventListener('animationend', function handler() {
-      arrow.removeEventListener('animationend', handler);
-      setTimeout(bounce, 600);
-    });
-  }
-  setTimeout(bounce, 1200);
-});
+showLayer('political');
 </script>
 </body>
 </html>
