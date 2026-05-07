@@ -41,6 +41,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: var(--pape
   background: var(--ink); color: var(--paper);
   display: grid; place-items: center;
   font-family: var(--serif); font-weight: 700; font-size: 14px;
+  font-variation-settings: 'opsz' 60;
 }
 .masthead-name {
   font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px;
@@ -54,6 +55,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: var(--pape
   font-family: var(--serif); font-weight: 600;
   font-size: 28px; line-height: 1.05; letter-spacing: -0.4px;
   color: var(--ink);
+  font-variation-settings: 'opsz' 60;
 }
 
 .layer-nav {
