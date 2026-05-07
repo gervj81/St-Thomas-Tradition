@@ -113,12 +113,18 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: var(--pape
   margin-top: 3px;
 }
 
-/* Story body (current layer) */
 .rail-body {
   flex: 1;
   overflow-y: auto;
-  padding: 18px 28px 28px;
+  padding: 18px 28px 48px;
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
+  mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }
+.rail-body::-webkit-scrollbar { width: 6px; }
+.rail-body::-webkit-scrollbar-track { background: transparent; }
+.rail-body::-webkit-scrollbar-thumb { background-color: var(--line); border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
 .story-eyebrow {
   font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px;
   text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
@@ -301,6 +307,18 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: var(--pape
 </head>
 <body>
 
+<div id="error-log" style="position:fixed;top:0;left:0;z-index:9999;background:red;color:white;padding:10px;display:none;max-height:50vh;overflow:auto;width:100%;"></div>
+<script>
+  window.addEventListener('error', function(e) {
+    document.getElementById('error-log').style.display = 'block';
+    document.getElementById('error-log').innerHTML += '<br>' + e.message + ' at ' + e.filename + ':' + e.lineno;
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    document.getElementById('error-log').style.display = 'block';
+    document.getElementById('error-log').innerHTML += '<br>Promise Rejection: ' + e.reason;
+  });
+</script>
+
 <div id="root">
   <!-- Mobile tabs -->
   <nav class="mobile-tabs" id="mobile-tabs">
@@ -312,14 +330,16 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: var(--pape
   </nav>
 
   <!-- Story rail -->
-  <aside class="rail">
+  <aside class="rail"> 
     <div class="rail-head">
       <div class="masthead">
-        <div class="masthead-mark">M</div>
-        <div class="masthead-name">Oikouménē - the inhabited world</div>
+        <div class="masthead-mark">O</div>
+        <div class="masthead-name">The Matrix - Oikouménē</div>
 	</div>
-            <div class="chapter-eyebrow">Chapter I · c. 50 CE</div>
+            <div class="chapter-eyebrow">The Inhabited world · c. 50 CE</div>
+	<div class="chapter-title">The Cosmopolitan Network</div>
     </div>
+ 
 
     <nav class="layer-nav" id="layer-nav">
       <button class="layer-row active" data-tab="political">
@@ -360,7 +380,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: var(--pape
     </nav>
 
     <div class="rail-body" id="rail-body"></div>
-  </aside>
+    </aside>
 
   <!-- Map stage -->
   <div class="stage">
@@ -449,6 +469,7 @@ const inits = {
     L.polygon(D.POLY.arabia, POLY_OPTS(C.arabia)).addTo(m).bindPopup(popup('Arabian Zone','Nabataean, Himyarite','Frankincense control made Arabia essential.'));
     D.CITIES.political.forEach(([lat,lng,n,s,d,c,r]) => cityMark(m,lat,lng,n,s,d,C[c],r));
     regionLabels(m);
+    return m;
   },
   maritime(){
     const m = makeMap('pane-maritime', [18, 65], 3);
@@ -466,6 +487,7 @@ const inits = {
     L.polyline(D.ROUTES.chinese, { color: C.chinese, weight: 2.6, opacity: 0.9 }).addTo(m).bindPopup(popup('Chinese Segment','East→West','Roman merchants did not sail east of Sri Lanka.'));
     D.CITIES.maritime.forEach(([lat,lng,n,s,d,c,r]) => cityMark(m,lat,lng,n,s,d,C[c],r));
     regionLabels(m);
+    return m;
   },
   silkroad(){
     const m = makeMap('pane-silkroad', [36, 65], 3);
@@ -476,12 +498,14 @@ const inits = {
     L.polyline([...D.ROUTES.redSea, ...D.ROUTES.monsoon], { color: C.green, weight: 1.4, dashArray: '3,5', opacity: 0.32, interactive: false }).addTo(m);
     D.CITIES.silkroad.forEach(([lat,lng,n,s,d,c,r]) => cityMark(m,lat,lng,n,s,d,C[c],r));
     regionLabels(m);
+    return m;
   },
   evidence(){
     const m = makeMap('pane-evidence', [16, 65], 3);
     L.polyline([...D.ROUTES.redSea, ...D.ROUTES.monsoon], { color: C.blue, weight: 1.4, dashArray: '3,6', opacity: 0.4 }).addTo(m);
     D.CITIES.evidence.forEach(([lat,lng,n,s,d,c,r]) => cityMark(m,lat,lng,n,s,d,C[c],r));
     regionLabels(m);
+    return m;
   },
   languages(){
     const m = makeMap('pane-languages', [28, 42], 3);
@@ -491,6 +515,7 @@ const inits = {
     L.polygon(D.POLY.overlap, POLY_OPTS(C.purple, 0.36)).addTo(m).bindPopup(popup('Bilingual Overlap','Greek + Aramaic','The Levant.'));
     D.CITIES.languages.forEach(([lat,lng,n,s,d,c]) => cityMark(m,lat,lng,n,s,d,C[c]));
     regionLabels(m);
+    return m;
   }
 };
 
@@ -536,11 +561,13 @@ const legendHTML = {
 const figNum = { political:'01', maritime:'02', silkroad:'03', evidence:'04', languages:'05' };
 
 const inited = {};
+const mapInstances = {};
 function showLayer(t){
   document.querySelectorAll('.layer-row').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
   document.querySelectorAll('.mobile-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
   document.querySelectorAll('.map-pane').forEach(p => p.classList.toggle('active', p.id === 'pane-'+t));
-  if (!inited[t]) { inited[t] = true; inits[t](); }
+  if (!inited[t]) { inited[t] = true; mapInstances[t] = inits[t](); }
+  if (mapInstances[t]) { setTimeout(() => mapInstances[t].invalidateSize(), 50); }
   const inf = D.tabInfo[t];
   document.getElementById('cap-num').textContent = 'FIG. ' + figNum[t];
   document.getElementById('cap-ttl').textContent = inf.title;

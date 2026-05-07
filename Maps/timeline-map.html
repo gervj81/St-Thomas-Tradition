@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://unpkg.com/topojson-client@3"></script>
-<link rel="stylesheet" href="../css/map-core.css">
+<link rel="stylesheet" href="../css/map-core.css?v=2">
 <style>
 .layer-nav { display: none; }
 .timeline { border-bottom: 1px solid var(--line); padding: 18px 28px 22px; flex-shrink: 0; }
@@ -32,6 +32,8 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
 .poly { stroke-width: 1.2; transition: opacity 0.5s, fill 0.5s; }
 .node { fill: #f4ede0; stroke: #1a1612; stroke-width: 1.4; cursor: pointer; transition: r 0.4s, opacity 0.4s; }
 .node-label { font-family: 'Source Serif 4', serif; font-size: 11px; font-weight: 600; fill: #1a1612; pointer-events: none; paint-order: stroke fill; stroke: rgba(244,237,224,0.92); stroke-width: 3px; stroke-linejoin: round; }
+.tt-close { position: absolute; top: 6px; right: 8px; background: transparent; border: none; font-size: 16px; color: var(--ink); cursor: pointer; padding: 4px; line-height: 1; }
+.d3-tip { pointer-events: auto !important; }
 
 @media (max-width: 879px) { .timeline { padding: 14px 18px 18px; } .tick-label { font-size: 8px; } }
 </style>
@@ -193,14 +195,26 @@ const root = svg.append('g');
 const gMap = root.append('g'), gPoly = root.append('g'), gNode = root.append('g'), gLabel = root.append('g');
 
 const tooltip = d3.select('#tooltip');
-function showTip(html, ev){ tooltip.html(html).style('opacity', 1); placeTip(ev); }
+window.hideTip = function(){ tooltip.style('opacity', 0).style('pointer-events', 'none'); };
+function showTip(html, ev){ 
+  tooltip.html(`
+    <button class="tt-close" onclick="hideTip()" aria-label="Close">✕</button>
+    ${html}
+  `).style('opacity', 1).style('pointer-events', 'auto'); 
+  placeTip(ev); 
+}
 function placeTip(ev){
   const r = stage.getBoundingClientRect();
   const x = Math.min(r.width - 270, Math.max(10, ev.clientX - r.left + 12));
   const y = Math.min(r.height - 100, Math.max(10, ev.clientY - r.top + 12));
   tooltip.style('left', x+'px').style('top', y+'px');
 }
-function hideTip(){ tooltip.style('opacity', 0); }
+
+d3.select('.stage').on('click', (e) => {
+  if (!e.target.closest('.cmark') && !e.target.closest('.poly') && !e.target.closest('#tooltip')) {
+    hideTip();
+  }
+});
 
 d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world => {
   const land = topojson.feature(world, world.objects.countries).features;
@@ -209,21 +223,16 @@ d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(w
   // static labels
   REGIONS.forEach(([lng,lat,name,modern,size]) => {
     const [x,y] = proj([lng,lat]);
-    gLabel.append('text').attr('x',x).attr('y',y).attr('text-anchor','middle')
+    const fs = Math.max(9, size - 2);
+    gLabel.append('text')
+      .attr('transform', `translate(${x},${y})`)
+      .attr('data-x', x).attr('data-y', y).attr('data-size', fs)
+      .attr('text-anchor','middle')
       .style('font-family',"'Source Serif 4',Georgia,serif").style('font-weight',700)
       .style('letter-spacing','2.5px').style('text-transform','uppercase')
       .style('fill','#1a1612').style('paint-order','stroke fill')
       .style('stroke','rgba(244,237,224,0.92)').style('stroke-width','3px').style('stroke-linejoin','round')
-      .style('pointer-events','none').style('font-size', size+'px').text(name);
-  });
-  OCEANS.forEach(([lng,lat,name,_,size]) => {
-    const [x,y] = proj([lng,lat]);
-    gLabel.append('text').attr('x',x).attr('y',y).attr('text-anchor','middle')
-      .style('font-family',"'Source Serif 4',Georgia,serif").style('font-style','italic').style('font-weight',500)
-      .style('letter-spacing','3px').style('text-transform','uppercase')
-      .style('fill','#3a5a8a').style('paint-order','stroke fill')
-      .style('stroke','rgba(244,237,224,0.92)').style('stroke-width','3px').style('stroke-linejoin','round')
-      .style('pointer-events','none').style('font-size', size+'px').text(name);
+      .style('pointer-events','none').style('font-size', fs+'px').text(name);
   });
 
   render(0);
@@ -232,7 +241,12 @@ d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(w
 // zoom
 const zoom = d3.zoom().scaleExtent([0.6,6]).on('zoom', e => {
   root.attr('transform', e.transform);
-  gNode.selectAll('g.cmark').attr('transform', d => `translate(${proj(d.coord)[0]},${proj(d.coord)[1]}) scale(${1/e.transform.k})`);
+  const k = Math.max(1, e.transform.k); // Clamp anti-zoom so things shrink when zooming out
+  gNode.selectAll('g.cmark').attr('transform', d => `translate(${proj(d.coord)[0]},${proj(d.coord)[1]}) scale(${1/k})`);
+  gLabel.selectAll('text').attr('transform', function() {
+    const el = d3.select(this);
+    return `translate(${el.attr('data-x')},${el.attr('data-y')}) scale(${1/k})`;
+  });
 });
 svg.call(zoom);
 d3.select('#zoom-in').on('click', () => svg.transition().call(zoom.scaleBy, 1.5));
@@ -247,19 +261,19 @@ function render(i) {
   polys.enter().append('path').attr('class','poly')
     .attr('d', d => path(POLYS[d[0]]))
     .attr('fill', d => C[d[0]]).attr('stroke', d => C[d[0]]).attr('fill-opacity', 0).attr('stroke-opacity', 0)
-    .on('mousemove', (e,d) => showTip(`<div class="tt-name">${d[1]}</div><div class="tt-cat">${era.label}</div>`, e))
-    .on('mouseleave', hideTip)
+    .on('click', (e,d) => { e.stopPropagation(); showTip(`<div class="tt-name">${d[1]}</div><div class="tt-cat">${era.label}</div>`, e); })
     .transition().duration(500).attr('fill-opacity', 0.32).attr('stroke-opacity', 0.85);
   polys.transition().duration(500).attr('fill-opacity', 0.32).attr('stroke-opacity', 0.85);
 
   // cities
   const cities = gNode.selectAll('g.cmark').data(era.cities, d => d.name);
   cities.exit().transition().duration(300).style('opacity',0).remove();
+  const t = d3.zoomTransform(svg.node());
+  const k = Math.max(1, t.k);
   const enter = cities.enter().append('g').attr('class','cmark')
-    .attr('transform', d => `translate(${proj(d.coord)[0]},${proj(d.coord)[1]})`)
+    .attr('transform', d => `translate(${proj(d.coord)[0]},${proj(d.coord)[1]}) scale(${1/k})`)
     .style('opacity', 0)
-    .on('mousemove', (e,d) => showTip(`<div class="tt-name">${d.name}</div><div class="tt-cat">${d.cat}</div><div class="tt-desc">${d.desc}</div>`, e))
-    .on('mouseleave', hideTip);
+    .on('click', (e,d) => { e.stopPropagation(); showTip(`<div class="tt-name">${d.name}</div><div class="tt-cat">${d.cat}</div><div class="tt-desc">${d.desc}</div>`, e); });
   enter.append('circle').attr('class','node').attr('r',6).attr('fill', d => d.color);
   enter.append('text').attr('class','node-label').attr('x',9).attr('y',4).text(d => d.name);
   enter.transition().duration(450).style('opacity',1);
@@ -283,10 +297,25 @@ window.addEventListener('resize', () => {
   proj.scale(Math.max(W(),900)/3.2).translate([W()/2, H()/1.7]);
   gMap.selectAll('path.country').attr('d', path);
   gPoly.selectAll('path.poly').attr('d', d => path(POLYS[d[0]]));
-  gNode.selectAll('g.cmark').attr('transform', d => `translate(${proj(d.coord)[0]},${proj(d.coord)[1]})`);
+  const t = d3.zoomTransform(svg.node());
+  const k = Math.max(1, t.k);
+  gNode.selectAll('g.cmark').attr('transform', d => `translate(${proj(d.coord)[0]},${proj(d.coord)[1]}) scale(${1/k})`);
   gLabel.selectAll('text').each(function(){
-    const t = d3.select(this);
-    // labels are absolute; re-place by re-running render simpler — skip for now
+    const el = d3.select(this);
+    // Find the original coordinates from the raw arrays (matching by text content)
+    let lng, lat;
+    const name = el.text();
+    const region = REGIONS.find(r => r[2] === name);
+    if (region) { lng = region[0]; lat = region[1]; }
+    else {
+      const ocean = OCEANS.find(o => o[2] === name);
+      if (ocean) { lng = ocean[0]; lat = ocean[1]; }
+    }
+    if (lng !== undefined) {
+      const [nx, ny] = proj([lng, lat]);
+      el.attr('data-x', nx).attr('data-y', ny);
+      el.attr('transform', `translate(${nx},${ny}) scale(${1/k})`);
+    }
   });
 });
 
