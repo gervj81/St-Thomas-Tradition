@@ -48,8 +48,8 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
   cursor: grabbing;
 }
 .static-map {
-  width: 1536px;
-  height: 1024px;
+  width: 1448px;
+  height: 1086px;
   position: absolute;
   top: 0; left: 0;
   transition: opacity 0.25s ease-out;
@@ -111,7 +111,7 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
 
   <div class="stage">
     <div class="static-map-container" id="static-map-container">
-      <div id="map-zoom-layer" style="width: 1536px; height: 1024px; position: absolute; top: 0; left: 0; transform-origin: 0 0;">
+      <div id="map-zoom-layer" style="width: 1448px; height: 1086px; position: absolute; top: 0; left: 0; transform-origin: 0 0;">
         <img id="map-layer-0" class="static-map layer-active" src="../images/timeline/babylone.webp" alt="Map">
         <img id="map-layer-1" class="static-map" data-src="../images/timeline/persian.webp" alt="Map">
         <img id="map-layer-2" class="static-map" data-src="../images/timeline/hellas.webp" alt="Map">
@@ -253,8 +253,8 @@ document.querySelectorAll('.tick-label').forEach(t => {
 const mapContainer = d3.select('#static-map-container');
 const mapZoomLayer = d3.select('#map-zoom-layer');
 
-const IW = 1536;
-const IH = 1024;
+const IW = 1448;
+const IH = 1086;
 
 let zoom = d3.zoom()
   .on('zoom', (e) => {
