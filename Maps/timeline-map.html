@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The March to the Matrix — Timeline</title>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://unpkg.com/topojson-client@3"></script>
 <link rel="stylesheet" href="../css/map-core.css?v=2">
 <style>
 .layer-nav { display: none; }
@@ -26,16 +24,43 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
 .tick-label:first-child { text-align: left; }
 .tick-label:last-child { text-align: right; }
 
-/* d3-specific overrides */
-.stage { background: #ede0c2; }
-.country { fill: #d6c7a8; stroke: #b8a784; stroke-width: 0.4; }
-.poly { stroke-width: 1.2; transition: opacity 0.5s, fill 0.5s; }
-.node { fill: #f4ede0; stroke: #1a1612; stroke-width: 1.4; cursor: pointer; transition: r 0.4s, opacity 0.4s; }
-.node-label { font-family: 'Source Serif 4', serif; font-size: 11px; font-weight: 600; fill: #1a1612; pointer-events: none; paint-order: stroke fill; stroke: rgba(244,237,224,0.92); stroke-width: 3px; stroke-linejoin: round; }
-.tt-close { position: absolute; top: 6px; right: 8px; background: transparent; border: none; font-size: 16px; color: var(--ink); cursor: pointer; padding: 4px; line-height: 1; }
-.d3-tip { pointer-events: auto !important; }
+/* Static Map Specific Overrides */
+.stage { 
+  background: var(--paper-2); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.static-map-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.static-map {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Ensures the whole map is visible */
+  transition: opacity 0.5s ease-in-out;
+  /* Normalize contrast, brightness, and tone to match editorial design consistently */
+  filter: sepia(0.15) contrast(1.05) brightness(0.95);
+  mix-blend-mode: multiply;
+}
 
-@media (max-width: 879px) { .timeline { padding: 14px 18px 18px; } .tick-label { font-size: 8px; } }
+[data-theme="dark"] .static-map {
+  filter: sepia(0.1) contrast(1.1) brightness(0.85) invert(1) hue-rotate(180deg);
+  mix-blend-mode: screen;
+}
+
+@media (max-width: 879px) { 
+  .timeline { padding: 14px 18px 18px; } 
+  .tick-label { font-size: 8px; } 
+}
 </style>
 </head>
 <body>
@@ -73,257 +98,124 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
   </aside>
 
   <div class="stage">
-    <div class="d3-map" id="map"></div>
-    <div class="map-caption">
-      <div class="num" id="cap-num">FIG. 01 · 600 BCE</div>
-      <div class="ttl" id="cap-ttl">The Rivers of Babylon</div>
+    <div class="static-map-container">
+      <img id="static-map" class="static-map" src="../images/babylone.png" alt="Map">
     </div>
-    <div class="d3-zoom">
-      <button id="zoom-in" aria-label="Zoom in">+</button>
-      <button id="zoom-out" aria-label="Zoom out">−</button>
-    </div>
-    <div class="credit">Geometry: Natural Earth · After Strabo and the Periplus</div>
-    <div class="d3-tip" id="tooltip"></div>
+    
+    <div class="credit">Cartography: Historic Extents</div>
   </div>
 </div>
 
 <script>
-const C = {
-  babylonian:'#7a30a8', achaemenid:'#a8782a', alexander:'#a82a2a',
-  antigonid:'#a82a2a', seleucid:'#3a6ba8', ptolemaic:'#7a30a8',
-  maurya:'#2fa86a', romanRep:'#a82a2a', roman:'#a82a2a',
-  parth:'#3a6ba8', indoParth:'#2f7a4d', chera:'#b8702a', chola:'#a85020'
-};
-
-// Polygons in [lng, lat] order for d3 (data-source uses [lat,lng] — swapping)
-const RAW = {
-  babylonian: [[37,36],[37,45],[30,48],[30,40],[33,36],[31,34],[34,35],[37,36]],
-  achaemenid: [[41,27],[42,40],[40,50],[42,60],[38,68],[30,70],[25,68],[25,55],[30,48],[30,34],[24,34],[22,32],[22,28],[31,28],[34,35],[38,27],[41,27]],
-  alexander:  [[41,20],[41,27],[42,40],[40,50],[42,60],[38,68],[33,74],[28,70],[25,68],[25,55],[30,48],[30,34],[31,28],[34,35],[38,27],[41,20]],
-  antigonid:  [[42,20],[42,25],[39,26],[38,24],[36,22],[39,20],[42,20]],
-  seleucid:   [[38,26],[40,40],[37,50],[38,60],[36,66],[30,60],[28,50],[33,40],[31,35],[36,35],[38,26]],
-  ptolemaic:  [[31,29],[33,35],[30,35],[28,34],[22,35],[22,32],[28,29],[31,29]],
-  maurya:     [[34,70],[30,76],[28,85],[26,90],[22,88],[19,85],[17,80],[15,75],[17,73],[20,70],[24,67],[30,66],[34,70]],
-  romanRep:   [[44,-5],[44,5],[45,10],[42,15],[38,24],[34,22],[32,15],[36,10],[36,-5]],
-  roman:      [[44,-10],[44,-2],[43,3],[47,7],[48,8],[47,12],[45,14],[43,17],[41,20],[40,24],[41,29],[40,33],[37,37],[31,35],[29,34],[24,37],[22,35],[22,28],[30,13],[32,12],[36,9],[36,3],[35,-1],[35,-6],[36,-9],[38,-9],[44,-10]],
-  brit:       [[50,-5],[51,1],[53,0],[55,-1],[56,-5],[55,-4],[53,-4],[50,-5]],
-  parth:      [[37,37],[40,44],[38,48],[36,50],[37,55],[38,60],[36,63],[32,62],[28,60],[26,55],[30,50],[30,45],[32,44],[35,40],[37,37]],
-  indoParth:  [[36,65],[36,70],[34,74],[30,72],[26,68],[24,66],[24,62],[28,60],[32,60],[36,65]],
-  chera:      [[12.5,75.0],[10.0,76.5],[8.0,77.2],[8.3,76.8],[10.0,76.0],[12.5,74.8]],
-  chola:      [[14.0,80.0],[12.0,79.5],[10.0,79.0],[8.0,77.5],[8.0,78.2],[10.0,79.8],[14.0,80.2]]
-};
-const POLYS = {};
-Object.keys(RAW).forEach(k => POLYS[k] = { type:'Polygon', coordinates: [RAW[k].map(([lat,lng]) => [lng,lat])] });
+// Theme setup for iframe embedding
+try {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTheme = urlParams.get('theme');
+  if (urlTheme) document.documentElement.setAttribute('data-theme', urlTheme);
+  
+  if (window.parent && window.parent.document) {
+    let parentTheme = window.parent.document.documentElement.getAttribute('data-theme');
+    if (parentTheme && !urlTheme) document.documentElement.setAttribute('data-theme', parentTheme);
+    
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          document.documentElement.setAttribute('data-theme', window.parent.document.documentElement.getAttribute('data-theme'));
+        }
+      });
+    });
+    observer.observe(window.parent.document.documentElement, { attributes: ['data-theme'] });
+  }
+} catch(e) {}
 
 const ERAS = [
   {
     label:'600 BCE', name:'The Rivers of Babylon',
     desc:'The Neo-Babylonian Empire dominates the Near East. The Israelite deportation begins; Akkadian persists in formal contexts while <strong>Aramaic</strong> spreads as the practical lingua franca.',
     pull:'"By the rivers of Babylon" — and by Aramaic, the language of empire.',
-    polys:[['babylonian','Neo-Babylonian Empire']],
-    cities:[
-      {coord:[44.42,32.54], name:'Babylon', cat:'Capital', desc:'On the Euphrates.', color:C.babylonian},
-      {coord:[35.23,31.77], name:'Jerusalem', cat:'Conquered', desc:'The exile begins.', color:C.roman}
-    ]
+    img: '../images/babylone.png'
   },
   {
     label:'500 BCE', name:'The Persian Golden Era',
     desc:'The <strong>Achaemenid Empire</strong> spans three continents under a single administration — and runs largely on <strong>Imperial Aramaic</strong>. The lingua franca that will carry Christian preaching is set in place.',
     pull:'"One administration, one tongue, three continents."',
-    polys:[['achaemenid','Achaemenid Empire']],
-    cities:[
-      {coord:[52.89,29.93], name:'Persepolis', cat:'Ceremonial capital', desc:'Apadana of Darius.', color:C.achaemenid},
-      {coord:[48.24,32.19], name:'Susa', cat:'Administrative capital', desc:'Royal road terminus.', color:C.achaemenid}
-    ]
+    img: '../images/persian.png'
   },
   {
     label:'320 BCE', name:"Alexander's Epic Run",
     desc:"Alexander shatters the Achaemenid world. The <strong>Mauryan</strong> rises in India, bringing Greek and Indian worlds into contact. In the deep south, the Tamil polities of Chera, Chola and Pandya emerge in proto-history.",
     pull:'"Greek seeded everywhere it stepped."',
-    polys:[['alexander',"Alexander's Empire"],['maurya','Mauryan Empire'],['chera','Early Chera'],['chola','Early Chola & Pandya']],
-    cities:[
-      {coord:[44.42,32.54], name:'Babylon', cat:'Alexander dies', desc:'323 BCE.', color:C.alexander},
-      {coord:[29.9,31.2], name:'Alexandria', cat:'Founded', desc:'The new jewel.', color:C.alexander}
-    ]
+    img: '../images/hellas.png'
   },
   {
     label:'250 BCE', name:'Greek Split & Mauryan Unity',
     desc:"Alexander's empire fractures into Hellenistic kingdoms. The Mauryan unites almost the entire subcontinent — though the deep Tamil south remains outside.",
     pull:'"A Greek constellation, an Indian empire — and a Tamil south on its own terms."',
-    polys:[['maurya','Mauryan Empire'],['seleucid','Seleucid Empire'],['ptolemaic','Ptolemaic Egypt'],['antigonid','Antigonid Macedon'],['chera','Chera'],['chola','Chola & Pandya']],
-    cities:[
-      {coord:[29.9,31.2], name:'Alexandria', cat:'Ptolemaic hub', desc:'Mediterranean–Red Sea pivot.', color:C.ptolemaic},
-      {coord:[36.2,36.2], name:'Antioch', cat:'Seleucid capital', desc:'On the Orontes.', color:C.seleucid},
-      {coord:[85.14,25.61], name:'Pataliputra', cat:'Mauryan capital', desc:'Hosted Megasthenes.', color:C.maurya}
-    ]
+    img: '../images/hellas break.png'
   },
   {
     label:'50 BCE', name:'The Rise of Rome',
     desc:'Rome dismantles the western Hellenistic states. In the east, the <strong>Parthian Empire</strong> rises to fill the vacuum — a powerful intermediary controlling overland trade.',
     pull:'"Two empires now stare across Mesopotamia."',
-    polys:[['romanRep','Roman Republic'],['ptolemaic','Ptolemaic Egypt'],['parth','Parthian Empire'],['chera','Chera'],['chola','Chola & Pandya']],
-    cities:[ {coord:[12.5,41.9], name:'Rome', cat:'Capital', desc:'Republic turning empire.', color:C.roman} ]
+    img: '../images/romo parthian.png'
   },
   {
     label:'50 CE', name:'The Cosmopolitan Matrix',
     desc:'Rome has direct maritime access via the Red Sea and monsoon routes to India. <strong>Greek</strong> in the Mediterranean, <strong>Aramaic</strong> across the Near East, <strong>Tamil and Prakrit</strong> in India — a continuous commercial chain is forged.',
     pull:'"Three languages, one matrix."',
-    polys:[['roman','Roman Empire'],['brit','Britannia'],['parth','Parthian Empire'],['indoParth','Indo-Parthian'],['chera','Chera'],['chola','Chola & Pandya']],
-    cities:[ {coord:[76.2,10.17], name:'Muziris', cat:'Great emporium', desc:'The monsoon (Hippalus) makes direct voyages possible.', color:C.chera} ]
+    img: '../images/50ce full.png'
   }
 ];
 
-const REGIONS = [
-  [33,34,'LEVANT','Syria-Palestine',11], [47,35,'MESOPOTAMIA','Iraq',12],
-  [55,33,'PERSIA','Iran',12], [31,28,'AEGYPTUS','Egypt',11],
-  [78,20,'DAKṢIṆĀPATHA','Deccan',11], [77,10,'TAMILAKAM','Tamil south',10],
-  [74,34,'GANDHĀRA','NW Pakistan',10], [15,42,'ROMA',null,11]
-];
-const OCEANS = [
-  [55,15,'Mare Erythraeum',null,16], [18,35,'Mare Internum',null,15],
-  [38,22,'Sinus Arabicus',null,12], [52,27,'Sinus Persicus',null,12],
-  [30,42,'Pontus Euxinus',null,11]
-];
+const mapImg = document.getElementById('static-map');
 
-// — set up d3 stage —
-const stage = document.querySelector('.stage');
-const W = () => stage.clientWidth, H = () => stage.clientHeight;
-const proj = d3.geoMercator().center([45,28]).scale(Math.max(W(),900)/3.2).translate([W()/2, H()/1.7]);
-const path = d3.geoPath().projection(proj);
-const svg = d3.select('#map').append('svg').attr('width', W()).attr('height', H());
-const root = svg.append('g');
-const gMap = root.append('g'), gPoly = root.append('g'), gNode = root.append('g'), gLabel = root.append('g');
-
-const tooltip = d3.select('#tooltip');
-window.hideTip = function(){ tooltip.style('opacity', 0).style('pointer-events', 'none'); };
-function showTip(html, ev){ 
-  tooltip.html(`
-    <button class="tt-close" onclick="hideTip()" aria-label="Close">✕</button>
-    ${html}
-  `).style('opacity', 1).style('pointer-events', 'auto'); 
-  placeTip(ev); 
-}
-function placeTip(ev){
-  const r = stage.getBoundingClientRect();
-  const x = Math.min(r.width - 270, Math.max(10, ev.clientX - r.left + 12));
-  const y = Math.min(r.height - 100, Math.max(10, ev.clientY - r.top + 12));
-  tooltip.style('left', x+'px').style('top', y+'px');
-}
-
-d3.select('.stage').on('click', (e) => {
-  if (!e.target.closest('.cmark') && !e.target.closest('.poly') && !e.target.closest('#tooltip')) {
-    hideTip();
-  }
+// Preload images to prevent flicker
+ERAS.forEach(era => {
+  const img = new Image();
+  img.src = era.img;
 });
-
-d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world => {
-  const land = topojson.feature(world, world.objects.countries).features;
-  gMap.selectAll('path.country').data(land).enter().append('path').attr('class','country').attr('d', path);
-
-  // static labels
-  REGIONS.forEach(([lng,lat,name,modern,size]) => {
-    const [x,y] = proj([lng,lat]);
-    const fs = Math.max(9, size - 2);
-    gLabel.append('text')
-      .attr('transform', `translate(${x},${y})`)
-      .attr('data-x', x).attr('data-y', y).attr('data-size', fs)
-      .attr('text-anchor','middle')
-      .style('font-family',"'Source Serif 4',Georgia,serif").style('font-weight',700)
-      .style('letter-spacing','2.5px').style('text-transform','uppercase')
-      .style('fill','#1a1612').style('paint-order','stroke fill')
-      .style('stroke','rgba(244,237,224,0.92)').style('stroke-width','3px').style('stroke-linejoin','round')
-      .style('pointer-events','none').style('font-size', fs+'px').text(name);
-  });
-
-  render(0);
-});
-
-// zoom
-const zoom = d3.zoom().scaleExtent([0.6,6]).on('zoom', e => {
-  root.attr('transform', e.transform);
-  const k = Math.max(1, e.transform.k); // Clamp anti-zoom so things shrink when zooming out
-  gNode.selectAll('g.cmark').attr('transform', d => `translate(${proj(d.coord)[0]},${proj(d.coord)[1]}) scale(${1/k})`);
-  gLabel.selectAll('text').attr('transform', function() {
-    const el = d3.select(this);
-    return `translate(${el.attr('data-x')},${el.attr('data-y')}) scale(${1/k})`;
-  });
-});
-svg.call(zoom);
-d3.select('#zoom-in').on('click', () => svg.transition().call(zoom.scaleBy, 1.5));
-d3.select('#zoom-out').on('click', () => svg.transition().call(zoom.scaleBy, 1/1.5));
 
 // — render an era —
 function render(i) {
   const era = ERAS[i];
-  // polys
-  const polys = gPoly.selectAll('path.poly').data(era.polys, d => d[0]);
-  polys.exit().transition().duration(400).style('opacity',0).remove();
-  polys.enter().append('path').attr('class','poly')
-    .attr('d', d => path(POLYS[d[0]]))
-    .attr('fill', d => C[d[0]]).attr('stroke', d => C[d[0]]).attr('fill-opacity', 0).attr('stroke-opacity', 0)
-    .on('click', (e,d) => { e.stopPropagation(); showTip(`<div class="tt-name">${d[1]}</div><div class="tt-cat">${era.label}</div>`, e); })
-    .transition().duration(500).attr('fill-opacity', 0.32).attr('stroke-opacity', 0.85);
-  polys.transition().duration(500).attr('fill-opacity', 0.32).attr('stroke-opacity', 0.85);
+  
+  // Fade transition for map
+  mapImg.style.opacity = 0;
+  setTimeout(() => {
+    mapImg.src = era.img;
+    mapImg.style.opacity = 1;
+  }, 250);
 
-  // cities
-  const cities = gNode.selectAll('g.cmark').data(era.cities, d => d.name);
-  cities.exit().transition().duration(300).style('opacity',0).remove();
-  const t = d3.zoomTransform(svg.node());
-  const k = Math.max(1, t.k);
-  const enter = cities.enter().append('g').attr('class','cmark')
-    .attr('transform', d => `translate(${proj(d.coord)[0]},${proj(d.coord)[1]}) scale(${1/k})`)
-    .style('opacity', 0)
-    .on('click', (e,d) => { e.stopPropagation(); showTip(`<div class="tt-name">${d.name}</div><div class="tt-cat">${d.cat}</div><div class="tt-desc">${d.desc}</div>`, e); });
-  enter.append('circle').attr('class','node').attr('r',6).attr('fill', d => d.color);
-  enter.append('text').attr('class','node-label').attr('x',9).attr('y',4).text(d => d.name);
-  enter.transition().duration(450).style('opacity',1);
-
-  // story rail
+  // Update story rail
   document.getElementById('now-label').textContent = era.label;
-  document.getElementById('cap-num').textContent = `FIG. ${String(i+1).padStart(2,'0')} · ${era.label}`;
-  document.getElementById('cap-ttl').textContent = era.name;
+  
   document.getElementById('rail-body').innerHTML = `
     <div class="story-eyebrow">Era ${String(i+1).padStart(2,'0')} · ${era.label}</div>
     <h2 class="story-h">${era.name}</h2>
     <p class="story-p">${era.desc}</p>
     <div class="pull-quote">${era.pull}</div>
   `;
+  
   document.querySelectorAll('.tick-label').forEach((t,j) => t.classList.toggle('active', j === i));
 }
 
-// resize
-window.addEventListener('resize', () => {
-  svg.attr('width', W()).attr('height', H());
-  proj.scale(Math.max(W(),900)/3.2).translate([W()/2, H()/1.7]);
-  gMap.selectAll('path.country').attr('d', path);
-  gPoly.selectAll('path.poly').attr('d', d => path(POLYS[d[0]]));
-  const t = d3.zoomTransform(svg.node());
-  const k = Math.max(1, t.k);
-  gNode.selectAll('g.cmark').attr('transform', d => `translate(${proj(d.coord)[0]},${proj(d.coord)[1]}) scale(${1/k})`);
-  gLabel.selectAll('text').each(function(){
-    const el = d3.select(this);
-    // Find the original coordinates from the raw arrays (matching by text content)
-    let lng, lat;
-    const name = el.text();
-    const region = REGIONS.find(r => r[2] === name);
-    if (region) { lng = region[0]; lat = region[1]; }
-    else {
-      const ocean = OCEANS.find(o => o[2] === name);
-      if (ocean) { lng = ocean[0]; lat = ocean[1]; }
-    }
-    if (lng !== undefined) {
-      const [nx, ny] = proj([lng, lat]);
-      el.attr('data-x', nx).attr('data-y', ny);
-      el.attr('transform', `translate(${nx},${ny}) scale(${1/k})`);
-    }
-  });
-});
+// Initial render
+document.getElementById('rail-body').innerHTML = `
+  <div class="story-eyebrow">Era 01 · 600 BCE</div>
+  <h2 class="story-h">The Rivers of Babylon</h2>
+  <p class="story-p">The Neo-Babylonian Empire dominates the Near East. The Israelite deportation begins; Akkadian persists in formal contexts while <strong>Aramaic</strong> spreads as the practical lingua franca.</p>
+  <div class="pull-quote">"By the rivers of Babylon" — and by Aramaic, the language of empire.</div>
+`;
 
 // slider wiring
 const slider = document.getElementById('time-slider');
 slider.addEventListener('input', e => render(parseInt(e.target.value, 10)));
 document.querySelectorAll('.tick-label').forEach(t => {
-  t.addEventListener('click', () => { const i = parseInt(t.dataset.i, 10); slider.value = i; render(i); });
+  t.addEventListener('click', () => { 
+    const i = parseInt(t.dataset.i, 10); 
+    slider.value = i; 
+    render(i); 
+  });
 });
 </script>
 </body>
