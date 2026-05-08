@@ -52,7 +52,7 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
   height: 100%;
   object-fit: contain; /* Ensures the whole map is visible */
   transition: opacity 0.5s ease-in-out;
-  transform-origin: center center;
+  transform-origin: 0 0;
   /* Normalize contrast, brightness, and tone to match editorial design consistently */
   filter: sepia(0.15) contrast(1.05) brightness(0.95);
   mix-blend-mode: multiply;
@@ -233,13 +233,25 @@ document.querySelectorAll('.tick-label').forEach(t => {
 const mapContainer = d3.select('#static-map-container');
 const mapImgD3 = d3.select('#static-map');
 
-const zoom = d3.zoom()
+function getBounds() {
+  const w = mapContainer.node().clientWidth || 800;
+  const h = mapContainer.node().clientHeight || 600;
+  return [[0, 0], [w, h]];
+}
+
+let zoom = d3.zoom()
   .scaleExtent([1, 6])
+  .translateExtent(getBounds())
   .on('zoom', (e) => {
     mapImgD3.style('transform', `translate(${e.transform.x}px, ${e.transform.y}px) scale(${e.transform.k})`);
   });
 
 mapContainer.call(zoom);
+
+// Update bounds on resize
+window.addEventListener('resize', () => {
+  zoom.translateExtent(getBounds());
+});
 
 d3.select('#zoom-in').on('click', () => mapContainer.transition().duration(300).call(zoom.scaleBy, 1.5));
 d3.select('#zoom-out').on('click', () => mapContainer.transition().duration(300).call(zoom.scaleBy, 1/1.5));
