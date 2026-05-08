@@ -50,12 +50,19 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
 .static-map {
   width: 100%;
   height: 100%;
+  position: absolute;
+  top: 0; left: 0;
   object-fit: contain; /* Ensures the whole map is visible */
-  transition: opacity 0.5s ease-in-out;
+  transition: opacity 0.25s ease-out;
   transform-origin: 0 0;
   /* Normalize contrast, brightness, and tone to match editorial design consistently */
   filter: sepia(0.15) contrast(1.05) brightness(0.95);
   mix-blend-mode: multiply;
+  opacity: 0;
+  pointer-events: none;
+}
+.static-map.layer-active {
+  opacity: 1;
 }
 
 [data-theme="dark"] .static-map {
@@ -105,7 +112,14 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
 
   <div class="stage">
     <div class="static-map-container" id="static-map-container">
-      <img id="static-map" class="static-map" src="../images/timeline/babylone.webp" alt="Map">
+      <div id="map-zoom-layer" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; transform-origin: 0 0;">
+        <img id="map-layer-0" class="static-map layer-active" src="../images/timeline/babylone.webp" alt="Map">
+        <img id="map-layer-1" class="static-map" src="../images/timeline/persian.webp" alt="Map">
+        <img id="map-layer-2" class="static-map" src="../images/timeline/hellas.webp" alt="Map">
+        <img id="map-layer-3" class="static-map" src="../images/timeline/hellas break.webp" alt="Map">
+        <img id="map-layer-4" class="static-map" src="../images/timeline/romo parthian.webp" alt="Map">
+        <img id="map-layer-5" class="static-map" src="../images/timeline/50ce full.webp" alt="Map">
+      </div>
     </div>
     
     <div class="d3-zoom">
@@ -190,12 +204,10 @@ ERAS.forEach(era => {
 function render(i) {
   const era = ERAS[i];
   
-  // Fade transition for map
-  mapImg.style.opacity = 0;
-  setTimeout(() => {
-    mapImg.src = era.img;
-    mapImg.style.opacity = 1;
-  }, 250);
+  // Instant multi-layer crossfade (no setTimeout race conditions!)
+  document.querySelectorAll('.static-map').forEach((img, index) => {
+    img.classList.toggle('layer-active', index === i);
+  });
 
   // Update story rail
   document.getElementById('now-label').textContent = era.label;
@@ -231,7 +243,7 @@ document.querySelectorAll('.tick-label').forEach(t => {
 
 // Zoom wiring
 const mapContainer = d3.select('#static-map-container');
-const mapImgD3 = d3.select('#static-map');
+const mapZoomLayer = d3.select('#map-zoom-layer');
 
 function getBounds() {
   const w = mapContainer.node().clientWidth || 800;
@@ -243,7 +255,7 @@ let zoom = d3.zoom()
   .scaleExtent([1, 6])
   .translateExtent(getBounds())
   .on('zoom', (e) => {
-    mapImgD3.style('transform', `translate(${e.transform.x}px, ${e.transform.y}px) scale(${e.transform.k})`);
+    mapZoomLayer.style('transform', `translate(${e.transform.x}px, ${e.transform.y}px) scale(${e.transform.k})`);
   });
 
 mapContainer.call(zoom);
