@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The March to the Matrix — Timeline</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/map-core.css?v=2">
 <style>
@@ -41,12 +42,17 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: grab;
+}
+.static-map-container:active {
+  cursor: grabbing;
 }
 .static-map {
   width: 100%;
   height: 100%;
   object-fit: contain; /* Ensures the whole map is visible */
   transition: opacity 0.5s ease-in-out;
+  transform-origin: center center;
   /* Normalize contrast, brightness, and tone to match editorial design consistently */
   filter: sepia(0.15) contrast(1.05) brightness(0.95);
   mix-blend-mode: multiply;
@@ -98,10 +104,15 @@ input[type=range].t-slider::-moz-range-thumb { height: 18px; width: 18px; border
   </aside>
 
   <div class="stage">
-    <div class="static-map-container">
-      <img id="static-map" class="static-map" src="../images/babylone.png" alt="Map">
+    <div class="static-map-container" id="static-map-container">
+      <img id="static-map" class="static-map" src="../images/timeline/babylone.webp" alt="Map">
     </div>
     
+    <div class="d3-zoom">
+      <button id="zoom-in" aria-label="Zoom in">+</button>
+      <button id="zoom-out" aria-label="Zoom out">−</button>
+    </div>
+
     <div class="credit">Cartography: Historic Extents</div>
   </div>
 </div>
@@ -133,37 +144,37 @@ const ERAS = [
     label:'600 BCE', name:'The Rivers of Babylon',
     desc:'The Neo-Babylonian Empire dominates the Near East. The Israelite deportation begins; Akkadian persists in formal contexts while <strong>Aramaic</strong> spreads as the practical lingua franca.',
     pull:'"By the rivers of Babylon" — and by Aramaic, the language of empire.',
-    img: '../images/babylone.png'
+    img: '../images/timeline/babylone.webp'
   },
   {
     label:'500 BCE', name:'The Persian Golden Era',
     desc:'The <strong>Achaemenid Empire</strong> spans three continents under a single administration — and runs largely on <strong>Imperial Aramaic</strong>. The lingua franca that will carry Christian preaching is set in place.',
     pull:'"One administration, one tongue, three continents."',
-    img: '../images/persian.png'
+    img: '../images/timeline/persian.webp'
   },
   {
     label:'320 BCE', name:"Alexander's Epic Run",
     desc:"Alexander shatters the Achaemenid world. The <strong>Mauryan</strong> rises in India, bringing Greek and Indian worlds into contact. In the deep south, the Tamil polities of Chera, Chola and Pandya emerge in proto-history.",
     pull:'"Greek seeded everywhere it stepped."',
-    img: '../images/hellas.png'
+    img: '../images/timeline/hellas.webp'
   },
   {
     label:'250 BCE', name:'Greek Split & Mauryan Unity',
     desc:"Alexander's empire fractures into Hellenistic kingdoms. The Mauryan unites almost the entire subcontinent — though the deep Tamil south remains outside.",
     pull:'"A Greek constellation, an Indian empire — and a Tamil south on its own terms."',
-    img: '../images/hellas break.png'
+    img: '../images/timeline/hellas break.webp'
   },
   {
     label:'50 BCE', name:'The Rise of Rome',
     desc:'Rome dismantles the western Hellenistic states. In the east, the <strong>Parthian Empire</strong> rises to fill the vacuum — a powerful intermediary controlling overland trade.',
     pull:'"Two empires now stare across Mesopotamia."',
-    img: '../images/romo parthian.png'
+    img: '../images/timeline/romo parthian.webp'
   },
   {
     label:'50 CE', name:'The Cosmopolitan Matrix',
     desc:'Rome has direct maritime access via the Red Sea and monsoon routes to India. <strong>Greek</strong> in the Mediterranean, <strong>Aramaic</strong> across the Near East, <strong>Tamil and Prakrit</strong> in India — a continuous commercial chain is forged.',
     pull:'"Three languages, one matrix."',
-    img: '../images/50ce full.png'
+    img: '../images/timeline/50ce full.webp'
   }
 ];
 
@@ -217,6 +228,22 @@ document.querySelectorAll('.tick-label').forEach(t => {
     render(i); 
   });
 });
+
+// Zoom wiring
+const mapContainer = d3.select('#static-map-container');
+const mapImgD3 = d3.select('#static-map');
+
+const zoom = d3.zoom()
+  .scaleExtent([1, 6])
+  .on('zoom', (e) => {
+    mapImgD3.style('transform', `translate(${e.transform.x}px, ${e.transform.y}px) scale(${e.transform.k})`);
+  });
+
+mapContainer.call(zoom);
+
+d3.select('#zoom-in').on('click', () => mapContainer.transition().duration(300).call(zoom.scaleBy, 1.5));
+d3.select('#zoom-out').on('click', () => mapContainer.transition().duration(300).call(zoom.scaleBy, 1/1.5));
+
 </script>
 </body>
 </html>
