@@ -22,6 +22,134 @@
   const FONT_STEP = 2;
   const STORAGE_KEY = 'antibook-reader';
   const THEMES = ['light', 'dark', 'sepia'];
+  const GENERATED_ASSETS = {
+    indianOceanAtlas: 'images/generated/indian_ocean_atlas_1778310739870.png',
+    pahlaviCross: 'images/generated/pahlavi_cross_1778310755572.png',
+    syriacTexture: 'images/generated/syriac_manuscript_texture_1778304748296.png',
+    keralaPort: 'images/generated/atlas_kerala_port_1778214566825.png',
+    portugueseArrival: 'images/generated/chapter_4_hero_1778310722502.png',
+    commonwealthNetwork: 'images/generated/atlas_era6_pepper_1778213608113.png',
+  };
+  const CHAPTER_VISUAL_STATES = {
+    'part-1-intro': {
+      state: 'Connectivity',
+      mode: 'Voyage',
+      evidence: 'Atlas memory',
+      image: GENERATED_ASSETS.indianOceanAtlas,
+      caption: 'Indian Ocean corridor as the opening spatial grammar of Part I.',
+    },
+    'chapter-01': {
+      state: 'Open oceanic system',
+      mode: 'Cosmopolitan expansion',
+      evidence: 'Maritime route',
+      image: 'images/generated/chapter_1_hero_1778310655224.png',
+      caption: 'Muziris imagined as a working node inside the Roman-Indian maritime system.',
+    },
+    'chapter-02': {
+      state: 'Documentary consolidation',
+      mode: 'Memory formation',
+      evidence: 'Manuscript witness',
+      image: 'images/generated/chapter_2_hero_1778310671655.png',
+      caption: 'Apostolic memory, Syriac witness, and the documentary layer of the tradition.',
+    },
+    'chapter-03': {
+      state: 'Network collapse',
+      mode: 'Sparse continuity',
+      evidence: 'Fragmented route',
+      image: 'images/generated/chapter_3_hero_1778310695574.png',
+      caption: 'Fading routes and isolated continuity after the old Mediterranean vectors fail.',
+    },
+    'chapter-04': {
+      state: 'Atlantic intrusion',
+      mode: 'Collision',
+      evidence: 'Competing maps',
+      image: GENERATED_ASSETS.portugueseArrival,
+      caption: 'Portuguese arrival rendered as a collision of European and Malabar geographies.',
+    },
+    'part-1-synthesis': {
+      state: 'Civilizational totality',
+      mode: 'Synthesis',
+      evidence: 'Network memory',
+      image: GENERATED_ASSETS.commonwealthNetwork,
+      caption: 'The Thomas Christian commonwealth as a restored Indian Ocean network.',
+    },
+    'part-2-intro': {
+      state: 'Biased abundance',
+      mode: 'Archive pressure',
+      evidence: 'Documentary overload',
+      pressure: 28,
+      image: GENERATED_ASSETS.syriacTexture,
+      caption: 'Part II shifts from sparse witness to an archive dense with institutional motive.',
+    },
+    'chapter-05': {
+      state: 'Atlantic intrusion',
+      mode: 'Encounter',
+      evidence: 'Royal commission',
+      pressure: 32,
+      image: GENERATED_ASSETS.portugueseArrival,
+      caption: 'The broad maritime world begins to narrow into Portuguese imperial paperwork.',
+    },
+    'chapter-06': {
+      state: 'Misrecognition',
+      mode: 'Absorption',
+      evidence: 'Legendary layer',
+      pressure: 40,
+      image: GENERATED_ASSETS.keralaPort,
+      caption: 'Kerala port power seen through the distorting frame of Portuguese expectation.',
+    },
+    'chapter-07': {
+      state: 'Administrative conversion',
+      mode: 'Standardization',
+      evidence: 'Canon law',
+      pressure: 50,
+      image: GENERATED_ASSETS.syriacTexture,
+      caption: 'The archive begins replacing open geography as the governing landscape.',
+    },
+    'chapter-08': {
+      state: 'Shadow jurisdiction',
+      mode: 'Surveillance',
+      evidence: 'Institutional report',
+      pressure: 58,
+      image: GENERATED_ASSETS.syriacTexture,
+      caption: 'Hidden reports and unstable authority lines thicken the documentary field.',
+    },
+    'chapter-09': {
+      state: 'Institution building',
+      mode: 'New instrument',
+      evidence: 'Jesuit letter',
+      pressure: 66,
+      image: GENERATED_ASSETS.keralaPort,
+      caption: 'Missionary movement becomes institutional machinery across the Malabar coast.',
+    },
+    'chapter-10': {
+      state: 'Imperial compression',
+      mode: 'Collapsed sword',
+      evidence: 'Synodal decree',
+      pressure: 78,
+      image: GENERATED_ASSETS.portugueseArrival,
+      caption: 'The open atlas contracts into decrees, seals, garrisons, and jurisdiction.',
+    },
+    'chapter-11': {
+      state: 'Palimpsest',
+      mode: 'Dual text',
+      evidence: 'Revised manuscript',
+      pressure: 86,
+      image: GENERATED_ASSETS.syriacTexture,
+      caption: 'Syriac continuity survives as correction, translation, and revision layer.',
+    },
+    'chapter-12': {
+      state: 'Fragmentation',
+      mode: 'Competing authority',
+      evidence: 'Broken settlement',
+      pressure: 96,
+      image: GENERATED_ASSETS.pahlaviCross,
+      caption: 'The archive can no longer contain the community it was built to administer.',
+    },
+  };
+  const GENERATED_SRC_REPLACEMENTS = new Map([
+    ['images/generated/indian_ocean_atlas.png', GENERATED_ASSETS.indianOceanAtlas],
+    ['images/generated/pahlavi_cross.png', GENERATED_ASSETS.pahlaviCross],
+  ]);
 
   // ── DOM References ──
   const $ = (sel) => document.querySelector(sel);
@@ -127,6 +255,22 @@
       dom.chapterContent.innerHTML = html;
       dom.chapterTitleBar.textContent = chapter.title;
 
+      // Determine current Part based on section markers
+      let currentPart = '1';
+      for (let i = 0; i <= index; i++) {
+        const marker = state.chapters[i].sectionMarker;
+        if (marker) {
+          if (marker.includes('PART I ')) currentPart = '1';
+          if (marker.includes('PART II')) currentPart = '2';
+          if (marker.includes('PART III')) currentPart = '3';
+        }
+      }
+      document.body.setAttribute('data-part', currentPart);
+      document.body.setAttribute('data-chapter', chapter.id || '');
+      applyChapterVisualState(chapter, currentPart);
+      repairGeneratedAssetReferences();
+      enhanceChapterOpening(chapter, currentPart);
+
       // Process footnotes
       processFootnotes();
       makeTablesResponsive();
@@ -167,6 +311,90 @@
 
   function hideLoader() {
     dom.loader.classList.add('hidden');
+  }
+
+  function getChapterVisualState(chapter, currentPart) {
+    const fallback = currentPart === '2'
+      ? {
+          state: 'Documentary pressure',
+          mode: 'Archive',
+          evidence: 'Institutional record',
+          pressure: 62,
+          image: GENERATED_ASSETS.syriacTexture,
+          caption: 'Documents, translations, and jurisdiction become the landscape of Part II.',
+        }
+      : {
+          state: 'Historical corridor',
+          mode: 'Atlas',
+          evidence: 'Route memory',
+          image: GENERATED_ASSETS.indianOceanAtlas,
+          caption: 'The chapter is situated inside the wider historical atlas.',
+        };
+
+    return Object.assign({}, fallback, CHAPTER_VISUAL_STATES[chapter.id] || {});
+  }
+
+  function applyChapterVisualState(chapter, currentPart) {
+    const visualState = getChapterVisualState(chapter, currentPart);
+    document.body.style.setProperty('--chapter-hero-image', `url("${visualState.image}")`);
+    document.body.style.setProperty('--chapter-pressure', `${visualState.pressure || 0}%`);
+  }
+
+  function repairGeneratedAssetReferences() {
+    dom.chapterContent.querySelectorAll('img[src]').forEach((img) => {
+      const replacement = GENERATED_SRC_REPLACEMENTS.get(img.getAttribute('src'));
+      if (replacement) img.setAttribute('src', replacement);
+    });
+  }
+
+  function enhanceChapterOpening(chapter, currentPart) {
+    const opening = dom.chapterContent.querySelector('.chapter-opening-unit');
+    if (!opening || opening.dataset.enhanced === 'true') return;
+
+    const visualState = getChapterVisualState(chapter, currentPart);
+    opening.dataset.enhanced = 'true';
+
+    let anchor = opening;
+    if (visualState.image) {
+      const figure = document.createElement('figure');
+      figure.className = 'chapter-visual-plate';
+      figure.innerHTML = `
+        <img src="${visualState.image}" alt="${visualState.caption || visualState.state}">
+        <figcaption>${visualState.caption || visualState.state}</figcaption>
+      `;
+      anchor.insertAdjacentElement('afterend', figure);
+      anchor = figure;
+    }
+
+    const statePanel = document.createElement('section');
+    statePanel.className = 'chapter-state-panel';
+    statePanel.setAttribute('aria-label', 'Chapter historical state');
+    statePanel.innerHTML = `
+      <div class="chapter-state-item">
+        <span>Historical State</span>
+        <strong>${visualState.state}</strong>
+      </div>
+      <div class="chapter-state-corridor" aria-hidden="true">
+        <span style="width:${visualState.pressure || 42}%"></span>
+      </div>
+      <div class="chapter-state-item">
+        <span>${currentPart === '2' ? 'Archive Mode' : 'Atlas Mode'}</span>
+        <strong>${visualState.mode}</strong>
+      </div>
+      <div class="chapter-state-item">
+        <span>Evidence Layer</span>
+        <strong>${visualState.evidence}</strong>
+      </div>
+    `;
+    anchor.insertAdjacentElement('afterend', statePanel);
+
+    if (currentPart === '2') {
+      const archiveStack = document.createElement('aside');
+      archiveStack.className = 'part2-archive-stack';
+      archiveStack.setAttribute('aria-hidden', 'true');
+      archiveStack.innerHTML = '<span></span><span></span><span></span>';
+      statePanel.insertAdjacentElement('afterend', archiveStack);
+    }
   }
 
 
@@ -505,7 +733,7 @@
   }
 
   function animateOnScroll() {
-    const elements = $$('.stat-card, .timeline-item, .comparison-side');
+    const elements = $$('.stat-card, .timeline-item, .comparison-side, .chapter-visual-plate, .chapter-state-panel, .part2-archive-stack, .coonan-rupture-panel');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -522,8 +750,28 @@
       el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
       observer.observe(el);
     });
-  }
 
+    // Cinematic reveals
+    const cinematicElements = $$('.documentary-panel, .royal-decree-panel');
+    const cinematicObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+          cinematicObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    cinematicElements.forEach(el => {
+      el.classList.add('cinematic-reveal');
+      if (el.classList.contains('royal-decree-panel')) {
+        el.classList.add('seal-stamp');
+      } else {
+        el.classList.add('ink-spread');
+      }
+      cinematicObserver.observe(el);
+    });
+  }
 
   // ══════════════════════════════════════
   //  PERSISTENCE
@@ -643,6 +891,7 @@
     // Touch swipe for chapter navigation
     let touchStartX = 0;
     let touchStartTarget = null;
+    const minSwipe = 80;
 
     document.addEventListener('touchstart', (e) => {
       touchStartX = e.changedTouches[0].screenX;
@@ -650,7 +899,7 @@
     }, { passive: true });
 
     document.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
+      const touchEndX = e.changedTouches[0].screenX;
       const diff = touchStartX - touchEndX;
 
       if (Math.abs(diff) < minSwipe) return;

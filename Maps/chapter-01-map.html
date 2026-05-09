@@ -303,6 +303,23 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: var(--pape
   .map-caption { top: 10px; left: 10px; padding: 6px 10px; }
   .map-caption .ttl { font-size: 12.5px; }
 }
+
+/* Cinematic Map Overrides */
+.leaflet-tile-pane {
+  filter: sepia(0.6) hue-rotate(340deg) contrast(1.1) brightness(0.9);
+}
+#map::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  background-image: url('../images/textures/part1_bg.png');
+  background-size: cover;
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+  z-index: 1000;
+}
+
 </style>
 </head>
 <body>

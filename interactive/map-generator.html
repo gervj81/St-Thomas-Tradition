@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ultimate Map Editor</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://unpkg.com/topojson-client@3"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background: #111; color: #fff;
+      font-family: 'IBM Plex Sans', sans-serif;
+      display: flex;
+    }
+    
+    #sidebar {
+      width: 320px;
+      padding: 20px;
+      background: #222;
+      height: 100vh;
+      box-sizing: border-box;
+      overflow-y: auto;
+      border-right: 1px solid #444;
+      flex-shrink: 0;
+    }
+    
+    #canvas-container {
+      flex: 1;
+      height: 100vh;
+      overflow: auto;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #1a1a1a;
+    }
+
+    #svg-wrapper {
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    h1, h2 { font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+    
+    .panel { background: #333; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+    
+    .control-group { margin-bottom: 12px; }
+    label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: #ccc; }
+    input[type=range], input[type=text], select { width: 100%; box-sizing: border-box; }
+    input[type=text], select { padding: 5px; background: #222; color: #fff; border: 1px solid #555; }
+    
+    button {
+      width: 100%; padding: 10px; background: #b8421f; color: #fff; border: none; border-radius: 4px;
+      font-weight: 600; cursor: pointer; margin-top: 5px; font-size: 12px;
+    }
+    button:hover { background: #d34c24; }
+    button.secondary { background: #555; }
+    button.secondary:hover { background: #666; }
+    button.danger { background: #900; }
+    button.danger:hover { background: #b00; }
+    
+    .btn-row { display: flex; gap: 8px; margin-bottom: 15px; }
+    .btn-row button { margin: 0; }
+    
+  </style>
+</head>
+<body>
+
+  <div id="sidebar">
+    <h1>Ultimate Map Editor</h1>
+    
+    <!-- EDIT PANEL -->
+    <div class="panel" id="panel-edit" style="display:none; border: 1px solid #b8421f;">
+      <h2>Active Element</h2>
+      <div class="control-group">
+        <label>Text</label>
+        <input type="text" id="edit-text">
+      </div>
+      <div class="control-group">
+        <label><span>Rotation (deg)</span> <span id="val-edit-rot">0</span></label>
+        <input type="range" id="edit-rot" min="-180" max="180" step="1" value="0">
+      </div>
+      <button id="btn-delete" class="danger">Delete Element</button>
+    </div>
+
+    <!-- ADD PANEL -->
+    <div class="panel">
+      <h2>Add New Element</h2>
+      <div class="btn-row">
+        <button id="btn-add-city" class="secondary">+ City</button>
+        <button id="btn-add-region" class="secondary">+ Region</button>
+        <button id="btn-add-hydro" class="secondary">+ River</button>
+      </div>
+    </div>
+
+    <!-- MATH GUIDELINE PANEL -->
+    <div class="panel">
+      <h2>Holographic Guideline</h2>
+      <button id="btn-toggle-coast" class="secondary" style="margin-bottom: 15px;">Show Green Coastlines</button>
+      
+      <div id="guideline-controls" style="display:none;">
+        <div class="control-group">
+          <label>Projection</label>
+          <select id="input-proj">
+            <option value="mercator">Mercator</option>
+            <option value="equirectangular" selected>Equirectangular</option>
+            <option value="conicConformal">Conic</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label><span>Scale</span> <span id="val-scale"></span></label>
+          <input type="range" id="input-scale" min="1000" max="6000" step="10" value="2600">
+        </div>
+        <div class="control-group">
+          <label><span>Center X</span> <span id="val-x"></span></label>
+          <input type="range" id="input-x" min="-180" max="180" step="0.5" value="45">
+        </div>
+        <div class="control-group">
+          <label><span>Center Y</span> <span id="val-y"></span></label>
+          <input type="range" id="input-y" min="-90" max="90" step="0.5" value="28">
+        </div>
+        <div class="control-group">
+          <label><span>Stretch X</span> <span id="val-sx"></span></label>
+          <input type="range" id="input-sx" min="0.5" max="2.0" step="0.01" value="1.0">
+        </div>
+        <div class="control-group">
+          <label><span>Stretch Y</span> <span id="val-sy"></span></label>
+          <input type="range" id="input-sy" min="0.5" max="2.0" step="0.01" value="1.0">
+        </div>
+      </div>
+    </div>
+
+    <button id="btn-export">📥 Export as SVG</button>
+  </div>
+
+  <div id="canvas-container">
+    <div id="svg-wrapper">
+      <svg id="map-export" xmlns="http://www.w3.org/2000/svg" width="1693" height="929" viewBox="0 0 1693 929">
+        <defs>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500&display=swap');
+            
+            .base-image { pointer-events: none; }
+            .ref-coast { fill: none; stroke: #00ff00; stroke-width: 1.5px; opacity: 0.8; pointer-events: none; }
+            
+            .draggable { cursor: grab; }
+            .draggable:active { cursor: grabbing; }
+            .selected text { fill: #b8421f !important; }
+            .selected circle.city-node { stroke: #b8421f !important; }
+            
+            .emp-poly { fill: #d8c8a0; opacity: 0.75; mix-blend-mode: multiply; stroke: #a39572; stroke-width: 2px; }
+            .poly-handle { fill: #d8c8a0; stroke: #a39572; stroke-width: 1.5px; cursor: grab; }
+            .poly-handle:active { cursor: grabbing; }
+            .poly-handle.selected { fill: #b8421f; }
+            
+            .city-node { fill: #ffffff; stroke: #1a1612; stroke-width: 1.5px; }
+            .city-label { font-family: 'Source Serif 4', Georgia, serif; font-size: 13px; fill: #1a1612; text-anchor: start; alignment-baseline: central; pointer-events: none; }
+            
+            .reg-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #6e6151; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; text-anchor: middle; alignment-baseline: central; }
+            
+            .hydro-label { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; font-size: 14px; fill: #486a87; text-anchor: middle; alignment-baseline: central; }
+          </style>
+          
+          <path id="star-marker" d="M 0 -4 L 1.5 -1 L 4.5 -1 L 2 1.5 L 3 4.5 L 0 2.5 L -3 4.5 L -2 1.5 L -4.5 -1 L -1.5 -1 Z" fill="#ffffff" stroke="#1a1612" stroke-width="1.2" />
+        </defs>
+
+        <image class="base-image" href="../images/timeline/base map.png" width="1693" height="929" />
+        
+        <g id="layer-coastlines"></g>
+        <g id="layer-empire"></g>
+        <g id="layer-handles"></g>
+        <g id="layer-hydro"></g>
+        <g id="layer-regions"></g>
+        <g id="layer-cities"></g>
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    const width = 1693;
+    const height = 929;
+    
+    // Global State
+    let selectedElement = null; // { type: 'city'|'region'|'hydro', data: object }
+    let idCounter = 0;
+
+    function createId() { return 'el-' + (idCounter++); }
+
+    // --- Initial Data (Draggable) ---
+    let cities = [
+      { id: createId(), name: "Babylon", x: 800, y: 400, rot: 0, anchor: "start", dx: 8, dy: 0 },
+      { id: createId(), name: "Nineveh", x: 800, y: 350, rot: 0, anchor: "start", dx: 8, dy: 0 },
+      { id: createId(), name: "Ur", x: 850, y: 450, rot: 0, anchor: "start", dx: 8, dy: 0 },
+      { id: createId(), name: "Susa", x: 900, y: 420, rot: 0, anchor: "start", dx: 8, dy: 0 },
+      { id: createId(), name: "Jerusalem", x: 500, y: 450, rot: 0, anchor: "end", dx: -10, dy: 0, isStar: true },
+      { id: createId(), name: "Tyre", x: 500, y: 400, rot: 0, anchor: "end", dx: -8, dy: 0 },
+      { id: createId(), name: "Gaza", x: 480, y: 470, rot: 0, anchor: "end", dx: -8, dy: 0 },
+      { id: createId(), name: "Memphis", x: 400, y: 550, rot: 0, anchor: "start", dx: 8, dy: 0 }
+    ];
+
+    let regions = [
+      { id: createId(), name: "LEVANT", x: 550, y: 400, rot: 0 },
+      { id: createId(), name: "ARAM", x: 650, y: 350, rot: 0 },
+      { id: createId(), name: "ELAM", x: 950, y: 450, rot: 0 },
+      { id: createId(), name: "EGYPT", x: 350, y: 550, rot: 0 }
+    ];
+
+    let hydro = [
+      { id: createId(), name: "Mediterranean Sea", x: 300, y: 300, rot: -15 },
+      { id: createId(), name: "Persian Gulf", x: 950, y: 600, rot: -25 },
+      { id: createId(), name: "Tigris", x: 850, y: 380, rot: -30 },
+      { id: createId(), name: "Euphrates", x: 750, y: 420, rot: -20 },
+      { id: createId(), name: "Nile", x: 420, y: 650, rot: -75 }
+    ];
+
+    let polyPoints = [
+      {x: 480, y: 480}, {x: 500, y: 430}, {x: 520, y: 380}, {x: 560, y: 350},
+      {x: 600, y: 330}, {x: 700, y: 325}, {x: 800, y: 320}, {x: 850, y: 360},
+      {x: 900, y: 400}, {x: 890, y: 440}, {x: 880, y: 480}, {x: 800, y: 490},
+      {x: 750, y: 500}, {x: 675, y: 495}, {x: 600, y: 490}, {x: 540, y: 485}
+    ];
+
+    // --- Math Engine (Guideline) ---
+    let worldData = null;
+    let showCoastlines = false;
+
+    function renderMathProjection() {
+      if (!worldData || !showCoastlines) {
+        d3.select('#layer-coastlines').selectAll('*').remove();
+        return;
+      }
+      
+      const projType = document.getElementById('input-proj').value;
+      let projection = d3.geoMercator();
+      if (projType === 'equirectangular') projection = d3.geoEquirectangular();
+      else if (projType === 'conicConformal') projection = d3.geoConicConformal();
+      
+      const scale = +document.getElementById('input-scale').value;
+      const cx = +document.getElementById('input-x').value;
+      const cy = +document.getElementById('input-y').value;
+      const sx = +document.getElementById('input-sx').value;
+      const sy = +document.getElementById('input-sy').value;
+      
+      document.getElementById('val-scale').innerText = scale;
+      document.getElementById('val-x').innerText = cx;
+      document.getElementById('val-y').innerText = cy;
+      document.getElementById('val-sx').innerText = sx;
+      document.getElementById('val-sy').innerText = sy;
+
+      projection.scale(scale).center([cx, cy]).translate([width / 2, height / 2]);
+
+      const customTransform = d3.geoTransform({
+        point: function(lon, lat) {
+          let [px, py] = projection([lon, lat]);
+          this.stream.point((px - width/2) * sx + width/2, (py - height/2) * sy + height/2);
+        }
+      });
+      
+      const path = d3.geoPath().projection(customTransform);
+      const coasts = d3.select('#layer-coastlines').selectAll('path').data(worldData.features);
+      coasts.enter().append('path').attr('class', 'ref-coast')
+            .merge(coasts).attr('d', path);
+      coasts.exit().remove();
+    }
+
+    d3.json('https://unpkg.com/world-atlas@2/countries-110m.json').then(topo => {
+      worldData = topojson.feature(topo, topo.objects.countries);
+      if(showCoastlines) renderMathProjection();
+    });
+
+    d3.selectAll('#guideline-controls input, #guideline-controls select').on('input', renderMathProjection);
+    document.getElementById('btn-toggle-coast').addEventListener('click', (e) => {
+      showCoastlines = !showCoastlines;
+      document.getElementById('guideline-controls').style.display = showCoastlines ? 'block' : 'none';
+      e.target.innerText = showCoastlines ? "Hide Green Coastlines" : "Show Green Coastlines";
+      renderMathProjection();
+    });
+
+
+    // --- Drag & Drop Editor Logic ---
+
+    function selectElement(type, d) {
+      selectedElement = { type, data: d };
+      
+      // Update UI Panel
+      document.getElementById('panel-edit').style.display = 'block';
+      document.getElementById('edit-text').value = d.name || '';
+      document.getElementById('edit-rot').value = d.rot || 0;
+      document.getElementById('val-edit-rot').innerText = d.rot || 0;
+      
+      // Highlight SVG
+      d3.selectAll('.draggable, .poly-handle').classed('selected', false);
+      if(d.id) d3.select(`[data-id="${d.id}"]`).classed('selected', true);
+    }
+
+    const drag = d3.drag()
+      .on("start", function(e, d) {
+        let type = d.anchor ? 'city' : (d.dx ? 'hydro' : 'region'); // hacky type detection
+        if(d3.select(this).classed('hydro-label-container')) type = 'hydro';
+        else if(d3.select(this).classed('reg-label-container')) type = 'region';
+        else type = 'city';
+        selectElement(type, d);
+      })
+      .on("drag", function(e, d) {
+        d.x = e.x;
+        d.y = e.y;
+        d3.select(this).attr("transform", `translate(${d.x},${d.y}) rotate(${d.rot||0})`);
+      });
+
+    const dragPoly = d3.drag()
+      .on("drag", function(e, d) {
+        d.x = e.x;
+        d.y = e.y;
+        d3.select(this).attr("cx", d.x).attr("cy", d.y);
+        renderPolygon();
+      });
+
+    // Drawing Functions
+    function renderPolygon() {
+      const lineGen = d3.line().x(d => d.x).y(d => d.y).curve(d3.curveCardinalClosed.tension(0.5));
+      const poly = d3.select('#layer-empire').selectAll('path').data([polyPoints]);
+      poly.enter().append('path').attr('class', 'emp-poly')
+          .merge(poly).attr('d', lineGen);
+    }
+
+    function renderHandles() {
+      const handles = d3.select('#layer-handles').selectAll('circle').data(polyPoints);
+      handles.enter().append('circle')
+             .attr('class', 'poly-handle')
+             .attr('r', 5)
+             .call(dragPoly)
+             .merge(handles)
+             .attr('cx', d => d.x)
+             .attr('cy', d => d.y);
+      handles.exit().remove();
+    }
+
+    function renderCities() {
+      const gCities = d3.select('#layer-cities');
+      const nodes = gCities.selectAll('g.city').data(cities, d => d.id);
+      
+      nodes.exit().remove();
+      const nodesEnter = nodes.enter().append('g')
+                              .attr('class', 'city draggable')
+                              .attr('data-id', d => d.id)
+                              .call(drag);
+      
+      nodesEnter.each(function(d) {
+        const sel = d3.select(this);
+        if (d.isStar) sel.append('use').attr('href', '#star-marker');
+        else sel.append('circle').attr('class', 'city-node').attr('r', 3);
+        sel.append('text').attr('class', 'city-label');
+      });
+
+      const merged = nodesEnter.merge(nodes);
+      merged.attr("transform", d => `translate(${d.x},${d.y}) rotate(${d.rot||0})`);
+      merged.select('text')
+            .attr('x', d => d.dx).attr('y', d => d.dy)
+            .attr('text-anchor', d => d.anchor)
+            .text(d => d.name);
+    }
+
+    function renderText(layerId, data, className) {
+      const layer = d3.select(layerId);
+      const textNodes = layer.selectAll(`g.${className}-container`).data(data, d => d.id);
+      
+      textNodes.exit().remove();
+      const textEnter = textNodes.enter().append('g')
+                                 .attr('class', `${className}-container draggable`)
+                                 .attr('data-id', d => d.id)
+                                 .call(drag);
+      
+      textEnter.append('text').attr('class', className);
+
+      const merged = textEnter.merge(textNodes);
+      merged.attr("transform", d => `translate(${d.x},${d.y}) rotate(${d.rot||0})`);
+      merged.select('text').text(d => d.name);
+    }
+
+    function renderAll() {
+      renderPolygon();
+      renderHandles();
+      renderCities();
+      renderText('#layer-regions', regions, 'reg-label');
+      renderText('#layer-hydro', hydro, 'hydro-label');
+      
+      if(selectedElement) {
+        d3.selectAll('.draggable').classed('selected', false);
+        d3.select(`[data-id="${selectedElement.data.id}"]`).classed('selected', true);
+      }
+    }
+
+    // --- UI Listeners ---
+    document.getElementById('edit-text').addEventListener('input', (e) => {
+      if(!selectedElement) return;
+      selectedElement.data.name = e.target.value;
+      renderAll();
+    });
+    
+    document.getElementById('edit-rot').addEventListener('input', (e) => {
+      if(!selectedElement) return;
+      selectedElement.data.rot = +e.target.value;
+      document.getElementById('val-edit-rot').innerText = e.target.value;
+      renderAll();
+    });
+
+    document.getElementById('btn-delete').addEventListener('click', () => {
+      if(!selectedElement) return;
+      if(selectedElement.type === 'city') cities = cities.filter(c => c.id !== selectedElement.data.id);
+      if(selectedElement.type === 'region') regions = regions.filter(r => r.id !== selectedElement.data.id);
+      if(selectedElement.type === 'hydro') hydro = hydro.filter(h => h.id !== selectedElement.data.id);
+      
+      selectedElement = null;
+      document.getElementById('panel-edit').style.display = 'none';
+      renderAll();
+    });
+
+    document.getElementById('btn-add-city').addEventListener('click', () => {
+      const newItem = { id: createId(), name: "New City", x: width/2, y: height/2, rot: 0, anchor: "start", dx: 8, dy: 0 };
+      cities.push(newItem);
+      selectElement('city', newItem);
+      renderAll();
+    });
+
+    document.getElementById('btn-add-region').addEventListener('click', () => {
+      const newItem = { id: createId(), name: "NEW REGION", x: width/2, y: height/2, rot: 0 };
+      regions.push(newItem);
+      selectElement('region', newItem);
+      renderAll();
+    });
+
+    document.getElementById('btn-add-hydro').addEventListener('click', () => {
+      const newItem = { id: createId(), name: "New River", x: width/2, y: height/2, rot: 0 };
+      hydro.push(newItem);
+      selectElement('hydro', newItem);
+      renderAll();
+    });
+
+    // --- Export ---
+    document.getElementById('btn-export').addEventListener('click', () => {
+      // Clean up before export
+      d3.select('#layer-handles').style('display', 'none');
+      d3.selectAll('.draggable').classed('selected', false);
+      const oldCoastShow = showCoastlines;
+      showCoastlines = false;
+      renderMathProjection();
+      
+      const svgNode = document.getElementById('map-export');
+      let source = new XMLSerializer().serializeToString(svgNode);
+      source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+      const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+      
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "babylone-blueprint.svg";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Restore state
+      d3.select('#layer-handles').style('display', null);
+      if(selectedElement) d3.select(`[data-id="${selectedElement.data.id}"]`).classed('selected', true);
+      showCoastlines = oldCoastShow;
+      renderMathProjection();
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>

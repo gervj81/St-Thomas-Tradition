@@ -1,0 +1,36 @@
+<?xml version="1.0" standalone="no"?>
+<svg id="map-export" xmlns="http://www.w3.org/2000/svg" width="1693" height="929" viewBox="0 0 1693 929">
+        <defs>
+          <style>
+            /* Embedded Fonts for standard renderers */
+            @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=IBM+Plex+Sans:wght@400;500&amp;display=swap');
+            
+            .base-image { pointer-events: none; }
+            
+            /* Reference Coastlines */
+            .ref-coast { fill: none; stroke: #00ff00; stroke-width: 1.5px; opacity: 0.8; pointer-events: none; }
+            
+            /* The Blueprint Styles */
+            .emp-poly { fill: #d8c8a0; opacity: 0.75; mix-blend-mode: multiply; stroke: #a39572; stroke-width: 2px; }
+            
+            .city-node { fill: #ffffff; stroke: #1a1612; stroke-width: 1.5px; }
+            .city-label { font-family: 'Source Serif 4', Georgia, serif; font-size: 13px; fill: #1a1612; text-anchor: start; alignment-baseline: central; }
+            
+            .reg-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #6e6151; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; text-anchor: middle; alignment-baseline: central; }
+            
+            .hydro-label { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; font-size: 14px; fill: #486a87; text-anchor: middle; alignment-baseline: central; }
+          </style>
+          
+          <path id="star-marker" d="M 0 -4 L 1.5 -1 L 4.5 -1 L 2 1.5 L 3 4.5 L 0 2.5 L -3 4.5 L -2 1.5 L -4.5 -1 L -1.5 -1 Z" fill="#ffffff" stroke="#1a1612" stroke-width="1.2"/>
+        </defs>
+
+        <!-- Base Raster Image -->
+        <image class="base-image" href="../images/timeline/base map.png" width="1693" height="929"/>
+        
+        <!-- Geography Groups -->
+        <g id="layer-empire"><path class="emp-poly" d="M556.62,446.811L573.011,352.5L590.048,305.165L661.222,291.928L715.049,302.468L770.184,371.662L824.675,405.551L825.876,464.275L790.209,476.925L736.168,466.482L646.142,445.005Z"/></g>
+        <g id="layer-coastlines"/>
+        <g id="layer-cities"><circle class="city-node" cx="742.5755018973236" cy="406.87337436122573" r="3"/><text class="city-label" x="750.5755018973236" y="406.87337436122573" text-anchor="start">Babylon</text><circle class="city-node" cx="718.043661695749" cy="317.4399271170539" r="3"/><text class="city-label" x="726.043661695749" y="317.4399271170539" text-anchor="start">Nineveh</text><circle class="city-node" cx="773.4030652584258" cy="443.0271586679161" r="3"/><text class="city-label" x="781.4030652584258" y="443.0271586679161" text-anchor="start">Ur</text><circle class="city-node" cx="811.1992279978755" cy="413.1798747450167" r="3"/><text class="city-label" x="819.1992279978755" y="413.1798747450167" text-anchor="start">Susa</text><use href="#star-marker" x="577.9999177828618" y="428.54016088974123"/><text class="city-label" x="567.9999177828618" y="428.54016088974123" text-anchor="end">Jerusalem</text><circle class="city-node" cx="577.0764750752344" cy="393.0742989981287" r="3"/><text class="city-label" x="569.0764750752344" y="393.0742989981287" text-anchor="end">Tyre</text><circle class="city-node" cx="564.6738894360681" cy="434.90820199584607" r="3"/><text class="city-label" x="556.6738894360681" y="434.90820199584607" text-anchor="end">Gaza</text><circle class="city-node" cx="507.78325974323536" cy="474.9631196317272" r="3"/><text class="city-label" x="515.7832597432354" y="474.9631196317272" text-anchor="start">Memphis</text></g>
+        <g id="layer-regions"><text class="reg-label" x="600.410906349399" y="387.20580977683153">LEVANT</text><text class="reg-label" x="635.3331324015505" y="339.4847449696541">ARAM</text><text class="reg-label" x="825.4027618892869" y="440.78531947806397">ELAM</text><text class="reg-label" x="683.1767316833026" y="514.6973751253629">ARABIA</text><text class="reg-label" x="486.1111000730692" y="530.3236279927347">EGYPT</text><text class="reg-label" x="360.4727040515423" y="508.7267586819774">LIBYA</text><text class="reg-label" x="455.7687460492762" y="272.3453886061156">LYDIA</text><text class="reg-label" x="438.1352325573478" y="284.3754482890462">IONIA</text><text class="reg-label" x="456.1208497800496" y="295.8381611167214">KARIA</text><text class="reg-label" x="509.00359037206584" y="259.69301323878153">PHRYGIA</text><text class="reg-label" x="956.9736128685273" y="307.96831591891186">PARTHAVA</text><text class="reg-label" x="914.108801310554" y="391.42569377267534">SAGARTIA</text><text class="reg-label" x="898.1916334098895" y="485.87019042060115">PĀRS</text></g>
+        <g id="layer-hydro"><text class="hydro-label" x="448.3592505407513" y="378.2067623292854">Mediterranean Sea</text><text class="hydro-label" x="569.5103462042581" y="164.5687226348299">Black Sea</text><text class="hydro-label" x="856.3761207084898" y="228.4566596071578">Caspian Sea</text><text class="hydro-label" x="881.6269057616505" y="556.821999556742">Persian Gulf</text><text class="hydro-label" x="730.5605849102719" y="360.8599668008887">Tigris</text><text class="hydro-label" x="689.8555114136709" y="385.29652423386784">Euphrates</text><text class="hydro-label" x="513.1485529854441" y="541.6037451638692">Nile</text></g>
+      </svg>
