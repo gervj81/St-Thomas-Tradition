@@ -118,7 +118,7 @@
   --bg-texture: url('../images/textures/Part1a background.png');
   --bg-gradient: linear-gradient(to bottom right, #fdfbf7, #f4eee2);
   --bg-image: url('../images/textures/Part1a background.png');
-  --texture-opacity: 0.05;
+  --texture-opacity: 0.08;
   --bg-animation: oceanicDrift 180s linear infinite;
   --accent: #b87333; /* Bronze */
   --part-atmosphere: 'oceanic';
@@ -127,7 +127,7 @@
 [data-theme="dark"][data-part="1"] {
   --bg-gradient: linear-gradient(to bottom right, #1a1a1e, #141418);
   --bg-image: url('../images/textures/Part1a background.png');
-  --texture-opacity: 0.05;
+  --texture-opacity: 0.06;
   --bg-animation: oceanicDrift 180s linear infinite;
   --noise-opacity: 0.04;
 }
@@ -3782,8 +3782,8 @@ margin-bottom: 0;
   align-items: center;
   justify-content: center;
   /* Fade out top and bottom edges completely */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 65%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 65%, transparent 100%);
   text-align: center;
 }
 
@@ -3802,7 +3802,7 @@ margin-bottom: 0;
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(to bottom, rgba(10, 5, 0, 0.25) 0%, transparent 50%, rgba(10, 5, 0, 0.25) 100%);
+  background: linear-gradient(to bottom, rgba(10, 5, 0, 0.15) 0%, transparent 20%, transparent 65%, rgba(10, 5, 0, 0.15) 100%);
   z-index: 2;
   pointer-events: none;
 }
