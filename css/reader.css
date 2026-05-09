@@ -3848,7 +3848,8 @@ margin-bottom: 0;
     height: 95vh;
   }
   .part-intro-hero .hero-bg {
-    background-position: 90% 30%; /* Keep India heavily in view on mobile */
+    background-position: 100% 30%; /* Anchor India */
+    animation: mobileHeroPan 60s ease-in-out infinite;
   }
 }
 
@@ -3859,4 +3860,10 @@ margin-bottom: 0;
 @keyframes subtleHeroDrift {
   0% { transform: scale(1) translate(0, 0); }
   100% { transform: scale(1.12) translate(-1.5%, 1%); }
+}
+
+@keyframes mobileHeroPan {
+  0% { background-position: 100% 30%; transform: scale(1); }
+  50% { background-position: 0% 30%; transform: scale(1.08); }
+  100% { background-position: 100% 30%; transform: scale(1); }
 }
