@@ -3792,7 +3792,7 @@ margin-bottom: 0;
   top: 0; left: 0; right: 0; bottom: 0;
   background-size: cover;
   background-position: center 30%;
-  animation: subtleHeroDrift 20s ease-in-out infinite alternate;
+  animation: subtleHeroDrift 40s ease-in-out infinite alternate;
   /* Seamless fade at the bottom into the background */
   
   z-index: 1;
@@ -3849,7 +3849,7 @@ margin-bottom: 0;
   }
   .part-intro-hero .hero-bg {
     background-position: 100% 30%; /* Anchor India */
-    animation: mobileHeroPan 60s ease-in-out infinite;
+    animation: mobileHeroPan 120s ease-in-out infinite;
   }
 }
 
