@@ -275,12 +275,6 @@ body::before {
   background-attachment: scroll;
   opacity: var(--bg-image-opacity, 0);
   transition: opacity var(--transition-slow);
-  animation: backgroundDrift 60s ease-in-out infinite alternate;
-}
-
-@keyframes backgroundDrift {
-  0%   { transform: scale(1.02) translate3d(0, 0, 0); }
-  100% { transform: scale(1.05) translate3d(-1%, -0.5%, 0); }
 }
 
 body::after {
@@ -733,28 +727,65 @@ main,
 
 .infographic-container {
   margin: var(--space-8) 0;
-  padding: var(--space-6);
+  padding: 0; /* Clear padding to let summary handle it */
+  background:
+    linear-gradient(135deg, var(--accent-soft) 0%, transparent 55%),
+    var(--bg-card);
+  border: 1px solid var(--rule-hairline);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-smooth);
+}
+.infographic-container[open] {
+  border: 1px solid var(--rule-hairline);
   background: var(--bg-card);
-  border-top: 1px solid var(--rule-archival);
-  border-bottom: 1px solid var(--rule-archival);
-  border-radius: 0;
   box-shadow: none;
 }
-.infographic-container .infographic-title {
-  font-family: var(--font-ui);
-  font-size: var(--fs-xs);
+
+/* Show only the toggle icon, hide all other decorative SVGs */
+.infographic-container svg:not(.toggle-icon) { display: none; }
+
+/* Toggle icon and ripple anchoring */
+.infographic-container summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4); /* Space after chevron */
+  position: relative;
+  min-height: 64px;
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-document);
   font-weight: 600;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: var(--space-4);
+  font-size: var(--fs-md);
+  text-transform: none;
+  color: var(--text-primary);
+  text-align: left;
 }
-.infographic-container h3 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: var(--fs-xl);
-  margin-top: 0;
-  margin-bottom: var(--space-4);
+
+.infographic-container svg.toggle-icon { 
+  position: relative;
+  z-index: 2;
+  flex: 0 0 22px; /* Fixed width for chevron */
+  display: inline-block; 
+  transition: transform var(--transition-smooth);
+  color: var(--accent);
+}
+.infographic-container[open] svg.toggle-icon {
+  transform: rotate(90deg);
+}
+.infographic-container summary::-webkit-details-marker { display: none; }
+.infographic-container summary::after { content: none !important; }
+.infographic-container h3,
+.infographic-container .infographic-subtitle {
+  display: none; /* Summary now acts as the primary title/context */
+}
+
+.infographic-content {
+  padding: var(--space-6);
+  background: var(--bg-primary); /* Discrete lane for content */
+  border-top: 1px solid var(--rule-hairline);
 }
 
 .infographic-grid {
@@ -769,6 +800,34 @@ main,
     gap: var(--space-6);
   }
 }
+
+.infographic-container .infographic-card {
+  font-family: var(--font-document); /* Serif body */
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  background: transparent;
+  border: 1px solid var(--rule-hairline);
+  border-left-width: 4px;
+}
+.infographic-container .infographic-card h4 {
+  font-family: var(--font-ui); /* Sans-serif sub-headers */
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: var(--space-2);
+  color: var(--text-primary);
+}
+.infographic-container .infographic-card .infographic-list {
+  padding-left: 1.2em;
+  color: var(--text-secondary);
+}
+
+/* Muted Column Borders */
+.infographic-container .gold-border  { border-left-color: #bda68a; }
+.infographic-container .slate-border { border-left-color: #708090; }
+.infographic-container .accent-border { border-left-color: var(--rule-strong); }
 
 .comparison-table,
 table.comparison {
@@ -1630,16 +1689,26 @@ button:hover,
 #footnote-popover {
   position: fixed; z-index: 90;
   max-width: 420px; width: calc(100vw - 32px);
+  left: 50%; bottom: var(--space-4); transform: translateX(-50%) translateY(12px);
   background: var(--bg-popover);
   border: 1px solid var(--rule-hairline);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  opacity: 0; pointer-events: none; transform: translateY(6px);
+  opacity: 0; pointer-events: none;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
-#footnote-popover.is-open, #footnote-popover.active, #footnote-popover.open,
-#footnote-backdrop.is-open, #footnote-backdrop.active {
-  opacity: 1; pointer-events: auto; transform: translateY(0);
+#footnote-popover.active,
+#footnote-backdrop.active {
+  opacity: 1; pointer-events: auto;
+}
+#footnote-popover.active {
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (min-width: 768px) {
+  #footnote-popover {
+    bottom: auto !important;
+  }
 }
 #footnote-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -2166,13 +2235,7 @@ p.chapter-lead-last { font-style: normal; }
   border: 1px solid var(--rule-hairline);
   border-left: 2px solid var(--accent);
   border-radius: var(--radius-sm);
-  transition: transform var(--transition-fast), border-color var(--transition-fast),
-              box-shadow var(--transition-fast);
-}
-.infographic-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
-  box-shadow: var(--shadow-sm);
+  /* Static cards — no hover interaction as requested */
 }
 .infographic-card-header {
   display: flex;
@@ -2344,6 +2407,17 @@ p.chapter-lead-last { font-style: normal; }
 /* ════════════════════════════════════════════════════════════════
    29. TIMELINE-ITEM (chapter-3 style) — polished cards + motion
    ════════════════════════════════════════════════════════════════ */
+@keyframes detailsGleam {
+  0%   { transform: translateX(-130%); }
+  60%  { transform: translateX(130%); }
+  100% { transform: translateX(130%); }
+}
+
+@keyframes detailsOpen {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .infographic .timeline,
 .timeline {
   display: grid;
@@ -2447,12 +2521,7 @@ p.chapter-lead-last { font-style: normal; }
   transition: transform var(--transition-fast), background var(--transition-fast),
               box-shadow var(--transition-fast);
 }
-.timeline-item:hover .timeline-date::before {
-  transform: scale(1.25);
-  background: var(--accent);
-  box-shadow: 0 0 0 3px var(--bg-primary), 0 0 14px var(--accent-glow);
-}
-
+/* Static timeline — no hover interaction as requested */
 .timeline-item .timeline-title {
   font-family: var(--font-display);
   font-weight: 500;
@@ -2589,22 +2658,6 @@ details[open].info-collapse,
   box-shadow: var(--shadow-md);
 }
 
-/* Always-on attention beacon when collapsed */
-.chapter-container details:not([open])::before,
-.prose details:not([open])::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(115deg,
-    transparent 40%,
-    color-mix(in oklab, var(--accent), white 35%) 50%,
-    transparent 60%);
-  opacity: 0.18;
-  transform: translateX(-130%);
-  animation: detailsGleam 5.5s cubic-bezier(0.4,0,0.2,1) infinite;
-  mix-blend-mode: overlay;
-}
 @keyframes detailsGleam {
   0%   { transform: translateX(-130%); }
   60%  { transform: translateX(130%); }
