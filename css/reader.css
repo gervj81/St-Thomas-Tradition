@@ -97,6 +97,9 @@
   --rule-strong:   rgba(31, 26, 20, 0.22);
   --rule-archival: rgba(95, 60, 30, 0.32);
 
+  --scrollbar-thumb:       #cdc5b4;
+  --scrollbar-thumb-hover: #b9b1a0;
+
   --accent:        #b87333;   /* default — overridden per part */
   --accent-soft:   rgba(184, 115, 51, 0.18);
   --accent-glow:   rgba(184, 115, 51, 0.28);
@@ -137,6 +140,9 @@
   --rule-strong:   rgba(236, 228, 210, 0.18);
   --rule-archival: rgba(232, 184, 109, 0.30);
 
+  --scrollbar-thumb:       #4a453e;
+  --scrollbar-thumb-hover: #5d574e;
+
   --accent:      #e8b86d;
   --accent-soft: rgba(232, 184, 109, 0.14);
   --accent-glow: rgba(232, 184, 109, 0.26);
@@ -175,6 +181,9 @@
   --rule-hairline: rgba(58, 47, 34, 0.10);
   --rule-strong:   rgba(58, 47, 34, 0.20);
   --rule-archival: rgba(139, 94, 52, 0.36);
+
+  --scrollbar-thumb:       #c5b8a0;
+  --scrollbar-thumb-hover: #b0a38b;
 
   --accent:      #8b5e34;
   --accent-soft: rgba(139, 94, 52, 0.16);
@@ -282,6 +291,38 @@ body::after {
 [data-theme="dark"] body::after { mix-blend-mode: overlay; }
 
 ::selection { background: var(--accent-soft); color: var(--text-primary); }
+ 
+/* Scrollbar Aesthetics ────────────────────────────────────────── */
+ 
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+ 
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+ 
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 10px;
+  transition: background var(--transition-fast);
+}
+ 
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+ 
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
 
 
 /* ════════════════════════════════════════════════════════════════
