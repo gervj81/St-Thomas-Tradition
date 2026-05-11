@@ -253,6 +253,8 @@
       const html = await res.text();
 
       dom.chapterContent.innerHTML = html;
+      // Motion-plate decoration
+      if (window.MotionPlate) window.MotionPlate.decorate(dom.chapterContent);
       dom.chapterTitleBar.textContent = chapter.title;
 
       // Determine current Part based on section markers
@@ -348,53 +350,12 @@
   }
 
   function enhanceChapterOpening(chapter, currentPart) {
+    // Full-version: chapter-state pills (Historical State / Atlas Mode / Evidence Layer)
+    // and the auto-injected visual plate are intentionally removed. Chapter HTML
+    // controls its own opening. Prev/Next live in the bottom #chapter-nav only.
     const opening = dom.chapterContent.querySelector('.chapter-opening-unit');
     if (!opening || opening.dataset.enhanced === 'true') return;
-
-    const visualState = getChapterVisualState(chapter, currentPart);
     opening.dataset.enhanced = 'true';
-
-    let anchor = opening;
-    if (visualState.image) {
-      const figure = document.createElement('figure');
-      figure.className = 'chapter-visual-plate';
-      figure.innerHTML = `
-        <img src="${visualState.image}" alt="${visualState.caption || visualState.state}">
-        <figcaption>${visualState.caption || visualState.state}</figcaption>
-      `;
-      anchor.insertAdjacentElement('afterend', figure);
-      anchor = figure;
-    }
-
-    const statePanel = document.createElement('section');
-    statePanel.className = 'chapter-state-panel';
-    statePanel.setAttribute('aria-label', 'Chapter historical state');
-    statePanel.innerHTML = `
-      <div class="chapter-state-item">
-        <span>Historical State</span>
-        <strong>${visualState.state}</strong>
-      </div>
-      <div class="chapter-state-corridor" aria-hidden="true">
-        <span style="width:${visualState.pressure || 42}%"></span>
-      </div>
-      <div class="chapter-state-item">
-        <span>${currentPart === '2' ? 'Archive Mode' : 'Atlas Mode'}</span>
-        <strong>${visualState.mode}</strong>
-      </div>
-      <div class="chapter-state-item">
-        <span>Evidence Layer</span>
-        <strong>${visualState.evidence}</strong>
-      </div>
-    `;
-    anchor.insertAdjacentElement('afterend', statePanel);
-
-    if (currentPart === '2') {
-      const archiveStack = document.createElement('aside');
-      archiveStack.className = 'part2-archive-stack';
-      archiveStack.setAttribute('aria-hidden', 'true');
-      archiveStack.innerHTML = '<span></span><span></span><span></span>';
-      statePanel.insertAdjacentElement('afterend', archiveStack);
-    }
   }
 
 
@@ -495,7 +456,12 @@
   function updateNavigation() {
     dom.prevBtn.disabled = state.currentChapter === 0;
     dom.nextBtn.disabled = state.currentChapter >= state.chapters.length - 1;
-    dom.chapterIndicator.textContent = `${state.currentChapter + 1} / ${state.chapters.length}`;
+    const cur = state.chapters[state.currentChapter];
+    const chapterOnly = state.chapters.filter(c => /^chapter-\d+$/.test(c.id));
+    const idx = chapterOnly.findIndex(c => c.id === cur.id);
+    dom.chapterIndicator.textContent = idx >= 0
+      ? `Chapter ${idx + 1} / ${chapterOnly.length}`
+      : (cur.title || '');
   }
 
 
@@ -929,3 +895,212 @@
   }
 
 })();
+
+
+/* ═══ MOTION PLATE MODULE (appended) ═══ */
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║  MOTION PLATE — Timeline-event immersive overlay              ║
+   ║  Pairs with reader.css §9 (.motion-plate, .timeline-event)     ║
+   ║                                                                ║
+   ║  Drop-in: include AFTER reader.js, OR paste the IIFE body      ║
+   ║  inside reader.js's init() once chapter content is rendered.   ║
+   ║  Works with delegated events, so it survives chapter swaps.    ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+(function () {
+  'use strict';
+
+  const PLATE_ID = 'motion-plate';
+  const BODY_OPEN = 'motion-plate-open';
+
+  // ── 1. Build the plate skeleton once ─────────────────────────────
+  function ensurePlate() {
+    let plate = document.getElementById(PLATE_ID);
+    if (plate) return plate;
+
+    plate = document.createElement('div');
+    plate.id = PLATE_ID;
+    plate.className = 'motion-plate';
+    plate.setAttribute('aria-hidden', 'true');
+    plate.setAttribute('role', 'dialog');
+    plate.setAttribute('aria-modal', 'true');
+    plate.setAttribute('aria-label', 'Historical motion plate');
+    plate.innerHTML = [
+      '<div class="motion-plate__frame">',
+      '  <div class="motion-plate__media" aria-hidden="true"></div>',
+      '  <div class="motion-plate__edges" aria-hidden="true"></div>',
+      '  <figcaption class="motion-plate__caption">',
+      '    <div class="year"></div>',
+      '    <div class="state"></div>',
+      '    <div class="blurb"></div>',
+      '  </figcaption>',
+      '  <button class="motion-plate__close" type="button" aria-label="Close motion plate">',
+      '    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
+      '      <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>',
+      '    </svg>',
+      '  </button>',
+      '</div>'
+    ].join('');
+    document.body.appendChild(plate);
+
+    // Close interactions
+    plate.addEventListener('click', (e) => {
+      // backdrop click (anywhere outside .motion-plate__frame)
+      if (e.target === plate) close();
+    });
+    plate.querySelector('.motion-plate__close').addEventListener('click', close);
+
+    return plate;
+  }
+
+  // ── 2. Open / close ──────────────────────────────────────────────
+  let lastFocused = null;
+  let activeEvent = null;
+  let preloadedSrc = null;
+
+  function open(eventEl) {
+    const plate = ensurePlate();
+    const media = plate.querySelector('.motion-plate__media');
+    const yearEl = plate.querySelector('.year');
+    const stateEl = plate.querySelector('.state');
+    const blurbEl = plate.querySelector('.blurb');
+
+    const src   = eventEl.getAttribute('data-motion');
+    const year  = eventEl.getAttribute('data-year')  || eventEl.querySelector('.timeline-year')?.textContent?.trim() || '';
+    const state = eventEl.getAttribute('data-state') || eventEl.querySelector('.timeline-tag')?.textContent?.trim() || '';
+    const blurb = eventEl.getAttribute('data-blurb') || eventEl.querySelector('.timeline-blurb')?.textContent?.trim() || '';
+
+    if (!src) return;
+
+    // Preload to avoid a flash of empty plate; then commit.
+    const img = new Image();
+    img.onload = paint;
+    img.onerror = paint; // still open — caption + vignette carry it
+    img.src = src;
+
+    function paint() {
+      media.style.backgroundImage = `url("${src}")`;
+      yearEl.textContent  = year;
+      stateEl.textContent = state;
+      blurbEl.textContent = blurb;
+      preloadedSrc = src;
+
+      // Mark + open
+      activeEvent = eventEl;
+      eventEl.classList.add('is-active');
+      document.body.classList.add(BODY_OPEN);
+      plate.setAttribute('aria-hidden', 'false');
+
+      // Focus management
+      lastFocused = document.activeElement;
+      plate.querySelector('.motion-plate__close').focus({ preventScroll: true });
+
+      // Lock background scroll
+      document.body.dataset.scrollLock = String(window.scrollY);
+      document.body.style.top = `-${window.scrollY}px`;
+      document.body.style.position = 'fixed';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+    }
+  }
+
+  function close() {
+    const plate = document.getElementById(PLATE_ID);
+    if (!plate || !document.body.classList.contains(BODY_OPEN)) return;
+
+    document.body.classList.remove(BODY_OPEN);
+    plate.setAttribute('aria-hidden', 'true');
+
+    if (activeEvent) {
+      activeEvent.classList.remove('is-active');
+      activeEvent = null;
+    }
+
+    // Restore scroll
+    const y = parseInt(document.body.dataset.scrollLock || '0', 10);
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    delete document.body.dataset.scrollLock;
+    window.scrollTo(0, y);
+
+    // Restore focus
+    if (lastFocused && typeof lastFocused.focus === 'function') {
+      lastFocused.focus({ preventScroll: true });
+    }
+    lastFocused = null;
+
+    // After the close transition, drop the heavy bg image so it doesn't
+    // sit decoded in memory between plates.
+    setTimeout(() => {
+      if (!document.body.classList.contains(BODY_OPEN) && plate) {
+        const media = plate.querySelector('.motion-plate__media');
+        if (media) media.style.backgroundImage = '';
+        preloadedSrc = null;
+      }
+    }, 500);
+  }
+
+  // ── 3. Delegated click + keyboard wiring ─────────────────────────
+  // Delegated from document so it survives chapter swaps without rebinding.
+  document.addEventListener('click', (e) => {
+    // Ignore clicks inside the plate itself
+    if (e.target.closest('.motion-plate')) return;
+
+    const ev = e.target.closest('.timeline-event[data-motion]');
+    if (!ev) return;
+
+    // Don't hijack clicks on inner links / footnote refs
+    if (e.target.closest('a, button, .footnote-ref')) return;
+
+    e.preventDefault();
+    open(ev);
+  });
+
+  // Keyboard: Enter/Space to open a focused timeline event; Esc to close.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.body.classList.contains(BODY_OPEN)) {
+      e.preventDefault();
+      close();
+      return;
+    }
+    if ((e.key === 'Enter' || e.key === ' ') &&
+        document.activeElement &&
+        document.activeElement.matches('.timeline-event[data-motion]')) {
+      e.preventDefault();
+      open(document.activeElement);
+    }
+  });
+
+  // ── 4. Tabindex + ARIA on motion-bearing events ──────────────────
+  // Run on load AND whenever new chapter content lands. We expose a
+  // tiny global so reader.js can call it after innerHTML swaps.
+  function decorateMotionEvents(scope) {
+    const root = scope || document;
+    root.querySelectorAll('.timeline-event[data-motion]').forEach((ev) => {
+      if (!ev.hasAttribute('tabindex')) ev.setAttribute('tabindex', '0');
+      if (!ev.hasAttribute('role')) ev.setAttribute('role', 'button');
+      if (!ev.hasAttribute('aria-label')) {
+        const year  = ev.querySelector('.timeline-year')?.textContent?.trim() || '';
+        const title = ev.querySelector('.timeline-title')?.textContent?.trim() || '';
+        ev.setAttribute('aria-label', `Play motion plate: ${year} ${title}`.trim());
+      }
+    });
+  }
+
+  // Initial pass
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => decorateMotionEvents());
+  } else {
+    decorateMotionEvents();
+  }
+
+  // Public hook for reader.js
+  window.MotionPlate = {
+    decorate: decorateMotionEvents,
+    open,
+    close,
+  };
+})();
+
