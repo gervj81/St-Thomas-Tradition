@@ -353,7 +353,7 @@ h3 {
   font-style: normal;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-accent);
+  color: var(--accent);
   margin-top: var(--space-7);
   margin-bottom: var(--space-3);
 }
@@ -577,7 +577,7 @@ main,
   font-weight: 500;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--accent);
   margin-bottom: var(--space-2);
 }
 
@@ -602,7 +602,7 @@ main,
   font-weight: 350;
   font-size: var(--fs-md);
   line-height: 1.55;
-  color: var(--text-secondary);
+  color: var(--accent);
   max-width: 56ch;
 }
 .folio-epigraph cite { color: var(--text-muted); }
