@@ -381,7 +381,7 @@ h6 {
   font-weight: 600;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--text-accent);
+  color: var(--accent);
 }
 
 p {
@@ -638,8 +638,8 @@ main,
   font-weight: 600;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--text-muted);
-  background: var(--bg-card);
+  color: var(--accent);
+  background: var(--bg-primary);
 }
 
 .callout > h3,
@@ -699,7 +699,7 @@ main,
   font-weight: 600;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--text-accent);
+  color: var(--accent);
   margin-bottom: var(--space-3);
 }
 
@@ -800,7 +800,7 @@ main,
   text-transform: uppercase;
   margin-top: 0;
   margin-bottom: var(--space-2);
-  color: var(--text-primary);
+  color: var(--accent);
 }
 .infographic-container .infographic-card .infographic-list {
   padding-left: 1.2em;
@@ -1179,7 +1179,7 @@ sup.footnote {
   font-family: var(--font-ui);
   font-size: 0.72em;
   font-weight: 500;
-  color: var(--text-accent);
+  color: var(--accent);
   vertical-align: super;
   line-height: 0;
   cursor: pointer;
@@ -1962,8 +1962,9 @@ button:hover,
   position: absolute; top: var(--space-3); right: var(--space-4);
   font-family: var(--font-ui);
   font-size: 9px; font-weight: 700;
-  letter-spacing: 0.18em; color: var(--text-accent);
-  opacity: 0.55;
+  letter-spacing: 0.18em; 
+  color: var(--accent);
+  opacity: 0.65;
 }
 .interactive-feature-card:hover {
   transform: translateY(-2px);
@@ -2022,7 +2023,7 @@ button:hover,
   font-family: var(--font-body);
   font-size: var(--fs-sm);
   line-height: 1.45;
-  color: var(--text-secondary);
+  color: color-mix(in oklab, var(--text-secondary), var(--accent) 25%); /* Subtle part tint */
   margin: 0;
 }
 .interactive-feature-arrow {
@@ -2182,7 +2183,7 @@ p.chapter-lead-last { font-style: normal; }
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-accent);
+  color: var(--accent);
   margin-bottom: var(--space-5);
   padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--rule-hairline);
@@ -2251,7 +2252,7 @@ p.chapter-lead-last { font-style: normal; }
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-accent);
+  color: var(--accent);
   margin: 0 0 var(--space-4);
 }
 
@@ -2467,7 +2468,7 @@ p.chapter-lead-last { font-style: normal; }
   font-size: 11px;
   letter-spacing: 0.20em;
   text-transform: uppercase;
-  color: var(--text-accent);
+  color: var(--accent);
   font-variant-numeric: lining-nums;
   margin-bottom: var(--space-2);
   display: inline-block;
@@ -2871,7 +2872,7 @@ details.infographic-container:not([open]) > summary::after {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.20em;
-  color: var(--text-accent);
+  color: var(--accent);
   padding: 4px 10px;
   border: 1px solid var(--accent-soft);
   border-radius: 999px;
