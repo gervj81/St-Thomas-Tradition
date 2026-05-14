@@ -52,7 +52,14 @@ window.regionLabels = function(map, regions, oceans) {
 };
 
 window.makeMap = function(paneId, center, zoom){
-  const map = L.map(paneId, { center, zoom, zoomControl: false, preferCanvas: true });
+  const map = L.map(paneId, { 
+    center, 
+    zoom, 
+    zoomControl: false, 
+    preferCanvas: true,
+    dragging: !L.Browser.mobile,
+    tap: !L.Browser.mobile
+  });
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '', maxZoom: 12 }).addTo(map);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
   return map;
