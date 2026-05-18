@@ -778,9 +778,13 @@ main,
 }
 .infographic-container summary::-webkit-details-marker { display: none; }
 .infographic-container summary::after { content: none !important; }
-.infographic-container h3,
+
 .infographic-container .infographic-subtitle {
-  display: none; /* Summary now acts as the primary title/context */
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: var(--space-5);
 }
 
 .infographic-content {
