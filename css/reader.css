@@ -858,7 +858,7 @@ table.comparison {
   color: var(--text-muted);
   border-bottom: 1px solid var(--rule-strong);
 }
-.comparison-table tbody tr:hover { background: var(--accent-soft); }
+
 
 
 /* ════════════════════════════════════════════════════════════════
