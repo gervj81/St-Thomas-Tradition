@@ -780,8 +780,8 @@ main,
 .infographic-container summary::after { content: none !important; }
 
 .infographic-container .infographic-subtitle {
-  font-size: 14.5px;
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
   line-height: 1.5;
   margin-top: 0;
   margin-bottom: var(--space-5);
