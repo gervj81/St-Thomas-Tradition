@@ -424,7 +424,7 @@ blockquote {
    ──────────────────────────────────────────────────────────────── */
 
 /* Chapter 4 - Poetic, high-register in-text blockquotes with elegant quotation marks and no left line */
-[data-chapter="chapter-04"] #chapter-content blockquote {
+[data-chapter="chapter-04"] #chapter-content > blockquote {
   border-left: none !important;
   padding: var(--space-4) var(--space-8) var(--space-4) var(--space-8) !important;
   margin: var(--space-5) 0 !important;
@@ -438,7 +438,7 @@ blockquote {
 }
 
 /* Elegant large opening quote mark */
-[data-chapter="chapter-04"] #chapter-content blockquote::before {
+[data-chapter="chapter-04"] #chapter-content > blockquote::before {
   content: "“" !important;
   font-family: 'Merriweather', 'Georgia', serif !important;
   font-size: 4.2rem !important;
@@ -453,7 +453,7 @@ blockquote {
 }
 
 /* Elegant large closing quote mark */
-[data-chapter="chapter-04"] #chapter-content blockquote::after {
+[data-chapter="chapter-04"] #chapter-content > blockquote::after {
   content: "”" !important;
   font-family: 'Merriweather', 'Georgia', serif !important;
   font-size: 4.2rem !important;
@@ -468,7 +468,7 @@ blockquote {
 }
 
 /* Author / Citation line within the blockquote */
-[data-chapter="chapter-04"] #chapter-content blockquote p:last-of-type {
+[data-chapter="chapter-04"] #chapter-content > blockquote p:last-of-type {
   margin-top: var(--space-2) !important;
   font-family: var(--font-ui) !important;
   font-size: var(--fs-xs) !important;
@@ -482,14 +482,14 @@ blockquote {
 
 /* Responsive adjustment for Chapter 4 blockquotes on mobile viewports */
 @media (max-width: 640px) {
-  [data-chapter="chapter-04"] #chapter-content blockquote {
+  [data-chapter="chapter-04"] #chapter-content > blockquote {
     padding: var(--space-3) var(--space-6) var(--space-3) var(--space-6) !important;
   }
-  [data-chapter="chapter-04"] #chapter-content blockquote::before {
+  [data-chapter="chapter-04"] #chapter-content > blockquote::before {
     left: 0 !important;
     font-size: 3.2rem !important;
   }
-  [data-chapter="chapter-04"] #chapter-content blockquote::after {
+  [data-chapter="chapter-04"] #chapter-content > blockquote::after {
     right: 0 !important;
     font-size: 3.2rem !important;
   }
