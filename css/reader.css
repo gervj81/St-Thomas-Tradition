@@ -419,6 +419,83 @@ blockquote {
   margin: var(--space-6) 0;
 }
 
+/* ────────────────────────────────────────────────────────────────
+   4B. CHAPTER-SPECIFIC IN-TEXT BLOCKQUOTES
+   ──────────────────────────────────────────────────────────────── */
+
+/* Chapter 4 - Poetic, high-register in-text blockquotes with elegant quotation marks and no left line */
+[data-chapter="chapter-04"] #chapter-content blockquote {
+  border-left: none !important;
+  padding: var(--space-4) var(--space-8) var(--space-4) var(--space-8) !important;
+  margin: var(--space-5) 0 !important;
+  font-family: var(--font-body) !important;
+  font-size: calc(var(--fs-base) * 0.98) !important; /* Slightly reduced text size to merge elegantly with surrounding Lora prose */
+  line-height: 1.68 !important;
+  font-style: italic !important;
+  color: var(--text-secondary) !important;
+  position: relative !important;
+  text-align: left;
+}
+
+/* Elegant large opening quote mark */
+[data-chapter="chapter-04"] #chapter-content blockquote::before {
+  content: "“" !important;
+  font-family: 'Merriweather', 'Georgia', serif !important;
+  font-size: 4.2rem !important;
+  font-weight: 300 !important;
+  color: var(--accent) !important; /* Employs Chapter 4's copper accent */
+  opacity: 0.32 !important;
+  position: absolute !important;
+  left: var(--space-3) !important;
+  top: -0.7rem !important;
+  line-height: 1 !important;
+  user-select: none;
+}
+
+/* Elegant large closing quote mark */
+[data-chapter="chapter-04"] #chapter-content blockquote::after {
+  content: "”" !important;
+  font-family: 'Merriweather', 'Georgia', serif !important;
+  font-size: 4.2rem !important;
+  font-weight: 300 !important;
+  color: var(--accent) !important;
+  opacity: 0.32 !important;
+  position: absolute !important;
+  right: var(--space-3) !important;
+  bottom: -1.8rem !important;
+  line-height: 1 !important;
+  user-select: none;
+}
+
+/* Author / Citation line within the blockquote */
+[data-chapter="chapter-04"] #chapter-content blockquote p:last-of-type {
+  margin-top: var(--space-2) !important;
+  font-family: var(--font-ui) !important;
+  font-size: var(--fs-xs) !important;
+  font-style: normal !important;
+  font-weight: 600 !important;
+  letter-spacing: var(--tracking-caps) !important;
+  text-transform: uppercase !important;
+  color: var(--text-muted) !important;
+  display: block !important;
+}
+
+/* Responsive adjustment for Chapter 4 blockquotes on mobile viewports */
+@media (max-width: 640px) {
+  [data-chapter="chapter-04"] #chapter-content blockquote {
+    padding: var(--space-3) var(--space-6) var(--space-3) var(--space-6) !important;
+  }
+  [data-chapter="chapter-04"] #chapter-content blockquote::before {
+    left: 0 !important;
+    font-size: 3.2rem !important;
+  }
+  [data-chapter="chapter-04"] #chapter-content blockquote::after {
+    right: 0 !important;
+    font-size: 3.2rem !important;
+  }
+}
+
+
 cite {
   display: block;
   margin-top: var(--space-3);
