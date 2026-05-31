@@ -227,9 +227,17 @@
   --accent: #d36b63;
 }
 
+/* Part III — Reconstruction and Divergence */
 [data-part="3"] {
   --content-max-width: 720px;
-  --accent: #4a4540;
+  --lh-body: 1.72;
+  --accent:      #345e5a; /* Dusk Teal (Loss & Hope) */
+  --accent-soft: rgba(52, 94, 90, 0.1);
+  --accent-glow: rgba(52, 94, 90, 0.2);
+  --part-atmosphere: 'reconstruction';
+}
+[data-theme="dark"][data-part="3"] {
+  --accent: #6fa39b; /* Twilight Jade */
 }
 
 

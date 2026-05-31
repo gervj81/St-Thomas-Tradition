@@ -85,6 +85,17 @@
       "id": "chapter-12",
       "title": "The Wreckage",
       "file": "chapters/chapter-12.html"
+    },
+    {
+      "id": "part-3-intro",
+      "sectionMarker": "PART III · RECONSTRUCTION AND DIVERGENCE",
+      "title": "Part 3 Introduction",
+      "file": "chapters/part-3-intro.html"
+    },
+    {
+      "id": "chapter-13",
+      "title": "The Years of Divergence (1653–1815)",
+      "file": "chapters/chapter-13.html"
     }
   ]
 }
