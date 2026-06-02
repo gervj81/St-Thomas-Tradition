@@ -89,7 +89,12 @@
       image: GENERATED_ASSETS.syriacTexture,
     },
     'chapter-13': {
-      image: GENERATED_ASSETS.syriacTexture,
+      state: 'Global trade rivalry',
+      mode: 'Chronicle',
+      evidence: 'Company record',
+      pressure: 100,
+      image: GENERATED_ASSETS.keralaPort,
+      caption: 'The Calvinist VOC fleet conquers the pepper ports of Portuguese Malabar.',
     },
   };
   const GENERATED_SRC_REPLACEMENTS = new Map([
