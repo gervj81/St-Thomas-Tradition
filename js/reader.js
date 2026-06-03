@@ -96,6 +96,14 @@
       image: GENERATED_ASSETS.keralaPort,
       caption: 'The Calvinist VOC fleet conquers the pepper ports of Portuguese Malabar.',
     },
+    'chapter-14': {
+      state: 'Double jurisdiction',
+      mode: 'Archive',
+      evidence: 'Carmelite petition',
+      pressure: 100,
+      image: GENERATED_ASSETS.syriacTexture,
+      caption: 'The Carmelite vicars apostolic and the Padroado dispute the governance of the Serra.',
+    },
   };
   const GENERATED_SRC_REPLACEMENTS = new Map([
     ['images/generated/indian_ocean_atlas.png', GENERATED_ASSETS.indianOceanAtlas],
