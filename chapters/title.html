@@ -2,6 +2,36 @@
 <style>
   /* Hide the global chapter nav on the title page */
   #chapter-nav { display: none !important; }
+
+  .title-card-contact {
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-2);
+    margin-bottom: 0;
+    opacity: 0;
+    animation: titleReveal 900ms cubic-bezier(0.16, 1, 0.3, 1) 1020ms forwards;
+  }
+  
+  .title-card-email {
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--rule-hairline);
+    transition: color 0.2s ease, border-bottom-color 0.2s ease;
+  }
+  
+  .title-card-email:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .title-card-contact {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
 </style>
 <div class="title-card">
   <div class="title-card-bg" aria-hidden="true">
@@ -18,6 +48,7 @@
       <span>Origins</span>
     </h1>
     <p class="title-card-deck">An Investigative synthesis by <span class="title-card-author">Gerald Johnson</span></p>
+    <p class="title-card-contact">Contact: <a href="mailto:mytsark@gmail.com" class="title-card-email">mytsark@gmail.com</a></p>
     
     <div class="title-card-nav">
       <button class="pill-btn primary" onclick="document.querySelectorAll('#toc-list a')[1].click()">Begin reading</button>
