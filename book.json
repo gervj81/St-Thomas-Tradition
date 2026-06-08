@@ -94,13 +94,18 @@
     },
     {
       "id": "chapter-13",
-      "title": "The Trade Companies of War",
+      "title": "Companies of War",
       "file": "chapters/chapter-13.html"
     },
     {
       "id": "chapter-14",
       "title": "The Bishop at Alangad",
       "file": "chapters/chapter-14.html"
+    },
+    {
+      "id": "chapter-15",
+      "title": "The Spark Awaited",
+      "file": "chapters/chapter-15.html"
     }
   ]
 }

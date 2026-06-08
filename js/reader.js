@@ -104,6 +104,14 @@
       image: GENERATED_ASSETS.syriacTexture,
       caption: 'The Carmelite vicars apostolic and the Padroado dispute the governance of the Serra.',
     },
+    'chapter-15': {
+      state: 'Native agitation',
+      mode: 'Archive',
+      evidence: 'Padiyola oath',
+      pressure: 100,
+      image: GENERATED_ASSETS.syriacTexture,
+      caption: 'The cattanars of the Serra swear the Angamaly Padiyola, demanding native government.',
+    },
   };
   const GENERATED_SRC_REPLACEMENTS = new Map([
     ['images/generated/indian_ocean_atlas.png', GENERATED_ASSETS.indianOceanAtlas],
