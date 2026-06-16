@@ -16,7 +16,7 @@
     },
     {
       "id": "part-1-intro",
-      "sectionMarker": "PART I · ORIGINS AND THE COMMONWEALTH",
+      "sectionMarker": "PART I \u00b7 ORIGINS AND THE COMMONWEALTH",
       "title": "Part 1 Introduction",
       "file": "chapters/part-1-intro.html"
     },
@@ -42,7 +42,7 @@
     },
     {
       "id": "part-2-intro",
-      "sectionMarker": "PART II · THE LONG DISRUPTION",
+      "sectionMarker": "PART II \u00b7 THE LONG DISRUPTION",
       "title": "Part 2 Introduction",
       "file": "chapters/part-2-intro.html"
     },
@@ -88,7 +88,7 @@
     },
     {
       "id": "part-3-intro",
-      "sectionMarker": "PART III · RECONSTRUCTION AND DIVERGENCE",
+      "sectionMarker": "PART III \u00b7 RECONSTRUCTION AND DIVERGENCE",
       "title": "Part 3 Introduction",
       "file": "chapters/part-3-intro.html"
     },
@@ -106,6 +106,16 @@
       "id": "chapter-15",
       "title": "The Spark Awaited",
       "file": "chapters/chapter-15.html"
+    },
+    {
+      "id": "chapter-16",
+      "title": "The New Sovereigns",
+      "file": "chapters/chapter-16.html"
+    },
+    {
+      "id": "chapter-17",
+      "title": "The Forging of a People",
+      "file": "chapters/chapter-17.html"
     }
   ]
 }

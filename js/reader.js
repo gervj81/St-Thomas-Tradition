@@ -112,6 +112,22 @@
       image: GENERATED_ASSETS.syriacTexture,
       caption: 'The cattanars of the Serra swear the Angamaly Padiyola, demanding native government.',
     },
+    'chapter-16': {
+      state: 'Decline of Dutch',
+      mode: 'Chronicle',
+      evidence: 'Company report',
+      pressure: 100,
+      image: GENERATED_ASSETS.keralaPort,
+      caption: 'The decline of the VOC and the rise of new European sovereigns on the coast.',
+    },
+    'chapter-17': {
+      state: 'Forging of a people',
+      mode: 'Chronicle',
+      evidence: 'British records',
+      pressure: 100,
+      image: GENERATED_ASSETS.syriacTexture,
+      caption: 'The St. Thomas Christians under the Carmelite vicars apostolic and British rule.',
+    },
   };
   const GENERATED_SRC_REPLACEMENTS = new Map([
     ['images/generated/indian_ocean_atlas.png', GENERATED_ASSETS.indianOceanAtlas],
