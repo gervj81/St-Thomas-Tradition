@@ -128,17 +128,6 @@
       image: GENERATED_ASSETS.syriacTexture,
       caption: 'The St. Thomas Christians under the Carmelite vicars apostolic and British rule.',
     },
-    'part-4-intro': {
-      image: GENERATED_ASSETS.syriacTexture,
-    },
-    'chapter-18': {
-      state: 'The War for the Past',
-      mode: 'Apologetics',
-      evidence: 'Printed records',
-      pressure: 100,
-      image: GENERATED_ASSETS.syriacTexture,
-      caption: 'The Nazranis and their historians, 1901–1936.',
-    },
   };
   const GENERATED_SRC_REPLACEMENTS = new Map([
     ['images/generated/indian_ocean_atlas.png', GENERATED_ASSETS.indianOceanAtlas],
@@ -259,7 +248,6 @@
           if (marker.includes('PART I ')) currentPart = '1';
           if (marker.includes('PART II')) currentPart = '2';
           if (marker.includes('PART III')) currentPart = '3';
-          if (marker.includes('PART IV')) currentPart = '4';
         }
       }
       document.body.setAttribute('data-part', currentPart);
@@ -319,15 +307,6 @@
           pressure: 62,
           image: GENERATED_ASSETS.syriacTexture,
           caption: 'Documents, translations, and jurisdiction become the landscape of Part II.',
-        }
-      : currentPart === '4'
-      ? {
-          state: 'Scholarly debate',
-          mode: 'Apologetics',
-          evidence: 'Printed histories',
-          pressure: 100,
-          image: GENERATED_ASSETS.syriacTexture,
-          caption: 'Print, debate, and critical history shape the reception of the St. Thomas tradition.',
         }
       : {
           state: 'Historical corridor',

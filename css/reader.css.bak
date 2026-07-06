@@ -240,19 +240,6 @@
   --accent: #6fa39b; /* Twilight Jade */
 }
 
-/* Part IV — The Apologetics and Church Histories */
-[data-part="4"] {
-  --content-max-width: 720px;
-  --lh-body: 1.72;
-  --accent:      #3c527a; /* Ink Indigo */
-  --accent-soft: rgba(60, 82, 122, 0.1);
-  --accent-glow: rgba(60, 82, 122, 0.2);
-  --part-atmosphere: 'apologetics';
-}
-[data-theme="dark"][data-part="4"] {
-  --accent: #8ba3c7; /* Archive Blue */
-}
-
 
 /* ════════════════════════════════════════════════════════════════
    3. RESET + BASE
