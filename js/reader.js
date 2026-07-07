@@ -139,6 +139,22 @@
       image: GENERATED_ASSETS.syriacTexture,
       caption: 'The Nazranis and their historians, 1901–1936.',
     },
+    'chapter-19': {
+      state: 'The Rupture & Hierarchy',
+      mode: 'Chronicle',
+      evidence: 'Eccl. decrees',
+      pressure: 100,
+      image: GENERATED_ASSETS.syriacTexture,
+      caption: 'The Metran–Bava schism and the restoration of the canonical hierarchy, 1909–1923.',
+    },
+    'chapter-20': {
+      state: 'Ancient Traditions',
+      mode: 'Analysis',
+      evidence: 'Scholarly synthesis',
+      pressure: 100,
+      image: GENERATED_ASSETS.syriacTexture,
+      caption: 'Critical analysis of the royal, Knai Thoma, and Ramban Pattu traditions.',
+    },
   };
   const GENERATED_SRC_REPLACEMENTS = new Map([
     ['images/generated/indian_ocean_atlas.png', GENERATED_ASSETS.indianOceanAtlas],
